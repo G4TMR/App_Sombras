@@ -1,0 +1,39 @@
+Resumo do Sistema de RPG Sombras do Abismo
+1. Estrutura do Projeto
+O projeto é um RPG digital com foco em terror, investigação e evolução de personagem.
+O sistema mistura ideias de mangás de isekai (como o exilado cavaleiro pesado) e Ordem Paranormal, mas com mecânicas próprias e inovadoras.
+2. Criação de Personagem
+O jogador escolhe uma classe base (ex: Cavaleiro Pesado, Arcanista, Atirador).
+Cada classe tem atributos iniciais e habilidades exclusivas.
+Ao atingir certos níveis de fragmentação (NF), o jogador pode escolher uma especialização/trilha (ex: Cavaleiro Pesado, Espadachim Ágil, Pistoleiro, etc.).
+O sistema é modular: o mestre escolhe a época da campanha (medieval, moderna, futurista) e só aparecem especializações e habilidades compatíveis.
+3. Nível de Fragmentação (NF)
+NF representa o quanto o personagem foi exposto ao paranormal.
+Vai de 0 a 99, aumentando de 5 em 5, e é definido pelo mestre.
+Ao ganhar NF, o personagem recebe pontos para distribuir em atributos ou desbloquear habilidades.
+4. Árvore de Habilidades
+Cada classe/especialização tem uma árvore de habilidades própria.
+O jogador não vê a árvore inteira: ao upar, o sistema mostra 4 opções de habilidades para escolher.
+As escolhas moldam o personagem e abrem caminhos diferentes na árvore.
+O sistema é fechado: nem mestre nem jogador podem editar habilidades manualmente, só escolher entre opções válidas.
+5. Inventário
+Inventário semi-realista, com limite de espaço/peso baseado nos atributos do personagem.
+Itens leves (papéis, documentos, evidências) não ocupam espaço relevante e podem ser renomeados pelo jogador ou mestre.
+Itens pesados (armas, equipamentos) ocupam espaço/peso.
+Inventário é editável: jogador e mestre podem adicionar, renomear ou remover itens, mas o sistema controla o espaço/peso.
+6. Interface
+Sistema visual com etapas (wizard): escolha de classe, distribuição de atributos, personalização.
+Navegação por etapas, só uma tela aparece por vez.
+Inventário visual, com barra de espaço ocupado e lista de itens editáveis.
+Ficha do personagem mostra atributos, NF, habilidades desbloqueadas e inventário.
+7. Segurança e Equilíbrio
+Sistema fechado para evitar trapaças ou desbalanceamento.
+Jogador só pode escolher entre opções válidas, não pode editar atributos ou habilidades manualmente.
+Mestre não precisa intervir nas escolhas, só narra e acompanha.
+8. Continuidade
+O projeto está salvo localmente, não sincroniza o chat do Copilot entre computadores.
+Para continuar em casa, basta copiar este resumo e os arquivos do projeto (HTML, CSS, JS) para o novo computador.
+Dica:
+Salve este texto em um arquivo .md ou .txt no seu projeto para referência futura!
+
+Se quiser retomar qualquer ponto ou pedir exemplos de código, basta abrir o projeto e continuar de onde parou.

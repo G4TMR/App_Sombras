@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Agente | Sombras do Abismo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <div id="header-placeholder"></div>
+    <main class="main-content">
+        <div class="horizontal-container">
+            <!-- Etapa 1: Escolha de Classe -->
+            <section id="step-1" class="full-screen-section active-section">
+                <div class="wizard-content">
+                    <div class="step-navigation">
+                        <span class="step-item active" id="nav-step-1-1"><span class="step-number">1.</span> <span class="step-label">Classe</span></span>
+                        <span class="step-connector"></span>
+                        <span class="step-item" id="nav-step-1-2"><span class="step-number">2.</span> <span class="step-label">Atributos</span></span>
+                        <span class="step-connector"></span>
+                        <span class="step-item" id="nav-step-1-3"><span class="step-number">3.</span> <span class="step-label">Personalizar</span></span>
+                    </div>
+                    <p class="info-text">Escolha a especialização inicial do seu agente. Cada classe oferece um estilo de jogo único.</p>
+                    <div class="class-selection-container">
+                        <div class="class-card" data-class="Artilheiro">
+                            <h3>Artilheiro</h3>
+                            <p>Especialista em combate à distância, usando armas de fogo para eliminar ameaças antes que se aproximem.</p>
+                        </div>
+                        <div class="class-card" data-class="Colosso">
+                            <h3>Colosso</h3>
+                            <p>A linha de frente. Um combatente resistente, focado em proteger seus aliados e suportar dano massivo.</p>
+                        </div>
+                        <div class="class-card" data-class="Arcanista">
+                            <h3>Arcanista</h3>
+                            <p>Estudioso do oculto que manipula a realidade através de rituais e artefatos arcanos.</p>
+                        </div>
+                        <div class="class-card" data-class="Laminante">
+                            <h3>Laminante</h3>
+                            <p>Combatente ágil e letal, especializado em ataques rápidos e precisos com armas brancas.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Etapa 2: Atributos e Perícias -->
+            <section id="step-2" class="full-screen-section">
+                <div class="wizard-content">
+                    <div class="step-navigation">
+                        <span class="step-item" id="nav-step-2-1"><span class="step-number">1.</span> <span class="step-label">Classe</span></span>
+                        <span class="step-connector"></span>
+                        <span class="step-item active" id="nav-step-2-2"><span class="step-number">2.</span> <span class="step-label">Atributos</span></span>
+                        <span class="step-connector"></span>
+                        <span class="step-item" id="nav-step-2-3"><span class="step-number">3.</span> <span class="step-label">Personalizar</span></span>
+                    </div>
+                    <p class="info-text">Distribua seus pontos de atributo. O valor de Intelecto define quantas perícias você pode escolher.</p>
+                    
+                    <div class="step2-layout">
+                        <!-- Coluna de Atributos -->
+                        <div class="attributes-section">
+                            <div class="points-counter">
+                                Pontos para Distribuir: <span id="attribute-points">10</span>
+                            </div>
+                            <div class="attributes-container">
+                                <div class="attribute-group" data-attribute="vigor">
+                                    <p>Vigor (VIG)</p>
+                                    <div class="attribute-controls">
+                                        <button class="attr-btn minus">-</button>
+                                        <span class="attribute-value">1</span>
+                                        <button class="attr-btn plus">+</button>
+                                    </div>
+                                </div>
+                                <div class="attribute-group" data-attribute="agilidade">
+                                    <p>Agilidade (AGI)</p>
+                                    <div class="attribute-controls">
+                                        <button class="attr-btn minus">-</button>
+                                        <span class="attribute-value">1</span>
+                                        <button class="attr-btn plus">+</button>
+                                    </div>
+                                </div>
+                                <div class="attribute-group" data-attribute="intelecto">
+                                    <p>Intelecto (INT)</p>
+                                    <div class="attribute-controls">
+                                        <button class="attr-btn minus">-</button>
+                                        <span class="attribute-value">1</span>
+                                        <button class="attr-btn plus">+</button>
+                                    </div>
+                                </div>
+                                <div class="attribute-group" data-attribute="presenca">
+                                    <p>Presença (PRE)</p>
+                                    <div class="attribute-controls">
+                                        <button class="attr-btn minus">-</button>
+                                        <span class="attribute-value">1</span>
+                                        <button class="attr-btn plus">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Coluna de Perícias -->
+                        <div class="skills-section">
+                            <div class="skills-header">
+                                <h3>Perícias Treinadas (<span id="skills-selected-count">0</span>/<span id="skills-limit">1</span>)</h3>
+                            </div>
+                            <ul id="skills-list" class="skills-list">
+                                <!-- As perícias serão geradas pelo JS -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div style="text-align:center; margin-top:2rem;">
+                        <button id="back-to-class" class="wizard-btn">Voltar</button>
+                        <button id="next-to-customize" class="wizard-btn">Próximo</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Etapa 3: Personalizar -->
+            <section id="step-3" class="full-screen-section">
+                <div class="wizard-content">
+                    <div class="step-navigation">
+                        <span class="step-item" id="nav-step-3-1"><span class="step-number">1.</span> <span class="step-label">Classe</span></span>
+                        <span class="step-connector"></span>
+                        <span class="step-item" id="nav-step-3-2"><span class="step-number">2.</span> <span class="step-label">Atributos</span></span>
+                        <span class="step-connector"></span>
+                        <span class="step-item active" id="nav-step-3-3"><span class="step-number">3.</span> <span class="step-label">Personalizar</span></span>
+                    </div>
+                    <p class="info-text">Finalize a ficha do seu agente com nome, aparência e detalhes únicos. Campos com * são obrigatórios.</p>
+                    
+                    <form id="personalization-form" class="personalization-form" novalidate>
+                        <div class="form-section">
+                            <h3 class="section-title">Identificação</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="char-name">Nome do Agente *</label>
+                                    <input type="text" id="char-name" name="name" placeholder="Ex: Alex Mercer" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="char-player">Nome do Jogador *</label>
+                                    <input type="text" id="char-player" name="player" placeholder="Seu nome" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="char-age">Idade</label>
+                                    <input type="number" id="char-age" name="age" placeholder="Ex: 28">
+                                </div>
+                                <div class="form-group">
+                                    <label for="char-profession">Profissão</label>
+                                    <input type="text" id="char-profession" name="profession" placeholder="Ex: Detetive Particular">
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="form-section">
+                            <h3 class="section-title">Detalhes Pessoais</h3>
+                            <div class="form-group">
+                                <label for="char-appearance">Característica Visual</label>
+                                <textarea id="char-appearance" name="appearance" placeholder="Descreva a aparência do seu agente. Cicatrizes, roupas, etc."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="char-history">História e Origem</label>
+                                <textarea id="char-history" name="history" placeholder="Qual o passado do seu agente? De onde ele veio?"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="char-motivation">Objetivo de Vida</label>
+                                <textarea id="char-motivation" name="motivation" placeholder="O que move seu agente? Vingança, curiosidade, redenção?"></textarea>
+                            </div>
+                        </div>
+                    </form>
+    
+                    <div class="character-summary">
+                        <h3 class="section-title">Resumo do Agente</h3>
+                        <div id="character-summary-container"></div>
+                    </div>
+
+                    <div style="text-align:center; margin-top:2rem;">
+                        <button id="back-to-attributes" class="wizard-btn">Voltar</button>
+                        <button id="finish-wizard" class="wizard-btn">Finalizar</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>

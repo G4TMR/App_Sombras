@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha de Agente | Sombras do Abismo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <div id="header-placeholder"></div>
+
+    <main id="sheet-container" class="sheet-container" style="display: none;">
+        <!-- Cabeçalho da Ficha -->
+        <header class="sheet-header">
+            <div>
+                <h2 id="sheet-char-name">Nome do Agente</h2>
+                <p id="sheet-char-class-player">Classe | Jogador</p>
+            </div>
+        </header>
+
+        <!-- Corpo da Ficha -->
+        <div class="sheet-main">
+            <!-- Coluna Esquerda -->
+            <div class="sheet-column">
+                <!-- Atributos -->
+                <section class="sheet-section">
+                    <h3>Atributos</h3>
+                    <div class="attributes-display">
+                        <div class="stat-block">
+                            <span class="stat-label">Vida (HP)</span>
+                            <span id="sheet-hp" class="stat-value">--/--</span>
+                        </div>
+                        <div class="stat-block">
+                            <span class="stat-label">Sanidade</span>
+                            <span id="sheet-sanity" class="stat-value">--/--</span>
+                        </div>
+                        <div class="stat-block">
+                            <span class="stat-label">Defesa</span>
+                            <span id="sheet-defense" class="stat-value">--</span>
+                        </div>
+                        <div class="stat-block">
+                            <span class="stat-label">Pontos de Ação (PA)</span>
+                            <span id="sheet-pa" class="stat-value">--</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Perícias -->
+                <section class="sheet-section">
+                    <h3>Perícias</h3>
+                    <ul id="sheet-skills-list" class="skills-list">
+                        <!-- Perícias serão inseridas aqui -->
+                    </ul>
+                </section>
+
+                <!-- Inventário -->
+                <section class="sheet-section">
+                    <h3>Inventário</h3>
+                    <ul id="sheet-inventory-list" class="inventory-list">
+                        <li><p>Nenhum item no inventário.</p></li>
+                    </ul>
+                </section>
+            </div>
+
+            <!-- Coluna Direita -->
+            <div class="sheet-column">
+                <!-- Detalhes Pessoais -->
+                <section class="sheet-section">
+                    <h3>Detalhes Pessoais</h3>
+                    <div class="details-group">
+                        <h4>Aparência</h4>
+                        <p id="sheet-appearance">...</p>
+                    </div>
+                    <div class="details-group">
+                        <h4>História e Origem</h4>
+                        <p id="sheet-history">...</p>
+                    </div>
+                    <div class="details-group">
+                        <h4>Objetivo de Vida</h4>
+                        <p id="sheet-motivation">...</p>
+                    </div>
+                </section>
+
+                <!-- Notas -->
+                <section class="sheet-section">
+                    <h3>Notas da Campanha</h3>
+                    <textarea id="sheet-notes" placeholder="Anote pistas, nomes e eventos importantes aqui..."></textarea>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <div id="character-not-found" style="display: none; text-align: center; padding: 4rem;">
+        <h2>Agente não encontrado</h2>
+        <p>O agente que você está procurando não foi encontrado. <a href="agentes.html">Voltar para a lista de agentes.</a></p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
