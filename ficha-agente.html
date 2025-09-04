@@ -20,73 +20,156 @@
         </header>
 
         <!-- Corpo da Ficha -->
-        <div class="sheet-main">
-            <!-- Coluna Esquerda -->
-            <div class="sheet-column">
-                <!-- Atributos -->
+        <div class="sheet-main-desktop">
+            <!-- Coluna Esquerda: Status -->
+            <div class="sheet-col-left">
                 <section class="sheet-section">
-                    <h3>Atributos</h3>
-                    <div class="attributes-display">
-                        <div class="stat-block">
-                            <span class="stat-label">Vida (HP)</span>
-                            <span id="sheet-hp" class="stat-value">--/--</span>
+                    <div class="primary-attributes-container">
+                        <div class="primary-attr-block" data-attr="vigor">
+                            <span class="primary-attr-icon">💪</span>
+                            <span class="primary-attr-label">Vigor</span>
+                            <span id="sheet-vigor" class="primary-attr-value">--</span>
                         </div>
-                        <div class="stat-block">
-                            <span class="stat-label">Sanidade</span>
-                            <span id="sheet-sanity" class="stat-value">--/--</span>
+                        <div class="primary-attr-block" data-attr="agilidade">
+                            <span class="primary-attr-icon">🤸</span>
+                            <span class="primary-attr-label">Agilidade</span>
+                            <span id="sheet-agilidade" class="primary-attr-value">--</span>
                         </div>
-                        <div class="stat-block">
-                            <span class="stat-label">Defesa</span>
-                            <span id="sheet-defense" class="stat-value">--</span>
+                        <div class="primary-attr-block" data-attr="intelecto">
+                            <span class="primary-attr-icon">🧠</span>
+                            <span class="primary-attr-label">Intelecto</span>
+                            <span id="sheet-intelecto" class="primary-attr-value">--</span>
                         </div>
-                        <div class="stat-block">
-                            <span class="stat-label">Pontos de Ação (PA)</span>
-                            <span id="sheet-pa" class="stat-value">--</span>
+                        <div class="primary-attr-block" data-attr="presenca">
+                            <span class="primary-attr-icon">🗣️</span>
+                            <span class="primary-attr-label">Presença</span>
+                            <span id="sheet-presenca" class="primary-attr-value">--</span>
                         </div>
                     </div>
-                </section>
-
-                <!-- Perícias -->
-                <section class="sheet-section">
-                    <h3>Perícias</h3>
-                    <ul id="sheet-skills-list" class="skills-list">
-                        <!-- Perícias serão inseridas aqui -->
-                    </ul>
-                </section>
-
-                <!-- Inventário -->
-                <section class="sheet-section">
-                    <h3>Inventário</h3>
-                    <ul id="sheet-inventory-list" class="inventory-list">
-                        <li><p>Nenhum item no inventário.</p></li>
-                    </ul>
+                    <div class="secondary-stats-container">
+                        <div class="secondary-stat-block">
+                            <span class="secondary-stat-label">Nível de Fragmentação</span>
+                            <span id="sheet-nfm" class="secondary-stat-value">0%</span>
+                        </div>
+                        <div class="secondary-stat-block">
+                            <span class="secondary-stat-label">Pontos de Ação</span>
+                            <span id="sheet-pa" class="secondary-stat-value">--</span>
+                        </div>
+                        <div class="secondary-stat-block">
+                            <span class="secondary-stat-label">Deslocamento</span>
+                            <span id="sheet-deslocamento" class="secondary-stat-value">-- m</span>
+                        </div>
+                    </div>
+                    <div class="status-bars-container">
+                        <div class="status-bar-wrapper">
+                            <div class="status-bar-info"><span class="status-bar-label">HP</span> <span id="hp-value-text" class="status-bar-values">--/--</span></div>
+                            <div class="status-bar-background"><div id="hp-bar-fill" class="status-bar-fill hp"></div></div>
+                        </div>
+                        <div class="status-bar-wrapper">
+                            <div class="status-bar-info"><span class="status-bar-label">SAN</span> <span id="sanity-value-text" class="status-bar-values">--/--</span></div>
+                            <div class="status-bar-background"><div id="sanity-bar-fill" class="status-bar-fill sanity"></div></div>
+                        </div>
+                        <div class="status-bar-wrapper">
+                            <div class="status-bar-info"><span class="status-bar-label">PA</span> <span id="pa-value-text" class="status-bar-values">--/--</span></div>
+                            <div class="status-bar-background"><div id="pa-bar-fill" class="status-bar-fill pa"></div></div>
+                        </div>
+                    </div>
+                    <div class="defense-container">
+                        <div class="defense-shield">
+                            <span id="sheet-defense" class="defense-value">--</span>
+                        </div>
+                        <span class="defense-label">Defesa Total</span>
+                    </div>
+                    <div class="resistances-proficiencies-container">
+                        <h4>Resistências e Proficiências</h4>
+                        <div class="resistances-grid">
+                            <div class="resistance-block">
+                                <span class="resistance-label">Proteção</span>
+                                <span id="sheet-protection" class="resistance-value">0</span>
+                            </div>
+                            <div class="resistance-block">
+                                <span class="resistance-label">Balística</span>
+                                <span id="sheet-res-balistica" class="resistance-value">0</span>
+                            </div>
+                            <div class="resistance-block">
+                                <span class="resistance-label">Corte</span>
+                                <span id="sheet-res-corte" class="resistance-value">0</span>
+                            </div>
+                            <div class="resistance-block">
+                                <span class="resistance-label">Paranormal</span>
+                                <span id="sheet-res-paranormal" class="resistance-value">0</span>
+                            </div>
+                        </div>
+                        <p id="sheet-proficiencies">Proficiente com: Armas simples.</p>
+                    </div>
                 </section>
             </div>
 
-            <!-- Coluna Direita -->
-            <div class="sheet-column">
-                <!-- Detalhes Pessoais -->
-                <section class="sheet-section">
-                    <h3>Detalhes Pessoais</h3>
-                    <div class="details-group">
-                        <h4>Aparência</h4>
-                        <p id="sheet-appearance">...</p>
-                    </div>
-                    <div class="details-group">
-                        <h4>História e Origem</h4>
-                        <p id="sheet-history">...</p>
-                    </div>
-                    <div class="details-group">
-                        <h4>Objetivo de Vida</h4>
-                        <p id="sheet-motivation">...</p>
+            <!-- Coluna Central: Perícias -->
+            <div class="sheet-col-center">
+                <section class="sheet-section skills-section">
+                    <h3>Perícias</h3>
+                    <div id="sheet-skills-list" class="skills-panel">
+                        <!-- Perícias interativas geradas pelo JS -->
                     </div>
                 </section>
+            </div>
 
-                <!-- Notas -->
-                <section class="sheet-section">
-                    <h3>Notas da Campanha</h3>
-                    <textarea id="sheet-notes" placeholder="Anote pistas, nomes e eventos importantes aqui..."></textarea>
-                </section>
+            <!-- Coluna Direita: Ações -->
+            <div class="sheet-col-right">
+                <div class="actions-accordion">
+                    <div class="accordion-panel">
+                        <button class="accordion-header">Inventário</button>
+                        <div class="accordion-content">
+                            <ul id="sheet-inventory-list" class="inventory-list"></ul>
+                            <form id="add-item-form" class="add-item-form">
+                                <input type="text" id="add-item-input" class="add-item-input" placeholder="Novo item...">
+                                <button type="submit" class="add-item-btn">+</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="accordion-panel">
+                        <button class="accordion-header">Detalhes e Origem</button>
+                        <div class="accordion-content">
+                            <div class="details-group">
+                                <h4>Aparência</h4>
+                                <textarea id="sheet-appearance" class="details-textarea" rows="3"></textarea>
+                            </div>
+                            <div class="details-group">
+                                <h4>História</h4>
+                                <textarea id="sheet-history" class="details-textarea" rows="5"></textarea>
+                            </div>
+                            <div class="details-group">
+                                <h4>Motivação</h4>
+                                <textarea id="sheet-motivation" class="details-textarea" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-panel">
+                        <button class="accordion-header">Rolagem de Dados</button>
+                        <div class="accordion-content">
+                            <form id="dice-roller-form" class="dice-roller-form">
+                                <input type="number" id="dice-count" value="1">
+                                <span>d</span>
+                                <select id="dice-type">
+                                    <option>4</option>
+                                    <option>6</option>
+                                    <option>8</option>
+                                    <option>10</option>
+                                    <option>12</option>
+                                    <option selected>20</option>
+                                    <option>100</option>
+                                </select>
+                                <span>+</span>
+                                <input type="number" id="dice-bonus" value="0">
+                                <button type="submit" class="roll-btn">Rolar</button>
+                            </form>
+                            <div id="roll-log" class="roll-log">
+                                <p class="log-placeholder">O resultado das rolagens aparecerá aqui.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>

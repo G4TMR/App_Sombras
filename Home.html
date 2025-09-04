@@ -9,45 +9,43 @@
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-page="home">
     <div class="background-overlay"></div>
     <div id="header-placeholder"></div>
-    <main class="main-content">
-        <div class="horizontal-container">
-            <section class="content-section">
-                <div class="content-box">
-                    <h2>A Escuridão Espreita</h2>
-                    <p class="info-text">Um RPG de terror focado em narrativas intensas. O mundo é um reflexo distorcido de nossa realidade, onde criaturas ancestrais adormecidas despertam e horrores indescritíveis espreitam nas sombras. Você é um Agente, uma figura solitária que busca entender e combater o que está à espreita.</p>
-                    
-                    <div style="text-align: center; margin-top: 2rem;">
-                        <a href="criar-agente.html" class="create-character-btn">Começar Criando um Agente</a>
-                    </div>
+    <main class="home-main-content">
+        <section class="home-hero">
+            <div class="hero-content">
+                <h1>A Escuridão Espreita</h1>
+                <p>Um RPG de terror focado em narrativas intensas, onde suas escolhas definem a fronteira entre a sanidade e o abismo.</p>
+                <a href="criar-agente.html" class="hero-cta-btn">Criar seu Agente</a>
+            </div>
+        </section>
+
+        <div class="home-cards-container">
+            <div class="home-card">
+                <h2>Notas de Atualização</h2>
+                <div class="update-note">
+                    <h3>Versão 1.2 (27/08/2025)</h3>
+                    <p>Reformulação visual completa. Nova identidade visual, paleta de cores dinâmica e interface mais imersiva.</p>
                 </div>
-            </section>
-            <section class="content-section">
-                <div class="content-box">
-                    <h2>Notas de Atualização do Site</h2>
-                    <div class="update-note">
-                        <h3>Versão 1.1 (26/08/2025)</h3>
-                        <p>Implementado novo design visual e sistema de criação de fichas interativo.</p>
-                    </div>
-                    <div class="update-note">
-                        <h3>Versão 1.0 (15/08/2025)</h3>
-                        <p>Lançamento inicial do site com informações básicas sobre o sistema.</p>
-                    </div>
-                    <p class="info-text">[Adicione novas atualizações na topo da lista.]</p>
+                <div class="update-note">
+                    <h3>Versão 1.1 (26/08/2025)</h3>
+                    <p>Implementado sistema de criação de fichas interativo e elementos paranormais.</p>
                 </div>
-            </section>
-            <section class="content-section">
-                <div class="content-box">
-                    <h2>Apoie o Projeto</h2>
-                    <p class="info-text">Manter e desenvolver este site exige tempo e recursos. Se você gosta do projeto e quer ajudar a expandir o universo de Sombras do Abismo, considere fazer uma doação de qualquer valor. Todo apoio é muito bem-vindo e nos ajuda a continuar criando.</p>
-                    <div class="donation-info">
-                        <h3>Chave Pix:</h3>
-                        <p id="pix-key-placeholder">sua.chave.pix.aqui@exemplo.com</p>
-                    </div>
+            </div>
+            <div class="home-card">
+                <h2>Apoie o Projeto</h2>
+                <p>Este é um projeto independente. Seu apoio nos ajuda a continuar desenvolvendo novas funcionalidades e conteúdo.</p>
+                <div class="donation-info">
+                    <h3>Chave Pix (Exemplo):</h3>
+                    <p id="pix-key-placeholder">pix@sombrasdoabismo.com</p>
                 </div>
-            </section>
+            </div>
+            <div class="home-card">
+                <h2>Comunidade</h2>
+                <p>Junte-se a outros investigadores, compartilhe suas histórias e acesse conteúdo exclusivo em nosso servidor.</p>
+                <a href="#" class="hero-cta-btn discord-btn">Entrar no Discord</a>
+            </div>
         </div>
     </main>
     <script src="script.js"></script>

@@ -40,18 +40,60 @@
                             <p>Combatente ágil e letal, especializado em ataques rápidos e precisos com armas brancas.</p>
                         </div>
                     </div>
+
+                    <!-- O clique em um card de classe agora avança automaticamente -->
                 </div>
             </section>
 
-            <!-- Etapa 2: Atributos e Perícias -->
+            <!-- Etapa 2: Escolha de Elemento -->
             <section id="step-2" class="full-screen-section">
                 <div class="wizard-content">
                     <div class="step-navigation">
                         <span class="step-item" id="nav-step-2-1"><span class="step-number">1.</span> <span class="step-label">Classe</span></span>
                         <span class="step-connector"></span>
-                        <span class="step-item active" id="nav-step-2-2"><span class="step-number">2.</span> <span class="step-label">Atributos</span></span>
+                        <span class="step-item active" id="nav-step-2-2"><span class="step-number">2.</span> <span class="step-label">Elemento</span></span>
                         <span class="step-connector"></span>
-                        <span class="step-item" id="nav-step-2-3"><span class="step-number">3.</span> <span class="step-label">Personalizar</span></span>
+                        <span class="step-item" id="nav-step-2-3"><span class="step-number">3.</span> <span class="step-label">Atributos</span></span>
+                        <span class="step-connector"></span>
+                        <span class="step-item" id="nav-step-2-4"><span class="step-number">4.</span> <span class="step-label">Personalizar</span></span>
+                    </div>
+                    <h3 class="section-title" style="margin-top: 1rem;">Escolha de Elemento</h3>
+                    <p class="info-text">Selecione a afinidade elemental do seu agente. Esta escolha definirá seus poderes e fraquezas. Clique para saber mais.</p>
+                    <div class="element-selection-container">
+                        <div class="element-card" data-element="Temporal">
+                            <h4>Temporal</h4>
+                            <p>Manipulação do tempo, morte e decadência. Estética verde/preta.</p>
+                        </div>
+                        <div class="element-card" data-element="Cerebral">
+                            <h4>Cerebral</h4>
+                            <p>Conhecimento proibido e poder mental. Estética dourada/branca.</p>
+                        </div>
+                        <div class="element-card" data-element="Visceral">
+                            <h4>Visceral</h4>
+                            <p>Controle sobre a carne e o corpo. Estética vermelha.</p>
+                        </div>
+                        <div class="element-card" data-element="Vital">
+                            <h4>Vital</h4>
+                            <p>Energia caótica e desordem natural. Estética roxa/multicolorida.</p>
+                        </div>
+                    </div>
+                    <div style="text-align:center; margin-top:2rem;">
+                        <button id="back-to-class" class="wizard-btn">Voltar</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Etapa 3: Atributos e Perícias -->
+            <section id="step-3" class="full-screen-section">
+                <div class="wizard-content">
+                    <div class="step-navigation">
+                        <span class="step-item" id="nav-step-3-1"><span class="step-number">1.</span> <span class="step-label">Classe</span></span>
+                        <span class="step-connector"></span>
+                        <span class="step-item" id="nav-step-3-2"><span class="step-number">2.</span> <span class="step-label">Elemento</span></span>
+                        <span class="step-connector"></span>
+                        <span class="step-item active" id="nav-step-3-3"><span class="step-number">3.</span> <span class="step-label">Atributos</span></span>
+                        <span class="step-connector"></span>
+                        <span class="step-item" id="nav-step-3-4"><span class="step-number">4.</span> <span class="step-label">Personalizar</span></span>
                     </div>
                     <p class="info-text">Distribua seus pontos de atributo. O valor de Intelecto define quantas perícias você pode escolher.</p>
                     
@@ -109,21 +151,23 @@
                     </div>
 
                     <div style="text-align:center; margin-top:2rem;">
-                        <button id="back-to-class" class="wizard-btn">Voltar</button>
+                         <button id="back-to-element" class="wizard-btn">Voltar</button>
                         <button id="next-to-customize" class="wizard-btn">Próximo</button>
                     </div>
                 </div>
             </section>
 
-            <!-- Etapa 3: Personalizar -->
-            <section id="step-3" class="full-screen-section">
+            <!-- Etapa 4: Personalizar -->
+            <section id="step-4" class="full-screen-section">
                 <div class="wizard-content">
                     <div class="step-navigation">
-                        <span class="step-item" id="nav-step-3-1"><span class="step-number">1.</span> <span class="step-label">Classe</span></span>
+                        <span class="step-item" id="nav-step-4-1"><span class="step-number">1.</span> <span class="step-label">Classe</span></span>
                         <span class="step-connector"></span>
-                        <span class="step-item" id="nav-step-3-2"><span class="step-number">2.</span> <span class="step-label">Atributos</span></span>
+                        <span class="step-item" id="nav-step-4-2"><span class="step-number">2.</span> <span class="step-label">Elemento</span></span>
                         <span class="step-connector"></span>
-                        <span class="step-item active" id="nav-step-3-3"><span class="step-number">3.</span> <span class="step-label">Personalizar</span></span>
+                        <span class="step-item" id="nav-step-4-3"><span class="step-number">3.</span> <span class="step-label">Atributos</span></span>
+                        <span class="step-connector"></span>
+                        <span class="step-item active" id="nav-step-4-4"><span class="step-number">4.</span> <span class="step-label">Personalizar</span></span>
                     </div>
                     <p class="info-text">Finalize a ficha do seu agente com nome, aparência e detalhes únicos. Campos com * são obrigatórios.</p>
                     
@@ -182,6 +226,21 @@
             </section>
         </div>
     </main>
+
+    <!-- Modal para a Lore do Elemento -->
+    <div id="element-lore-overlay" class="modal-overlay">
+        <div id="element-lore-modal" class="element-lore-modal-content">
+            <h1 id="modal-element-title">Nome do Elemento</h1>
+            <div class="element-divider"></div>
+            <p id="modal-element-lore">Lore do elemento...</p>
+            <div class="element-divider"></div>
+            <div class="modal-actions">
+                <button id="modal-cancel-btn" class="wizard-btn cancel-btn">Voltar</button>
+                <button id="modal-confirm-btn" class="wizard-btn">Confirmar Elemento</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
