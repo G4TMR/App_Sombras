@@ -3,6 +3,25 @@
  * Contém a lógica para a criação de personagens e exibição de agentes.
  */
 
+const CLASS_BASE_ATTRIBUTES = {
+    'Artilheiro': { forca: 2, vigor: 2, agilidade: 4, intelecto: 3, presenca: 1 },
+    'Colosso':    { forca: 4, vigor: 4, agilidade: 1, intelecto: 2, presenca: 3 },
+    'Arcanista':  { forca: 1, vigor: 1, agilidade: 2, intelecto: 4, presenca: 3 },
+    'Laminante':  { forca: 3, vigor: 2, agilidade: 4, intelecto: 1, presenca: 3 }
+};
+
+const SKILL_TREES = {
+    'Artilheiro': [
+        { id: 'art01', name: 'Tiro Preciso', description: 'Sua mira é mortal. Você recebe +2 em testes de ataque com armas de fogo.', requirements: { agilidade: 5 }, unlocked: false },
+        { id: 'art02', name: 'Recarga Rápida', description: 'Você recarrega armas de fogo como uma ação livre.', requirements: { agilidade: 6 }, unlocked: false },
+    ],
+    'Colosso': [
+        { id: 'col01', name: 'Pele de Aço', description: 'Sua pele é como uma armadura. Você recebe +2 de Defesa.', requirements: { vigor: 5 }, unlocked: false },
+        { id: 'col02', name: 'Inabalável', description: 'Você é imune a ser empurrado ou derrubado.', requirements: { vigor: 6 }, unlocked: false },
+    ],
+    // Adicionar árvores para Arcanista e Laminante aqui
+};
+
 // =================================================================================
 // CLASSE: CharacterCreator - Gerencia o assistente de criação de personagens
 // =================================================================================
@@ -42,22 +61,9 @@ class CharacterCreator {
             id: `char_${Date.now()}`,
             class: '',
             element: '',
-            baseAttributes: {
-                vigor: this.baseAttributeValue,
-                agilidade: this.baseAttributeValue,
-                intelecto: this.baseAttributeValue,
-                presenca: this.baseAttributeValue
-            },
+            baseAttributes: {},
             status: { sanidade: 50 },
-            pericias: {
-                'Atletismo': 0,
-                'Furtividade': 0,
-                'Investigação': 0,
-                'Percepção': 0,
-                'Tecnologia': 0,
-                'Medicina': 0,
-                'Ocultismo': 0
-            },            
+            pericias: {}, // Perícias agora serão adquiridas via progressão
             inventario: [],
             personalization: {},
             createdAt: new Date().toISOString()
@@ -69,17 +75,10 @@ class CharacterCreator {
             navSteps: document.querySelectorAll('.step-item'),
             classCards: document.querySelectorAll('.class-card'),
             elementCards: document.querySelectorAll('.element-card'),
-            attributePointsDisplay: document.getElementById('attribute-points'),
-            attributeControls: document.querySelectorAll('.attributes-container .attribute-group'),
-            skillsListContainer: document.getElementById('skills-list'),
-            skillsSelectedCount: document.getElementById('skills-selected-count'),
-            skillsLimit: document.getElementById('skills-limit'),
             personalizationForm: document.getElementById('personalization-form'),
             wizardButtons: {
-                nextToCustomize: document.getElementById('next-to-customize'),
                 backToClass: document.getElementById('back-to-class'),
                 backToElement: document.getElementById('back-to-element'),
-                backToAttributes: document.getElementById('back-to-attributes'), // Este será o da etapa 4
                 finish: document.getElementById('finish-wizard')
             },
             loreModal: {
@@ -100,9 +99,6 @@ class CharacterCreator {
 
         this.setupClassSelection();
         this.setupElementSelection();
-        this.generateSkillsList();
-        this.setupAttributeControls();
-        this.setupSkillSelection();
         this.setupPersonalizationForm();
         this.setupWizardButtons();
         this.restoreFormData(); // Restaura dados ao carregar a página
@@ -137,6 +133,8 @@ class CharacterCreator {
                 
                 const selectedClass = card.dataset.class;
                 this.currentCharacter.class = selectedClass;
+                // Atribui os atributos base da classe
+                this.currentCharacter.baseAttributes = { ...CLASS_BASE_ATTRIBUTES[selectedClass] };
                 this.updateCharacterSummary();
                 this.navigateToStep(2); // Avança para a seleção de elemento
             });
@@ -174,7 +172,7 @@ class CharacterCreator {
             this.updateCharacterSummary();
             this.saveFormData();
             this.hideLoreModal();
-            this.navigateToStep(3);
+            this.navigateToStep(3); // Avança para a etapa de Finalizar
             cleanup();
         };
 
@@ -196,103 +194,6 @@ class CharacterCreator {
         this.elements.loreModal.overlay.classList.remove('visible');
     }
 
-    // Configura os botões de + e - dos atributos
-    setupAttributeControls() {        
-        this.elements.attributeControls.forEach(group => {
-            const attribute = group.dataset.attribute;
-            const valueSpan = group.querySelector('.attribute-value');
-            const plusBtn = group.querySelector('.plus');
-            const minusBtn = group.querySelector('.minus');
-
-            plusBtn.addEventListener('click', () => {
-                if (this.attributePoints > 0) {
-                    this.attributePoints--;
-                    this.currentCharacter.baseAttributes[attribute]++;
-                    this.updateAttributeDisplay();
-                }
-            });
-
-            minusBtn.addEventListener('click', () => {
-                if (this.currentCharacter.baseAttributes[attribute] > this.baseAttributeValue) {
-                    this.attributePoints++;
-                    this.currentCharacter.baseAttributes[attribute]--;
-                    this.updateAttributeDisplay();
-                }
-            });
-        });
-        this.updateAttributeDisplay();
-    }
-
-    updateAttributeDisplay() {
-        if (!this.elements.attributePointsDisplay) return;
-        this.elements.attributePointsDisplay.textContent = this.attributePoints;
-
-        this.elements.attributeControls.forEach(group => {
-            const attribute = group.dataset.attribute;
-            const valueSpan = group.querySelector('.attribute-value');
-            const plusBtn = group.querySelector('.plus');
-            const minusBtn = group.querySelector('.minus');
-
-            valueSpan.textContent = this.currentCharacter.baseAttributes[attribute];
-            plusBtn.disabled = this.attributePoints === 0;
-            minusBtn.disabled = this.currentCharacter.baseAttributes[attribute] === this.baseAttributeValue;
-        });
-
-        this.updateSkillAllowance();
-        this.updateCharacterSummary();
-        this.saveFormData();
-    }
-
-    generateSkillsList() {
-        if (!this.elements.skillsListContainer) return;
-        const skills = Object.keys(this.currentCharacter.pericias);
-        this.elements.skillsListContainer.innerHTML = '';
-        skills.forEach(skill => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <label>
-                    <input type="checkbox" data-skill="${skill}">
-                    <span>${skill}</span>
-                </label>
-            `;
-            this.elements.skillsListContainer.appendChild(li);
-        });
-    }
-
-    setupSkillSelection() {
-        if (!this.elements.skillsListContainer) return;
-        this.elements.skillsListContainer.addEventListener('change', (e) => {
-            if (e.target.type === 'checkbox') {
-                const skill = e.target.dataset.skill;
-                this.currentCharacter.pericias[skill] = e.target.checked ? 1 : 0; // 1 para treinado, 0 para não
-                this.updateSkillAllowance();
-                this.updateCharacterSummary();
-                this.saveFormData();
-            }
-        });
-    }
-
-    updateSkillAllowance() {
-        if (!this.elements.skillsLimit) return;
-        const intelecto = this.currentCharacter.baseAttributes.intelecto;
-        const selectedSkills = Object.values(this.currentCharacter.pericias).filter(v => v > 0).length;
-
-        this.elements.skillsLimit.textContent = intelecto;
-        this.elements.skillsSelectedCount.textContent = selectedSkills;
-
-        const checkboxes = this.elements.skillsListContainer.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
-            const label = checkbox.parentElement;
-            if (!checkbox.checked && selectedSkills >= intelecto) {
-                checkbox.disabled = true;
-                label.classList.add('disabled');
-            } else {
-                checkbox.disabled = false;
-                label.classList.remove('disabled');
-            }
-        });
-    }
-    
     // Configura o formulário de personalização
     setupPersonalizationForm() {
         const form = this.elements.personalizationForm;
@@ -311,10 +212,8 @@ class CharacterCreator {
         const { wizardButtons, navSteps } = this.elements;
 
         // Botões de navegação
-        wizardButtons.nextToCustomize?.addEventListener('click', () => this.navigateToStep(4));
         wizardButtons.backToClass?.addEventListener('click', () => this.navigateToStep(1));
         wizardButtons.backToElement?.addEventListener('click', () => this.navigateToStep(2));
-        wizardButtons.backToAttributes?.addEventListener('click', () => this.navigateToStep(3));
         wizardButtons.finish?.addEventListener('click', () => this.saveCharacter());
 
         // Permite navegação livre clicando nos indicadores de passo
@@ -334,13 +233,14 @@ class CharacterCreator {
         const summaryContainer = document.getElementById('character-summary-container');
         if (!summaryContainer) return;
 
-        const { class: charClass, element, baseAttributes, personalization } = this.currentCharacter;
+        const { class: charClass, element, baseAttributes = {}, personalization } = this.currentCharacter;
+        const attrText = baseAttributes.vigor ? `FOR: ${baseAttributes.forca} | VIG: ${baseAttributes.vigor} | AGI: ${baseAttributes.agilidade} | INT: ${baseAttributes.intelecto} | PRE: ${baseAttributes.presenca}` : 'Atributos definidos pela classe';
         summaryContainer.innerHTML = `
             <div class="summary-item"><strong>Nome:</strong> ${personalization.name || '...'}</div>
             <div class="summary-item"><strong>Jogador:</strong> ${personalization.player || '...'}</div>
             <div class="summary-item"><strong>Classe:</strong> ${charClass || 'Não definida'}</div>
             <div class="summary-item"><strong>Elemento:</strong> ${element || 'Não definido'}</div>
-            <div class="summary-item"><strong>Atributos:</strong> VIG: ${baseAttributes.vigor} | AGI: ${baseAttributes.agilidade} | INT: ${baseAttributes.intelecto} | PRE: ${baseAttributes.presenca}</div>
+            <div class="summary-item"><strong>Atributos:</strong> ${attrText}</div>
         `;
     }
 
@@ -364,22 +264,6 @@ class CharacterCreator {
                 });
             }
 
-            // Restaura os pontos de atributo
-            const usedPoints = Object.values(this.currentCharacter.baseAttributes).reduce((sum, val) => sum + (val - this.baseAttributeValue), 0);
-            this.attributePoints = 10 - usedPoints;
-            this.updateAttributeDisplay();
-
-            // Restaura as perícias
-            if (this.elements.skillsListContainer) {
-                const checkboxes = this.elements.skillsListContainer.querySelectorAll('input[type="checkbox"]');
-                checkboxes.forEach(cb => {
-                    if (this.currentCharacter.pericias && this.currentCharacter.pericias[cb.dataset.skill]) {
-                        cb.checked = this.currentCharacter.pericias[cb.dataset.skill] > 0;
-                    }
-                });
-                this.updateSkillAllowance();
-            }
-            
             // Restaura o formulário de personalização
             if (this.elements.personalizationForm) {
                 for (const key in this.currentCharacter.personalization) {
@@ -405,6 +289,10 @@ class CharacterCreator {
             alert('Por favor, preencha os campos obrigatórios (Nome do Agente e Nome do Jogador) para finalizar.');
             return;
         }
+
+        // Garante que os atributos e perícias iniciais estão definidos
+        this.currentCharacter.baseAttributes = this.currentCharacter.baseAttributes || CLASS_BASE_ATTRIBUTES[this.currentCharacter.class];
+        this.currentCharacter.pericias = this.currentCharacter.pericias || {};
 
         // Define os atributos base com base na classe escolhida
         const baseStats = {
@@ -527,19 +415,19 @@ class CharacterDisplay {
             </div>
             <div class="character-attributes">
                 <div class="attr-item">
-                    <span class="attr-icon">💪</span>
+                    <span class="attr-icon"><svg class="attr-svg-icon-small" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></span>
                     <span>${attrs.vigor} VIG</span>
                 </div>
                 <div class="attr-item">
-                    <span class="attr-icon">🤸</span>
+                    <span class="attr-icon"><svg class="attr-svg-icon-small" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg></span>
                     <span>${attrs.agilidade} AGI</span>
                 </div>
                 <div class="attr-item">
-                    <span class="attr-icon">🧠</span>
+                    <span class="attr-icon"><svg class="attr-svg-icon-small" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5zm0 10c-2.48 0-4.5-2.02-4.5-4.5S9.52 5.5 12 5.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7C10.62 7.5 9.5 8.62 9.5 10s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5S13.38 7.5 12 7.5z"/></svg></span>
                     <span>${attrs.intelecto} INT</span>
                 </div>
                 <div class="attr-item">
-                    <span class="attr-icon">🗣️</span>
+                    <span class="attr-icon"><svg class="attr-svg-icon-small" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2z"/></svg></span>
                     <span>${attrs.presenca} PRE</span>
                 </div>
             </div>
@@ -580,6 +468,7 @@ class CharacterSheet {
         if (this.character) {
             this.renderSheet();
             this.setupEventListeners();
+            this.renderSkillTree();
         }
     }
 
@@ -616,7 +505,7 @@ class CharacterSheet {
         // Header
         const sheetContainer = document.getElementById('sheet-container');
         const header = document.querySelector('.sheet-header');
-        sheetContainer.classList.remove('temporal', 'cerebral', 'visceral', 'vital');
+        sheetContainer.className = 'sheet-container'; // Reseta as classes
         if (this.character.element) {
             const elementClass = this.character.element.toLowerCase();
             sheetContainer.classList.add(elementClass);
@@ -626,6 +515,7 @@ class CharacterSheet {
         document.title = `${personalization.name || 'Agente'} | Ficha de Agente`;
 
         // Atributos Primários
+        document.getElementById('sheet-forca').textContent = baseAttributes.forca || '-';
         document.getElementById('sheet-vigor').textContent = baseAttributes.vigor || '-';
         document.getElementById('sheet-agilidade').textContent = baseAttributes.agilidade || '-';
         document.getElementById('sheet-intelecto').textContent = baseAttributes.intelecto || '-';
@@ -706,11 +596,15 @@ class CharacterSheet {
 
     updateBar(type, current, max) {
         const fill = document.getElementById(`${type}-bar-fill`);
-        const text = document.getElementById(`${type}-value-text`);
-        if (!fill || !text) return;
+        const currentDisplay = document.getElementById(`${type}-current`);
+        const maxInput = document.getElementById(`${type}-max`);
+
+        if (!fill || !currentDisplay || !maxInput) return;
+
         const percentage = max > 0 ? (current / max) * 100 : 0;
         fill.style.width = `${percentage}%`;
-        text.textContent = `${current}/${max}`;
+        currentDisplay.textContent = current;
+        maxInput.value = max;
     }
 
     createInventoryItem(item, index) {
@@ -726,7 +620,7 @@ class CharacterSheet {
     }
 
     setupEventListeners() { // Totalmente reescrito para os novos elementos
-        // Acordion
+        // Acordeão
         document.querySelector('.actions-accordion').addEventListener('click', (e) => {
             if (e.target.classList.contains('accordion-header')) {
                 const currentPanel = e.target.closest('.accordion-panel');
@@ -741,6 +635,35 @@ class CharacterSheet {
                 currentPanel.classList.toggle('active');
             }
         });
+
+        // Salvar status (HP, Sanidade, PA) com botões e inputs
+        document.querySelector('.status-bars-container').addEventListener('click', (e) => {
+            if (e.target.classList.contains('status-btn')) {
+                const stat = e.target.dataset.stat;
+                const amount = parseInt(e.target.dataset.amount, 10);
+                
+                if (stat && amount) {
+                    const statType = stat.split('_')[0];
+                    const maxStatKey = `${statType}_max`;
+
+                    let currentValue = this.character.status[stat];
+                    const maxValue = this.character.status[maxStatKey];
+
+                    currentValue += amount;
+
+                    if (currentValue < 0) currentValue = 0;
+                    if (currentValue > maxValue) currentValue = maxValue;
+
+                    this.character.status[stat] = currentValue;
+                    this.saveCharacterChanges();
+                    this.updateBar(statType, currentValue, maxValue);
+                }
+            }
+        });
+
+        document.getElementById('hp-max').addEventListener('change', (e) => this.updateStatus('hp_max', e.target.value));
+        document.getElementById('sanity-max').addEventListener('change', (e) => this.updateStatus('sanity_max', e.target.value));
+        document.getElementById('pa-max').addEventListener('change', (e) => this.updateStatus('pa_max', e.target.value));
 
         // Painel de Perícias (delegação de eventos)
         document.getElementById('sheet-skills-list').addEventListener('click', (e) => {
@@ -845,9 +768,50 @@ class CharacterSheet {
 
     updateStatus(key, value) {
         if (!this.character.status) this.character.status = {};
-        this.character.status[key] = parseInt(value, 10);
-        this.renderSheet(); // Re-renderiza para atualizar a barra
+        const newMaxValue = parseInt(value, 10);
+        this.character.status[key] = newMaxValue;
+
+        // Ajusta o valor atual se ele exceder o novo máximo
+        const currentKey = key.replace('_max', '_current');
+        if (this.character.status[currentKey] > newMaxValue) {
+            this.character.status[currentKey] = newMaxValue;
+        }
+        this.renderSheet();
         this.saveCharacterChanges();
+    }
+
+    renderSkillTree() {
+        const container = document.getElementById('skill-tree-container');
+        if (!container) return;
+
+        const tree = SKILL_TREES[this.character.class] || [];
+        container.innerHTML = '';
+
+        if (tree.length === 0) {
+            container.innerHTML = '<p>Nenhuma árvore de habilidades definida para esta classe.</p>';
+            return;
+        }
+
+        tree.forEach(skill => {
+            const skillNode = document.createElement('div');
+            skillNode.className = 'skill-node';
+            
+            // Checa se a habilidade está desbloqueada
+            const isUnlocked = this.character.skills && this.character.skills.includes(skill.id);
+            if (isUnlocked) {
+                skillNode.classList.add('unlocked');
+            }
+
+            skillNode.innerHTML = `
+                <h4 class="skill-name" contenteditable="true">${skill.name}</h4>
+                <p class="skill-description" contenteditable="true">${skill.description}</p>
+                <div class="skill-requirements">
+                    <strong>Requisitos:</strong>
+                    <span contenteditable="true">${Object.entries(skill.requirements).map(([key, value]) => `${key.toUpperCase()} ${value}`).join(', ')}</span>
+                </div>
+            `;
+            container.appendChild(skillNode);
+        });
     }
 
     saveCharacterChanges() {
@@ -926,5 +890,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     if (path.includes('ficha-agente.html')) {
         new CharacterSheet();
+    }
+
+    // Ativa o modo desenvolvedor
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('dev') === 'true') {
+        document.body.classList.add('dev-mode');
+        console.log('Modo Desenvolvedor Ativado.');
     }
 });

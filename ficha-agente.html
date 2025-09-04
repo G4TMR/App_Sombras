@@ -25,23 +25,28 @@
             <div class="sheet-col-left">
                 <section class="sheet-section">
                     <div class="primary-attributes-container">
+                        <div class="primary-attr-block" data-attr="forca">
+                            <span class="primary-attr-icon"><svg class="attr-svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 7.5c0-1.38-1.12-2.5-2.5-2.5S13 6.12 13 7.5s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5zM9.5 5C8.12 5 7 6.12 7 7.5S8.12 10 9.5 10 12 8.88 12 7.5 10.88 5 9.5 5zM12 13c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm6.5 1.5c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5-1.12-2.5-2.5-2.5zM5.5 14.5c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5-1.12-2.5-2.5-2.5z"/></svg></span>
+                            <span class="primary-attr-label">Força</span>
+                            <span id="sheet-forca" class="primary-attr-value">--</span>
+                        </div>
                         <div class="primary-attr-block" data-attr="vigor">
-                            <span class="primary-attr-icon">💪</span>
+                            <span class="primary-attr-icon"><svg class="attr-svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></span>
                             <span class="primary-attr-label">Vigor</span>
                             <span id="sheet-vigor" class="primary-attr-value">--</span>
                         </div>
                         <div class="primary-attr-block" data-attr="agilidade">
-                            <span class="primary-attr-icon">🤸</span>
+                            <span class="primary-attr-icon"><svg class="attr-svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg></span>
                             <span class="primary-attr-label">Agilidade</span>
                             <span id="sheet-agilidade" class="primary-attr-value">--</span>
                         </div>
                         <div class="primary-attr-block" data-attr="intelecto">
-                            <span class="primary-attr-icon">🧠</span>
+                            <span class="primary-attr-icon"><svg class="attr-svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5zm0 10c-2.48 0-4.5-2.02-4.5-4.5S9.52 5.5 12 5.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7C10.62 7.5 9.5 8.62 9.5 10s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5S13.38 7.5 12 7.5z"/></svg></span>
                             <span class="primary-attr-label">Intelecto</span>
                             <span id="sheet-intelecto" class="primary-attr-value">--</span>
                         </div>
                         <div class="primary-attr-block" data-attr="presenca">
-                            <span class="primary-attr-icon">🗣️</span>
+                            <span class="primary-attr-icon"><svg class="attr-svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2z"/></svg></span>
                             <span class="primary-attr-label">Presença</span>
                             <span id="sheet-presenca" class="primary-attr-value">--</span>
                         </div>
@@ -62,15 +67,42 @@
                     </div>
                     <div class="status-bars-container">
                         <div class="status-bar-wrapper">
-                            <div class="status-bar-info"><span class="status-bar-label">HP</span> <span id="hp-value-text" class="status-bar-values">--/--</span></div>
+                            <div class="status-bar-info">
+                                <span class="status-bar-label">HP</span>
+                                <div class="status-bar-values-editable">
+                                    <button class="status-btn minus" data-stat="hp_current" data-amount="-1" title="Diminuir HP">-</button>
+                                    <span id="hp-current" class="status-value-display">--</span>
+                                    <button class="status-btn plus" data-stat="hp_current" data-amount="1" title="Aumentar HP">+</button>
+                                    <span class="separator">/</span>
+                                    <input type="number" id="hp-max" class="status-input" title="HP Máximo">
+                                </div>
+                            </div>
                             <div class="status-bar-background"><div id="hp-bar-fill" class="status-bar-fill hp"></div></div>
                         </div>
                         <div class="status-bar-wrapper">
-                            <div class="status-bar-info"><span class="status-bar-label">SAN</span> <span id="sanity-value-text" class="status-bar-values">--/--</span></div>
+                            <div class="status-bar-info">
+                                <span class="status-bar-label">SAN</span>
+                                <div class="status-bar-values-editable">
+                                    <button class="status-btn minus" data-stat="sanity_current" data-amount="-1" title="Diminuir Sanidade">-</button>
+                                    <span id="sanity-current" class="status-value-display">--</span>
+                                    <button class="status-btn plus" data-stat="sanity_current" data-amount="1" title="Aumentar Sanidade">+</button>
+                                    <span class="separator">/</span>
+                                    <input type="number" id="sanity-max" class="status-input" title="Sanidade Máxima">
+                                </div>
+                            </div>
                             <div class="status-bar-background"><div id="sanity-bar-fill" class="status-bar-fill sanity"></div></div>
                         </div>
                         <div class="status-bar-wrapper">
-                            <div class="status-bar-info"><span class="status-bar-label">PA</span> <span id="pa-value-text" class="status-bar-values">--/--</span></div>
+                            <div class="status-bar-info">
+                                <span class="status-bar-label">PA</span>
+                                <div class="status-bar-values-editable">
+                                    <button class="status-btn minus" data-stat="pa_current" data-amount="-1" title="Diminuir PA">-</button>
+                                    <span id="pa-current" class="status-value-display">--</span>
+                                    <button class="status-btn plus" data-stat="pa_current" data-amount="1" title="Aumentar PA">+</button>
+                                    <span class="separator">/</span>
+                                    <input type="number" id="pa-max" class="status-input" title="PA Máximo">
+                                </div>
+                            </div>
                             <div class="status-bar-background"><div id="pa-bar-fill" class="status-bar-fill pa"></div></div>
                         </div>
                     </div>
@@ -166,6 +198,13 @@
                             </form>
                             <div id="roll-log" class="roll-log">
                                 <p class="log-placeholder">O resultado das rolagens aparecerá aqui.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-panel skill-tree-panel">
+                        <button class="accordion-header">Árvore de Habilidades (DEV)</button>
+                        <div class="accordion-content">
+                            <div id="skill-tree-container" class="skill-tree-container">
                             </div>
                         </div>
                     </div>
