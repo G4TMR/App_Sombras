@@ -663,7 +663,7 @@ class CharacterCreator {
         sessionStorage.removeItem('character-in-progress'); 
     }
 
-    saveCharacter() {
+    async saveCharacter() {
         const { name, player } = this.currentCharacter.personalization;
         if (!name || !player) {
             alert('Por favor, preencha os campos obrigatórios (Nome do Agente e Nome do Jogador) para finalizar.');
@@ -691,34 +691,30 @@ class CharacterCreator {
             defense: 10 + attrs.agilidade,
         };
         
-        this.currentCharacter.deslocamento = 10;
-        this.currentCharacter.nfm = 0;
-        this.currentCharacter.protection = 0;
-        this.currentCharacter.resBalistica = 0;
-        this.currentCharacter.resCorte = 0;
-        this.currentCharacter.resParanormal = 0;
-        this.currentCharacter.proficiencies = 'Armas simples.';
-
-        let existingCharacters = [];
         try {
-            const storedData = localStorage.getItem('sombras-characters');
-            if (storedData) {
-                const parsedData = JSON.parse(storedData);
-                if (Array.isArray(parsedData)) {
-                    existingCharacters = parsedData;
+            const response = await fetch('http://localhost:3000/api/characters', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(this.currentCharacter),
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                this.clearFormData();
+                window.location.href = 'agentes.html';
+            } else {
+                const errorData = await response.json();
+                alert(`Erro ao salvar personagem: ${errorData.message}`);
+                if (response.status === 401) {
+                    window.location.href = 'http://localhost:3000/auth/google';
                 }
             }
         } catch (error) {
-            console.error('Erro ao ler personagens existentes do localStorage. Os dados podem estar corrompidos e serão sobrescritos.', error);
-            existingCharacters = [];
+            console.error('Erro de rede ao salvar personagem:', error);
+            alert('Erro de conexão com o servidor. Verifique se o backend está rodando.');
         }
-
-        console.log('Saving character:', this.currentCharacter);
-        existingCharacters.push(this.currentCharacter);
-        localStorage.setItem('sombras-characters', JSON.stringify(existingCharacters));
-
-        this.clearFormData();
-        window.location.href = 'agentes.html';
     }
 }
 
@@ -731,22 +727,23 @@ class CharacterDisplay {
         this.loadCharacters();
     }
 
-    loadCharacters() {
-        let characters = [];
+    async loadCharacters() {
         try {
-            const storedData = localStorage.getItem('sombras-characters');
-            if (storedData) {
-                characters = JSON.parse(storedData);
-                if (!Array.isArray(characters)) {
-                    characters = [];
+            const response = await fetch('http://localhost:3000/api/characters', { credentials: 'include' });
+            if (response.ok) {
+                const characters = await response.json();
+                this.renderCharacters(characters);
+            } else {
+                console.error('Falha ao carregar personagens. O usuário pode não estar logado.');
+                // Redireciona para o login se não estiver autorizado
+                if (response.status === 401) {
+                    this.container.innerHTML = `<div class="empty-state"><p class="empty-message">Você precisa estar logado para ver seus agentes.</p><a href="http://localhost:3000/auth/google" class="create-character-btn">Login com Google</a></div>`;
                 }
             }
         } catch (error) {
-            console.error('Erro ao carregar personagens do localStorage. O dado pode estar corrompido.', error);
-            characters = [];
-            localStorage.removeItem('sombras-characters');
+            console.error('Erro de rede ao carregar personagens:', error);
+            this.container.innerHTML = `<div class="empty-state"><p class="empty-message">Erro de conexão com o servidor.</p><p class="empty-submessage">Verifique se o backend está rodando e tente novamente.</p></div>`;
         }
-        this.renderCharacters(characters);
     }
 
     renderCharacters(characters) {
@@ -835,12 +832,17 @@ class CharacterDisplay {
         return card;
     }
 
-    deleteCharacter(characterId) {
+    async deleteCharacter(characterId) {
         if (confirm('Tem certeza que deseja excluir este agente? Esta ação não pode ser desfeita.')) {
-            let characters = JSON.parse(localStorage.getItem('sombras-characters')) || [];
-            characters = characters.filter(char => char.id !== characterId);
-            localStorage.setItem('sombras-characters', JSON.stringify(characters));
-            this.loadCharacters();
+            // A rota de delete não foi implementada no backend de exemplo,
+            // mas aqui é onde a chamada fetch seria feita.
+            // Ex: await fetch(`http://localhost:3000/api/characters/${characterId}`, { method: 'DELETE' });
+            alert('Funcionalidade de exclusão ainda não implementada no backend.');
+
+            // let characters = JSON.parse(localStorage.getItem('sombras-characters')) || [];
+            // characters = characters.filter(char => char.id !== characterId);
+            // localStorage.setItem('sombras-characters', JSON.stringify(characters));
+            // this.loadCharacters();
         }
     }
 }
@@ -852,7 +854,6 @@ class CharacterSheet {
     constructor() {
         document.body.classList.add('sheet-page-body');
         this.character = null;
-        this.characters = [];
         this.loadCharacter();
         if (this.character) {
             this.renderSheet();
@@ -862,16 +863,21 @@ class CharacterSheet {
         }
     }
 
-    loadCharacter() {
+    async loadCharacter() {
         const params = new URLSearchParams(window.location.search);
         const charId = params.get('id');
         if (!charId) {
             document.getElementById('character-not-found').style.display = 'block';
             return;
         }
-
-        this.characters = JSON.parse(localStorage.getItem('sombras-characters')) || [];
-        this.character = this.characters.find(char => char.id === charId);
+        
+        // No novo sistema, cada personagem seria carregado individualmente
+        // A rota para isso não foi implementada no backend de exemplo,
+        // então vamos continuar usando o localStorage por enquanto para a ficha.
+        // Em uma implementação completa, a linha abaixo seria um fetch.
+        // Ex: const response = await fetch(`http://localhost:3000/api/characters/${charId}`);
+        const characters = JSON.parse(localStorage.getItem('sombras-characters')) || [];
+        this.character = characters.find(char => char.id === charId);
 
         if (!this.character) {
             document.getElementById('character-not-found').style.display = 'block';
@@ -1290,12 +1296,17 @@ class CharacterSheet {
         }
     }
 
-    saveCharacterChanges() {
-        const charIndex = this.characters.findIndex(char => char.id === this.character.id);
-        if (charIndex > -1) {
-            this.characters[charIndex] = this.character;
-            localStorage.setItem('sombras-characters', JSON.stringify(this.characters));
-            console.log('Ficha salva!');
+    async saveCharacterChanges() {
+        try {
+            await fetch(`http://localhost:3000/api/characters/${this.character.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(this.character),
+                credentials: 'include'
+            });
+            console.log('Ficha salva no backend!');
+        } catch (err) {
+            console.error("Erro ao salvar ficha no backend:", err);
         }
     }
 }
@@ -1383,6 +1394,43 @@ function updateActiveLinks() {
     });
 }
 
+// Função para verificar o status de login e atualizar o header
+async function checkAuthStatus() {
+    const headerPlaceholder = document.getElementById('header-placeholder');
+    if (!headerPlaceholder) return;
+
+    // Espera o header ser carregado
+    while (!headerPlaceholder.querySelector('nav')) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    const nav = headerPlaceholder.querySelector('nav');
+    // Remove qualquer container de autenticação anterior para evitar duplicatas
+    const existingAuthContainer = nav.querySelector('.auth-container');
+    if (existingAuthContainer) {
+        existingAuthContainer.remove();
+    }
+
+    const authContainer = document.createElement('div');
+    authContainer.className = 'auth-container';
+
+    try {
+        const response = await fetch('http://localhost:3000/auth/user', { credentials: 'include' });
+        
+        if (response.ok) {
+            const user = await response.json();
+            authContainer.innerHTML = `<span class="user-info">Olá, ${user.displayName}! <a href="http://localhost:3000/auth/logout" class="auth-link">[Sair]</a></span>`;
+        } else {
+            authContainer.innerHTML = `<a href="http://localhost:3000/auth/google" class="login-btn auth-link">Login com Google</a>`;
+        }
+    } catch (error) {
+        console.log('Servidor backend offline. Mostrando botão de login padrão.');
+        authContainer.innerHTML = `<a href="http://localhost:3000/auth/google" class="login-btn auth-link">Login com Google</a>`;
+    }
+    
+    nav.appendChild(authContainer);
+}
+
 // Função para carregar o header dinamicamente
 async function loadHeader() {
     const headerPlaceholder = document.getElementById('header-placeholder');
@@ -1414,6 +1462,7 @@ async function loadHeader() {
 document.addEventListener('DOMContentLoaded', async () => {
     await loadHeader();
     updateActiveLinks();
+    checkAuthStatus();
 
     const path = window.location.pathname;
     if (path.includes('criar-agente.html')) {
