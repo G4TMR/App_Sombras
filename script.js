@@ -3,6 +3,17 @@
  * Contém a lógica para a criação de personagens e exibição de agentes.
  */
 
+// Configuração do Axios para comunicação com a API
+const api = axios.create({
+    baseURL: 'http://localhost:3000/api',
+    withCredentials: true, // Permite que cookies de autenticação sejam enviados
+});
+
+const authApi = axios.create({
+    baseURL: 'http://localhost:3000/auth',
+    withCredentials: true,
+});
+
 const CLASS_BASE_ATTRIBUTES = {
     'Bélico': { forca: 3, agilidade: 2, presenca: 1, vitalidade: 3, inteligencia: 1 },
     'Esotérico': { forca: 1, agilidade: 2, presenca: 3, vitalidade: 2, inteligencia: 2 },
@@ -663,7 +674,7 @@ class CharacterCreator {
         sessionStorage.removeItem('character-in-progress'); 
     }
 
-    saveCharacter() {
+    async saveCharacter() {
         const { name, player } = this.currentCharacter.personalization;
         if (!name || !player) {
             alert('Por favor, preencha os campos obrigatórios (Nome do Agente e Nome do Jogador) para finalizar.');
@@ -690,35 +701,27 @@ class CharacterCreator {
         this.currentCharacter.classStats = {
             defense: 10 + attrs.agilidade,
         };
-        
-        this.currentCharacter.deslocamento = 10;
-        this.currentCharacter.nfm = 0;
-        this.currentCharacter.protection = 0;
-        this.currentCharacter.resBalistica = 0;
-        this.currentCharacter.resCorte = 0;
-        this.currentCharacter.resParanormal = 0;
-        this.currentCharacter.proficiencies = 'Armas simples.';
 
-        let existingCharacters = [];
         try {
-            const storedData = localStorage.getItem('sombras-characters');
-            if (storedData) {
-                const parsedData = JSON.parse(storedData);
-                if (Array.isArray(parsedData)) {
-                    existingCharacters = parsedData;
-                }
-            }
+            // Usando Axios para enviar o personagem para o backend
+            await api.post('/characters', this.currentCharacter);
+            this.clearFormData();
+            window.location.href = 'agentes.html';
         } catch (error) {
-            console.error('Erro ao ler personagens existentes do localStorage. Os dados podem estar corrompidos e serão sobrescritos.', error);
-            existingCharacters = [];
+            if (error.response) {
+                // O servidor respondeu com um status de erro (4xx, 5xx)
+                const errorData = error.response.data;
+                alert(`Erro ao salvar personagem: ${errorData.message || 'Erro desconhecido.'}`);
+                if (error.response.status === 401) {
+                    // Se não autorizado, redireciona para o login
+                    window.location.href = 'http://localhost:3000/auth/google';
+                }
+            } else {
+                // Erro de rede ou outro problema
+                console.error('Erro de rede ao salvar personagem:', error.message);
+                alert('Erro de conexão com o servidor. Verifique se o backend está rodando.');
+            }
         }
-
-        console.log('Saving character:', this.currentCharacter);
-        existingCharacters.push(this.currentCharacter);
-        localStorage.setItem('sombras-characters', JSON.stringify(existingCharacters));
-
-        this.clearFormData();
-        window.location.href = 'agentes.html';
     }
 }
 
@@ -731,22 +734,25 @@ class CharacterDisplay {
         this.loadCharacters();
     }
 
-    loadCharacters() {
-        let characters = [];
+    async loadCharacters() {
         try {
-            const storedData = localStorage.getItem('sombras-characters');
-            if (storedData) {
-                characters = JSON.parse(storedData);
-                if (!Array.isArray(characters)) {
-                    characters = [];
-                }
-            }
+            // Usando Axios para buscar os personagens do usuário logado
+            const response = await api.get('/characters');
+            this.renderCharacters(response.data);
         } catch (error) {
-            console.error('Erro ao carregar personagens do localStorage. O dado pode estar corrompido.', error);
-            characters = [];
-            localStorage.removeItem('sombras-characters');
+            if (error.response) {
+                // O servidor respondeu com um status de erro
+                console.error('Falha ao carregar personagens. O usuário pode não estar logado.');
+                if (error.response.status === 401) {
+                    // Se não estiver autorizado, mostra a mensagem de login
+                    this.container.innerHTML = `<div class="empty-state"><p class="empty-message">Você precisa estar logado para ver seus agentes.</p><a href="http://localhost:3000/auth/google" class="create-character-btn">Login com Google</a></div>`;
+                }
+            } else {
+                // Erro de rede
+                console.error('Erro de rede ao carregar personagens:', error.message);
+                this.container.innerHTML = `<div class="empty-state"><p class="empty-message">Erro de conexão com o servidor.</p><p class="empty-submessage">Verifique se o backend está rodando e tente novamente.</p></div>`;
+            }
         }
-        this.renderCharacters(characters);
     }
 
     renderCharacters(characters) {
@@ -782,42 +788,41 @@ class CharacterDisplay {
         }
 
         const p = character.personalization || {};
-        console.log('Rendering character card for:', p.name);
         const attrs = character.attributes || { forca: '?', agilidade: '?', presenca: '?', vitalidade: '?', inteligencia: '?' };
         const creationDate = character.createdAt ? new Date(character.createdAt).toLocaleDateString('pt-BR') : 'Data inválida';
         const elementClass = character.element ? character.element.toLowerCase() : '';
 
         card.dataset.id = character.id;
 
-        card.innerHTML = `
+       card.innerHTML = `
             <div class="character-header">
                 <h3>${p.name || 'Agente Sem Nome'}</h3>
                 <span class="character-class">${character.class || 'Classe Desconhecida'}</span>
                 <span class="character-element ${elementClass}">${character.element || ''}</span>
             </div>
             <div class="character-info">
-                <p><strong>Profissão:</strong> ${p.profession || 'Não informado'}</p>
+                <p><strong>Profissão:</strong> ${p.profession || 'Não informado'}</p> 
             </div>
             <div class="character-attributes">
                 <div class="attr-item">
-                    <span class="attr-icon"><svg class="attr-svg-icon-small" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></span>
+                    <span class="attr-icon"><svg class="attr-svg-icon-small" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.5,8.5c-1.1,0-2,0.9-2,2s0.9,2,2,2s2-0.9,2-2S19.6,8.5,18.5,8.5z M12,13c-1.66,0-3-1.34-3-3s1.34-3,3-3,3,1.34,3,3 S13.66,13,12,13z M5.5,10.5c1.1,0,2-0.9,2-2s-0.9-2-2-2s-2,0.9-2,2S4.4,10.5,5.5,10.5z M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10 s10-4.48,10-10S17.52,2,12,2z M12,20c-4.41,0-8-3.59-8-8s3.59-8,8-8s8,3.59,8,8S16.41,20,12,20z"/></svg></span>
                     <span>${attrs.forca} FOR</span>
                 </div>
                 <div class="attr-item">
-                    <span class="attr-icon"><svg class="attr-svg-icon-small" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg></span>
+                    <span class="attr-icon"><svg class="attr-svg-icon-small" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg></span>
                     <span>${attrs.agilidade} AGI</span>
                 </div>
                 <div class="attr-item">
-                    <span class="attr-icon"><svg class="attr-svg-icon-small" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5zm0 10c-2.48 0-4.5-2.02-4.5-4.5S9.52 5.5 12 5.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7C10.62 7.5 9.5 8.62 9.5 10s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5S13.38 7.5 12 7.5z"/></svg></span>
-                    <span>${attrs.inteligencia} INT</span>
-                </div>
-                <div class="attr-item">
-                    <span class="attr-icon"><svg class="attr-svg-icon-small" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg></span>
+                    <span class="attr-icon"><svg class="attr-svg-icon-small" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,4.5C7,4.5,2.73,7.61,1,12c1.73,4.39,6,7.5,11,7.5s9.27-3.11,11-7.5C21.27,7.61,17,4.5,12,4.5z M12,14.5 c-2.48,0-4.5-2.02-4.5-4.5S9.52,5.5,12,5.5s4.5,2.02,4.5,4.5S14.48,14.5,12,14.5z M12,7.5C10.62,7.5,9.5,8.62,9.5,10 s1.12,2.5,2.5,2.5s2.5-1.12,2.5-2.5S13.38,7.5,12,7.5z"/></svg></span>
                     <span>${attrs.presenca} PRE</span>
                 </div>
-                 <div class="attr-item">
-                    <span class="attr-icon"><svg class="attr-svg-icon-small" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></span>
+                <div class="attr-item">
+                     <span class="attr-icon"><svg class="attr-svg-icon-small" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></span>
                     <span>${attrs.vitalidade} VIT</span>
+                </div>
+                <div class="attr-item">
+                    <span class="attr-icon"><svg class="attr-svg-icon-small" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z M12,20c-4.41,0-8-3.59-8-8s3.59-8,8-8 s8,3.59,8,8S16.41,20,12,20z M12.5,15.5h-1V14h1V15.5z M12.5,12.5h-1V7h1V12.5z"/></svg></span>
+                    <span>${attrs.inteligencia} INT</span>
                 </div>
             </div>
             <div class="character-footer">
@@ -835,12 +840,24 @@ class CharacterDisplay {
         return card;
     }
 
-    deleteCharacter(characterId) {
+    async deleteCharacter(characterId) {
         if (confirm('Tem certeza que deseja excluir este agente? Esta ação não pode ser desfeita.')) {
-            let characters = JSON.parse(localStorage.getItem('sombras-characters')) || [];
-            characters = characters.filter(char => char.id !== characterId);
-            localStorage.setItem('sombras-characters', JSON.stringify(characters));
-            this.loadCharacters();
+            try {
+                // Usando Axios para deletar o personagem
+                await api.delete(`/characters/${characterId}`);
+                // Recarrega a lista de personagens para refletir a exclusão
+                this.loadCharacters();
+            } catch (error) {
+                if (error.response) {
+                    alert(`Erro ao excluir personagem: ${error.response.data.message || 'Tente novamente.'}`);
+                    if (error.response.status === 401) {
+                        window.location.href = 'http://localhost:3000/auth/google';
+                    }
+                } else {
+                    console.error('Erro de rede ao excluir personagem:', error.message);
+                    alert('Erro de conexão com o servidor. Verifique se o backend está rodando.');
+                }
+            }
         }
     }
 }
@@ -852,76 +869,86 @@ class CharacterSheet {
     constructor() {
         document.body.classList.add('sheet-page-body');
         this.character = null;
-        this.characters = [];
-        this.loadCharacter();
-        if (this.character) {
-            this.renderSheet();
-            this.setupEventListeners();
-            this.renderSkillTree();
-            this.checkLevelUp();
-        }
     }
 
-    loadCharacter() {
+    async initialize() {
+        await this.loadCharacter();
+        this.renderSheet();
+        this.setupEventListeners();
+        this.renderSkillTree();
+        this.checkLevelUp();
+    }
+
+    async loadCharacter() {
         const params = new URLSearchParams(window.location.search);
         const charId = params.get('id');
         if (!charId) {
             document.getElementById('character-not-found').style.display = 'block';
             return;
         }
-
-        this.characters = JSON.parse(localStorage.getItem('sombras-characters')) || [];
-        this.character = this.characters.find(char => char.id === charId);
-
-        if (!this.character) {
-            document.getElementById('character-not-found').style.display = 'block';
-        } else {
-            // Lógica de migração para garantir que fichas antigas funcionem.
-            // Isso atualiza a estrutura de dados do personagem se estiver faltando algo.
-            let needsSave = false;
-
-            // Garante que todas as propriedades essenciais existam
-            if (typeof this.character.level === 'undefined') { this.character.level = 1; needsSave = true; }
-            if (typeof this.character.xp === 'undefined') { this.character.xp = 0; needsSave = true; }
-            if (typeof this.character.attributePoints === 'undefined') { this.character.attributePoints = 0; needsSave = true; }
-            if (typeof this.character.skillPoints === 'undefined') { this.character.skillPoints = 0; needsSave = true; }
-            if (!this.character.skills) { this.character.skills = []; needsSave = true; }
-            if (!this.character.inventario) { this.character.inventario = []; needsSave = true; }
-            if (!this.character.personalization) { this.character.personalization = {}; needsSave = true; }
-            
-            // Migração de atributos mais robusta para garantir que todos existam.
-            const defaultAttributes = { forca: 1, agilidade: 1, presenca: 1, vitalidade: 1, inteligencia: 1 };
-            const currentAttributes = this.character.attributes || {};
-            const mergedAttributes = { ...defaultAttributes, ...currentAttributes };
-            if (JSON.stringify(mergedAttributes) !== JSON.stringify(this.character.attributes)) {
-                this.character.attributes = mergedAttributes;
-                needsSave = true;
+        
+        try {
+            // Usando Axios para buscar um personagem específico pelo ID
+            const response = await api.get(`/characters/${charId}`);
+            this.character = response.data;
+        } catch (error) {
+            console.error('Erro ao carregar a ficha do personagem:', error);
+            this.character = null; // Garante que o personagem é nulo em caso de erro
+            if (error.response && error.response.status === 401) {
+                alert('Sua sessão expirou. Por favor, faça login novamente.');
+                window.location.href = 'agentes.html';
             }
+        } finally {
+            if (!this.character) {
+                document.getElementById('character-not-found').style.display = 'block';
+            } else {
+                // Lógica de migração para garantir que fichas antigas funcionem.
+                // Isso atualiza a estrutura de dados do personagem se estiver faltando algo.
+                let needsSave = false;
 
-            const attrs = this.character.attributes;
+                // Garante que todas as propriedades essenciais existam
+                if (typeof this.character.level === 'undefined') { this.character.level = 1; needsSave = true; }
+                if (typeof this.character.xp === 'undefined') { this.character.xp = 0; needsSave = true; }
+                if (typeof this.character.attributePoints === 'undefined') { this.character.attributePoints = 0; needsSave = true; }
+                if (typeof this.character.skillPoints === 'undefined') { this.character.skillPoints = 0; needsSave = true; }
+                if (!this.character.skills) { this.character.skills = []; needsSave = true; }
+                if (!this.character.inventario) { this.character.inventario = []; needsSave = true; }
+                if (!this.character.personalization) { this.character.personalization = {}; needsSave = true; }
+                
+                // Migração de atributos mais robusta para garantir que todos existam.
+                const defaultAttributes = { forca: 1, agilidade: 1, presenca: 1, vitalidade: 1, inteligencia: 1 };
+                const currentAttributes = this.character.attributes || {};
+                const mergedAttributes = { ...defaultAttributes, ...currentAttributes };
+                if (JSON.stringify(mergedAttributes) !== JSON.stringify(this.character.attributes)) {
+                    this.character.attributes = mergedAttributes;
+                    needsSave = true;
+                }
 
-            if (!this.character.status || !this.character.status.hasOwnProperty('pa_max')) {
-                const hpMax = 10 + (attrs.vitalidade * 2);
-                const sanityMax = 10 + (attrs.presenca * 2);
-                const paMax = 5 + Math.floor(attrs.agilidade / 2);
+                const attrs = this.character.attributes;
 
-                this.character.status = {
-                    hp_max: this.character.status?.hp_max || hpMax,
-                    hp_current: this.character.status?.hp_current ?? (this.character.status?.hp_max || hpMax),
-                    sanity_max: this.character.status?.sanity_max || sanityMax,
-                    sanity_current: this.character.status?.sanity_current ?? (this.character.status?.sanity_max || sanityMax),
-                    pa_max: paMax,
-                    pa_current: paMax,
-                };
-                needsSave = true;
+                if (!this.character.status || !this.character.status.hasOwnProperty('pa_max')) {
+                    const hpMax = 10 + (attrs.vitalidade * 2);
+                    const sanityMax = 10 + (attrs.presenca * 2);
+                    const paMax = 5 + Math.floor(attrs.agilidade / 2);
+
+                    this.character.status = {
+                        hp_max: this.character.status?.hp_max || hpMax,
+                        hp_current: this.character.status?.hp_current ?? (this.character.status?.hp_max || hpMax),
+                        sanity_max: this.character.status?.sanity_max || sanityMax,
+                        sanity_current: this.character.status?.sanity_current ?? (this.character.status?.sanity_max || sanityMax),
+                        pa_max: paMax,
+                        pa_current: paMax,
+                    };
+                    needsSave = true;
+                }
+
+                if (!this.character.classStats || !this.character.classStats.hasOwnProperty('defense')) {
+                    this.character.classStats = { defense: 10 + attrs.agilidade };
+                    needsSave = true;
+                }
+
+                if (needsSave) this.saveCharacterChanges();
             }
-
-            if (!this.character.classStats || !this.character.classStats.hasOwnProperty('defense')) {
-                this.character.classStats = { defense: 10 + attrs.agilidade };
-                needsSave = true;
-            }
-
-            if (needsSave) this.saveCharacterChanges();
         }
     }
 
@@ -1290,12 +1317,16 @@ class CharacterSheet {
         }
     }
 
-    saveCharacterChanges() {
-        const charIndex = this.characters.findIndex(char => char.id === this.character.id);
-        if (charIndex > -1) {
-            this.characters[charIndex] = this.character;
-            localStorage.setItem('sombras-characters', JSON.stringify(this.characters));
-            console.log('Ficha salva!');
+    async saveCharacterChanges() {
+        // Usando Axios para atualizar o personagem (PUT request)
+        try {
+            await api.put(`/characters/${this.character.id}`, this.character);
+            console.log('Ficha salva no backend!');
+        } catch (err) {
+            console.error("Erro ao salvar ficha no backend:", err);
+            if (err.response && err.response.status === 401) {
+                alert('Sua sessão expirou. Por favor, faça login novamente para salvar.');
+            }
         }
     }
 }
@@ -1337,17 +1368,25 @@ class ElementLorePage {
     }
 
     render() {
+        const titleEl = document.getElementById('element-title');
+        const loreEl = document.getElementById('element-lore');
+
         if (!this.elementName || !this.elementData[this.elementName]) {
-            document.getElementById('lore-element-title').textContent = 'Elemento não encontrado';
-            document.getElementById('lore-element-text').textContent = 'O elemento especificado não foi encontrado.';
+            if (titleEl) titleEl.textContent = 'Elemento não encontrado';
+            if (loreEl) loreEl.textContent = 'O elemento especificado não foi encontrado.';
             return;
         }
 
         const element = this.elementData[this.elementName];
         const contentBox = document.getElementById('lore-content-box');
-        const title = document.getElementById('lore-element-title');
-        const divider = document.getElementById('lore-element-divider');
-        const text = document.getElementById('lore-element-text');
+        const title = document.getElementById('element-title');
+        const divider = document.querySelector('#lore-content-box .element-divider');
+        const text = document.getElementById('element-lore');
+
+        if (!contentBox || !title || !divider || !text) {
+            console.error("Um ou mais elementos da página de lore não foram encontrados no DOM.");
+            return;
+        }
 
         document.title = `${element.title} | Lore do Elemento`;
         contentBox.style.borderColor = element.color;
@@ -1368,19 +1407,56 @@ function updateActiveLinks() {
     if (navLinks.length === 0) return;
 
     const currentPage = window.location.pathname.split('/').pop().toLowerCase();
-    
+
     navLinks.forEach(link => {
         const linkPage = link.getAttribute('href').split('/').pop().toLowerCase();
         link.classList.remove('active-link');
 
         const isCurrentPage = linkPage === currentPage;
         const isHomePage = (currentPage === '' || currentPage === 'home.html' || currentPage === 'index.html') && (linkPage === 'home.html' || linkPage === 'index.html');
-        const isAgentCreationPage = (currentPage === 'criar-agente.html' || currentPage === 'ficha-agente.html') && linkPage === 'agentes.html';
+        const isAgentCreationPage = (currentPage === 'criar-agente.html' || currentPage === 'ficha-agente.html' || currentPage === 'elemento-lore.html') && linkPage === 'agentes.html';
 
         if (isCurrentPage || isHomePage || isAgentCreationPage) {
             link.classList.add('active-link');
         }
     });
+}
+
+// Função para verificar o status de login e atualizar o header
+async function checkAuthStatus() {
+    const header = document.querySelector('#header-placeholder .home-header');
+    if (!header) {
+        // O header não foi carregado ou não contém a tag nav, provavelmente devido a um erro.
+        // A mensagem de erro já foi exibida por loadHeader.
+        return;
+    }
+
+    // Remove qualquer container de autenticação anterior para evitar duplicatas
+    const existingAuthContainer = header.querySelector('.auth-container');
+    if (existingAuthContainer) {
+        existingAuthContainer.remove();
+    }
+
+    const authContainer = document.createElement('div');
+    authContainer.className = 'auth-container';
+
+    try {
+        // Usando Axios para verificar o status de autenticação
+        const response = await authApi.get('/user');
+        const user = response.data;
+        authContainer.innerHTML = `<span class="user-info">Olá, ${user.displayName}! <a href="http://localhost:3000/auth/logout" class="auth-link">[Sair]</a></span>`;
+    } catch (error) {
+        if (error.response && error.response.status === 401) {
+            // Erro 401 (Não Autorizado) é esperado se o usuário não estiver logado
+            authContainer.innerHTML = `<a href="http://localhost:3000/auth/google" class="login-btn auth-link">Login com Google</a>`;
+        } else {
+            // Outros erros (como falha de rede) indicam que o backend pode estar offline
+            console.log('Servidor backend offline. Mostrando botão de login padrão.');
+            authContainer.innerHTML = `<a href="http://localhost:3000/auth/google" class="login-btn auth-link">Login com Google</a>`;
+        }
+    }
+    
+    header.appendChild(authContainer);
 }
 
 // Função para carregar o header dinamicamente
@@ -1389,20 +1465,18 @@ async function loadHeader() {
     if (!headerPlaceholder) return;
 
     try {
-        const response = await fetch('/_header.html'); 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.text();
+        // Usando Axios para carregar o HTML do cabeçalho
+        const response = await axios.get('_header.html');
+        const data = response.data;
         headerPlaceholder.innerHTML = data;
     } catch (error) {
         console.error('Erro ao carregar o cabeçalho:', error);
         if (window.location.protocol === 'file:') {
-            headerPlaceholder.innerHTML = `
-                <div style="padding: 1.5rem; text-align: center; background-color: #5d1a22; color: white; border-bottom: 2px solid #dc3545;">
-                    <h3 style="margin-top:0; font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem;">ERRO DE CARREGAMENTO DO MENU</h3>
-                    <p style="margin-bottom:0;">O menu não pôde ser carregado. Isso ocorre ao abrir o arquivo HTML diretamente.<br>
-                    <strong>Solução:</strong> No VS Code, clique com o botão direito no arquivo <strong>index.html</strong> e escolha <strong>"Open with Live Server"</strong>.</p>
+            headerPlaceholder.innerHTML = `<div style="padding: 1.5rem; text-align: center; background-color: #5d1a22; color: white; border: 3px solid #ff4d4d; border-radius: 8px; margin: 1rem;">
+                    <h3 style="margin-top:0; font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: #ffc107;">ERRO: O MENU NÃO PODE SER CARREGADO</h3>
+                    <p style="margin-bottom:0; font-size: 1.1rem;">Isso acontece porque o projeto foi aberto como um arquivo local (<code>file:///</code>).</p>
+                    <p style="margin-top: 0.5rem; font-size: 1.2rem; font-weight: bold;"><strong>SOLUÇÃO:</strong> Use a extensão <strong>"Live Server"</strong> no VS Code.</p>
+                    <p style="margin-top: 0.5rem;">Clique com o botão direito no arquivo <code>Home.html</code> e escolha <strong>"Open with Live Server"</strong>.</p>
                 </div>`;
         } else {
             headerPlaceholder.innerHTML = '<p style="color: red; text-align: center;">Erro ao carregar o cabeçalho. Verifique o console para mais detalhes.</p>';
@@ -1414,6 +1488,7 @@ async function loadHeader() {
 document.addEventListener('DOMContentLoaded', async () => {
     await loadHeader();
     updateActiveLinks();
+    checkAuthStatus();
 
     const path = window.location.pathname;
     if (path.includes('criar-agente.html')) {
@@ -1423,7 +1498,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         new CharacterDisplay();
     }
     if (path.includes('ficha-agente.html')) {
-        new CharacterSheet();
+        const sheet = new CharacterSheet();
+        await sheet.initialize();
     }
     if (path.includes('elemento-lore.html')) {
         new ElementLorePage();
