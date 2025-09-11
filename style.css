@@ -1884,6 +1884,231 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
+.campaigns-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.campaign-card {
+    background-color: rgba(0,0,0,0.2);
+    border: 1px solid var(--color-surface-2);
+    border-radius: 8px;
+    padding: 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--page-color, var(--color-primary));
+}
+
+.campaign-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    border-color: var(--page-color, var(--color-primary));
+}
+
+.campaign-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    color: var(--page-color, var(--color-primary));
+    margin: 0 0 1rem 0;
+    letter-spacing: 1px;
+}
+
+.campaign-card p {
+    color: var(--color-text-secondary);
+    font-size: 0.95rem;
+    flex-grow: 1;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.campaign-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #888;
+    border-top: 1px solid var(--color-surface-2);
+    padding-top: 1rem;
+    margin-top: auto; /* Empurra o rodapé para o final do card */
+}
+
+.campaign-card-footer .wizard-btn {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.9rem;
+    margin: 0;
+    background: var(--color-surface-2);
+}
+
+.campaign-card-footer .wizard-btn:hover {
+    background: var(--page-color, var(--color-primary));
+}
+
+/* --- PÁGINA DE CRIAÇÃO DE CAMPANHA --- */
+.master-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--color-surface-2);
+    margin: 2.5rem 0 1.5rem 0;
+}
+
+.tab-link {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    padding: 0.8rem 2rem;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--color-text-secondary);
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.tab-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--page-color, var(--color-primary));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.tab-link:hover {
+    color: var(--color-text-primary);
+}
+
+.tab-link.active {
+    color: var(--page-color, var(--color-primary));
+}
+
+.tab-link.active::after {
+    transform: scaleX(1);
+}
+
+.tab-content {
+    display: none;
+    padding: 1.5rem;
+    background-color: rgba(0,0,0,0.15);
+    border: 1px solid var(--color-surface-2);
+    border-radius: 8px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.master-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.tool-placeholder {
+    background-color: rgba(0,0,0,0.2);
+    border: 1px dashed #444;
+    padding: 2rem;
+    text-align: center;
+    color: var(--color-text-secondary);
+    border-radius: 8px;
+}
+
+.premium-lock {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.premium-lock .lock-icon {
+    font-size: 3rem;
+    color: var(--page-color, var(--color-primary));
+}
+
+.ai-tools-section { margin-top: 3rem; }
+.ai-tools { display: flex; justify-content: center; gap: 1rem; }
+
+/* --- PÁGINA DE GERENCIAMENTO DE CAMPANHA (LAYOUT COM SIDEBAR) --- */
+.campaign-layout {
+    display: grid;
+    grid-template-columns: 1fr; /* Padrão para mobile */
+    gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+    .campaign-layout {
+        grid-template-columns: 1fr 320px; /* Conteúdo principal e barra lateral */
+    }
+}
+
+.campaign-main-content .content-box {
+    width: 100%;
+    max-width: none;
+}
+
+.notification-sidebar {
+    background-color: rgba(var(--color-surface-1), 0.9);
+    border: 1px solid var(--color-surface-2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    height: fit-content;
+    position: sticky;
+    top: 2rem; /* Fixa a barra lateral ao rolar */
+}
+
+.notification-sidebar h3 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    color: var(--page-color, var(--color-primary));
+    margin: 0 0 1.5rem 0;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--page-color, var(--color-primary));
+    padding-bottom: 0.5rem;
+}
+
+.notification-sidebar .roll-log {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* --- DESBLOQUEIO DE FUNCIONALIDADE PREMIUM COM DEV MODE --- */
+.map-content-unlocked { display: none; }
+body.dev-mode .premium-lock { display: none; }
+body.dev-mode .map-content-unlocked { display: block; }
+
+/* --- INDICADOR DE SALVAMENTO AUTOMÁTICO --- */
+.save-status {
+    color: var(--color-accent-rare);
+    font-style: italic;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+.save-status.show { opacity: 1; }
+
+.campaign-actions-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-surface-2);
+}
+
+.wizard-btn.danger-btn {
+    background: var(--color-danger);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.wizard-btn.danger-btn:hover {
+    background: #e04453;
+    filter: brightness(1.1);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+}
+
 .tier-card h3 {
     font-family: var(--font-display);
     font-size: 2.2rem;

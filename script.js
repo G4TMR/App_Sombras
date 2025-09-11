@@ -1398,8 +1398,244 @@ class ElementLorePage {
 }
 
 // =================================================================================
+// FUNÇÕES DE GERENCIAMENTO DE CAMPANHA
+// =================================================================================
+
+/**
+ * Busca uma campanha específica pelo seu ID no localStorage.
+ * @param {string} campaignId - O ID da campanha a ser buscada.
+ * @returns {object|null} O objeto da campanha ou nulo se não for encontrado.
+ */
+function getCampaignById(campaignId) {
+    const campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
+    return campaigns.find(c => c.id === campaignId);
+}
+
+/**
+ * Atualiza uma campanha existente no localStorage.
+ * @param {object} updatedCampaign - O objeto da campanha com os dados atualizados.
+ */
+function updateCampaign(updatedCampaign, showIndicator = false) {
+    try {
+        let campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
+        const campaignIndex = campaigns.findIndex(c => c.id === updatedCampaign.id);
+        if (campaignIndex > -1) {
+            // Mantém dados existentes (como jogadores) e atualiza apenas os do formulário
+            campaigns[campaignIndex] = { ...campaigns[campaignIndex], ...updatedCampaign };
+            localStorage.setItem('sombras-campaigns', JSON.stringify(campaigns));
+            
+            // Fornece feedback visual de que foi salvo
+            if (showIndicator) {
+                const saveIndicator = document.getElementById('save-status-indicator');
+                if (saveIndicator) {
+                    saveIndicator.textContent = 'Salvo!';
+                    saveIndicator.classList.add('show');
+                    setTimeout(() => {
+                        saveIndicator.classList.remove('show');
+                    }, 2000); // O indicador some após 2 segundos
+                }
+            }
+
+            // window.location.href = 'campanhas.html'; // Removido para salvamento em tempo real
+        } else {
+            throw new Error("Campanha não encontrada para atualização.");
+        }
+    } catch (error) {
+        console.error("Erro ao atualizar campanha:", error);
+        alert("Ocorreu um erro ao atualizar a campanha.");
+    }
+}
+
+/**
+ * Exclui uma campanha do localStorage.
+ * @param {string} campaignId - O ID da campanha a ser excluída.
+ */
+function deleteCampaign(campaignId) {
+    if (!confirm('Tem certeza que deseja excluir esta campanha? Esta ação não pode ser desfeita.')) {
+        return;
+    }
+    try {
+        let campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
+        const updatedCampaigns = campaigns.filter(c => c.id !== campaignId);
+        localStorage.setItem('sombras-campaigns', JSON.stringify(updatedCampaigns));
+        window.location.href = 'campanhas.html'; // Volta para a lista
+    } catch (error) {
+        console.error("Erro ao excluir campanha:", error);
+        alert("Ocorreu um erro ao excluir a campanha.");
+    }
+}
+
+// =================================================================================
+// FUNÇÕES DE CAMPANHA
+// =================================================================================
+
+/**
+ * Salva uma nova campanha no localStorage e redireciona para a página de campanhas.
+ * @param {object} campaignData - O objeto da campanha a ser salvo.
+ */
+function saveCampaign(campaignData) {
+    try {
+        const campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
+        campaigns.unshift(campaignData); // Adiciona no início para a mais recente aparecer primeiro
+        localStorage.setItem('sombras-campaigns', JSON.stringify(campaigns));
+        window.location.href = 'campanhas.html';
+    } catch (error) {
+        console.error("Erro ao salvar campanha:", error);
+        alert("Ocorreu um erro ao salvar a campanha. Verifique o console para mais detalhes.");
+    }
+}
+
+/**
+ * Exibe as campanhas salvas na página de campanhas.
+ */
+function displayCampaigns() {
+    const campaignsContainer = document.querySelector('.campaigns-container');
+    if (!campaignsContainer) return;
+
+    const campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
+    const emptyState = campaignsContainer.querySelector('.empty-state');
+    let grid = campaignsContainer.querySelector('.campaigns-grid');
+
+    if (campaigns.length > 0) {
+        if (emptyState) emptyState.style.display = 'none';
+
+        if (!grid) {
+            grid = document.createElement('div');
+            grid.className = 'campaigns-grid';
+            campaignsContainer.appendChild(grid);
+        }
+        grid.innerHTML = ''; // Limpa o grid para renderizar novamente
+
+        campaigns.forEach(campaign => {
+            const card = document.createElement('div');
+            card.className = 'campaign-card';
+            const synopsisSnippet = campaign.synopsis ? campaign.synopsis.substring(0, 150) + (campaign.synopsis.length > 150 ? '...' : '') : 'Nenhuma sinopse fornecida.';
+
+            card.innerHTML = `
+                <h3>${campaign.title}</h3>
+                <p>${synopsisSnippet}</p>
+                <div class="campaign-card-footer">
+                    <span class="campaign-date">Criada em: ${new Date(campaign.createdAt).toLocaleDateString('pt-BR')}</span>
+                    <button class="wizard-btn" onclick="window.location.href='gerenciar-campanha.html?id=${campaign.id}'">Gerenciar</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    } else {
+        if (emptyState) emptyState.style.display = 'flex';
+        if (grid) grid.innerHTML = ''; // Limpa o grid se não houver campanhas
+    }
+}
+
+/**
+ * Inicializa a página de gerenciamento de campanha, carregando dados e configurando eventos.
+ */
+function initializeCampaignManagement() {
+    const params = new URLSearchParams(window.location.search);
+    const campaignId = params.get('id');
+    if (!campaignId) {
+        alert('ID da campanha não encontrado.');
+        window.location.href = 'campanhas.html';
+        return;
+    }
+
+    const campaign = getCampaignById(campaignId);
+    if (!campaign) {
+        alert('Campanha não encontrada.');
+        window.location.href = 'campanhas.html';
+        return;
+    }
+
+    const titleInput = document.getElementById('campaign-title');
+    const synopsisTextarea = document.getElementById('campaign-synopsis');
+
+    // Preenche os campos do formulário
+    titleInput.value = campaign.title;
+    synopsisTextarea.value = campaign.synopsis;
+
+    // Função que lida com a atualização
+    const handleUpdate = () => {
+        const title = titleInput.value.trim();
+        const synopsis = synopsisTextarea.value.trim();
+
+        if (!title) {
+            // Não salva se o título estiver vazio, mas não alerta para não atrapalhar
+            return;
+        }
+
+        const updatedCampaignData = { id: campaign.id, title, synopsis };
+        updateCampaign(updatedCampaignData, true); // Passa true para mostrar o indicador "Salvo!"
+    };
+
+    // Debounce para salvar em tempo real sem sobrecarregar
+    const debouncedUpdate = debounce(handleUpdate, 750);
+
+    // Adiciona os listeners de input
+    titleInput.addEventListener('input', debouncedUpdate);
+    synopsisTextarea.addEventListener('input', debouncedUpdate);
+
+    // Configura o botão de exclusão
+    const deleteBtn = document.getElementById('delete-campaign-btn');
+    deleteBtn.addEventListener('click', () => deleteCampaign(campaignId));
+
+    // Configura o gerador de mapa
+    const generateMapBtn = document.getElementById('generate-map-btn');
+    if (generateMapBtn) {
+        generateMapBtn.addEventListener('click', () => {
+            const synopsis = document.getElementById('map-synopsis').value.trim();
+            if (!synopsis) {
+                alert('Por favor, escreva uma sinopse para o mapa.');
+                return;
+            }
+
+            const loader = document.getElementById('map-loader');
+            const display = document.getElementById('map-display');
+
+            display.innerHTML = '';
+            loader.style.display = 'flex';
+
+            // Simula o tempo de geração da IA
+            setTimeout(() => {
+                loader.style.display = 'none';
+                
+                // Lista de mapas pré-selecionados para simular a geração
+                const mapPool = [
+                    'https://i.imgur.com/V14R5O1.jpeg', // Mansão/Castelo
+                    'https://i.imgur.com/pOFG6O3.jpeg', // Dungeon
+                    'https://i.imgur.com/y5Yg3yF.jpeg', // Floresta
+                    'https://i.imgur.com/SgYfBfA.jpeg'  // Vilarejo
+                ];
+
+                // Escolhe um mapa aleatório da lista
+                const randomMapSrc = mapPool[Math.floor(Math.random() * mapPool.length)];
+
+                const mapImage = document.createElement('img');
+                mapImage.src = randomMapSrc;
+                mapImage.alt = 'Mapa gerado pela IA';
+                display.appendChild(mapImage);
+            }, 3500); // 3.5 segundos de "geração"
+        });
+    }
+}
+
+// =================================================================================
 // FUNÇÕES UTILITÁRIAS E INICIALIZAÇÃO
 // =================================================================================
+
+/**
+ * Atraso na execução de uma função para evitar chamadas excessivas.
+ * @param {Function} func - A função a ser executada.
+ * @param {number} delay - O tempo de espera em milissegundos.
+ * @returns {Function} A nova função com debounce.
+ */
+function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+}
 
 // Função para marcar o link de navegação ativo
 function updateActiveLinks() {
@@ -1484,15 +1720,35 @@ async function loadHeader() {
     }
 }
 
+/**
+ * Verifica e aplica o modo de desenvolvedor se ativado via URL ou localStorage.
+ */
+function checkAndApplyDevMode() {
+    const params = new URLSearchParams(window.location.search);
+    const isDevMode = localStorage.getItem('devMode') === 'true' || params.get('dev') === 'true';
+
+    if (isDevMode) {
+        document.body.classList.add('dev-mode');
+        console.log('Modo Desenvolvedor Ativado. Recursos premium desbloqueados.');
+    }
+}
+
 // Inicialização do Script quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', async () => {
     await loadHeader();
+    checkAndApplyDevMode(); // Verifica o modo dev logo no início
     updateActiveLinks();
     checkAuthStatus();
 
     const path = window.location.pathname;
     if (path.includes('criar-agente.html')) {
         new CharacterCreator();
+    }
+    if (path.includes('campanhas.html')) {
+        displayCampaigns();
+    }
+    if (path.includes('gerenciar-campanha.html')) {
+        initializeCampaignManagement();
     }
     if (path.includes('agentes.html')) {
         new CharacterDisplay();
@@ -1513,15 +1769,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         devModeForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const input = document.getElementById('dev-mode-input');
-            if (input.value === 'DEVMODE2025') {
-                window.location.href = 'dev-dashboard.html';
+            if (input.value === '503038.123') {
+                localStorage.setItem('devMode', 'true');
+                alert('Modo Desenvolvedor Ativado! As funcionalidades pagas foram liberadas. A página será recarregada.');
+                window.location.reload();
+            } else {
+                alert('Código de acesso incorreto.');
             }
         });
     }
 
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('dev') === 'true') {
-        document.body.classList.add('dev-mode');
-        console.log('Modo Desenvolvedor Ativado.');
-    }
 });

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Campanha | Sombras do Abismo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="campanhas">
+    <div class="background-overlay"></div>
+    <div id="header-placeholder"></div>
+
+    <main class="main-content">
+        <div class="content-box">
+            <h2>Criar Nova Campanha</h2>
+            <p class="info-text">Defina os pilares da sua nova história de terror. Preencha os detalhes abaixo para começar.</p>
+
+            <form id="create-campaign-form" class="personalization-form" novalidate>
+                <div class="form-section">
+                    <h3 class="section-title">Informações da Campanha</h3>
+                    <div class="form-group">
+                        <label for="campaign-title">Título da Campanha</label>
+                        <input type="text" id="campaign-title" name="title" placeholder="Ex: O Lamento da Dama de Cinzas" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="campaign-synopsis">Sinopse</label>
+                        <textarea id="campaign-synopsis" name="synopsis" placeholder="Descreva a premissa principal, os mistérios e o tom da sua campanha."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="wizard-btn" onclick="alert('Funcionalidade em desenvolvimento!')">Adicionar Jogadores</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Abas do Mestre -->
+            <div class="master-tabs">
+                <button class="tab-link active" data-tab="escudo-mestre">Escudo do Mestre</button>
+                <button class="tab-link" data-tab="mapa">Mapa</button>
+            </div>
+
+            <!-- Conteúdo das Abas -->
+            <div class="tab-content active" id="escudo-mestre">
+                <h4>Recursos do Mestre</h4>
+                <p>Aqui você verá as fichas dos jogadores, monstros, notificações de alterações e o log de dados rolados. (Em desenvolvimento)</p>
+                <div class="master-tools-grid">
+                    <div class="tool-placeholder">Lista de Jogadores</div>
+                    <div class="tool-placeholder">Fichas de Monstros</div>
+                    <div class="tool-placeholder">Notificações</div>
+                    <div class="tool-placeholder">Log de Dados</div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="mapa">
+                <div class="premium-lock">
+                    <span class="lock-icon">🔒</span>
+                    <h3>Recurso Premium</h3>
+                    <p>A funcionalidade de Mapa Interativo está disponível apenas para apoiadores. Considere se tornar um Patrono para desbloquear este e outros recursos incríveis!</p>
+                    <a href="patente.html" class="wizard-btn">Ver Planos de Apoio</a>
+                </div>
+                <div class="map-content-unlocked">
+                    <h3>Mapa Interativo</h3>
+                    <p>Funcionalidade de mapa desbloqueada. (Em desenvolvimento)</p>
+                    <div class="tool-placeholder">Área do Mapa</div>
+                </div>
+            </div>
+
+            <!-- Ferramentas de IA -->
+            <div class="form-section ai-tools-section">
+                <h3 class="section-title">Ferramentas com IA</h3>
+                <div class="ai-tools">
+                    <button class="wizard-btn" onclick="alert('Funcionalidade em desenvolvimento!')">Gerar NPC com IA</button>
+                    <button class="wizard-btn" onclick="alert('Funcionalidade em desenvolvimento!')">Gerar Campanha com IA</button>
+                </div>
+            </div>
+
+            <div style="text-align:center; margin-top:3rem;">
+                <a href="campanhas.html" class="wizard-btn cancel-btn">Cancelar</a>
+                <button type="submit" form="create-campaign-form" id="save-campaign-btn" class="wizard-btn">Salvar Campanha</button>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Script da página de criação de campanha
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Carrega o header antes de adicionar os listeners
+            await loadHeader();
+            updateActiveLinks();
+            checkAuthStatus();
+
+            const tabLinks = document.querySelectorAll('.tab-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    const tabId = link.dataset.tab;
+
+                    tabLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === tabId) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            // Lógica para salvar a campanha
+            const campaignForm = document.getElementById('create-campaign-form');
+            if (campaignForm) {
+                campaignForm.addEventListener('submit', (event) => {
+                    event.preventDefault();
+
+                    const title = document.getElementById('campaign-title').value.trim();
+                    const synopsis = document.getElementById('campaign-synopsis').value.trim();
+
+                    if (!title) {
+                        alert('Por favor, dê um título para a sua campanha.');
+                        document.getElementById('campaign-title').focus();
+                        return;
+                    }
+
+                    const newCampaign = {
+                        id: `camp_${Date.now()}`,
+                        title: title,
+                        synopsis: synopsis,
+                        createdAt: new Date().toISOString()
+                    };
+                    saveCampaign(newCampaign);
+                });
+            }
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

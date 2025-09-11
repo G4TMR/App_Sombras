@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Campanha | Sombras do Abismo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="campanhas">
+    <div class="background-overlay"></div>
+    <div id="header-placeholder"></div>
+
+    <main class="main-content">
+        <div class="campaign-layout">
+            <div class="campaign-main-content">
+                <div class="content-box">
+                    <h2>Gerenciar Campanha</h2>
+                    <p class="info-text">Edite os detalhes da sua campanha, gerencie jogadores e acesse suas ferramentas de mestre.</p>
+        
+                    <form id="manage-campaign-form" class="personalization-form" novalidate>
+                        <div class="form-section">
+                            <h3 class="section-title">Informações da Campanha</h3>
+                            <div class="form-group">
+                                <label for="campaign-title">Título da Campanha</label>
+                                <input type="text" id="campaign-title" name="title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="campaign-synopsis">Sinopse</label>
+                                <textarea id="campaign-synopsis" name="synopsis"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <button type="button" class="wizard-btn" onclick="alert('Funcionalidade em desenvolvimento!')">Adicionar Jogadores</button>
+                            </div>
+                        </div>
+                    </form>
+        
+                    <!-- Abas do Mestre -->
+                    <div class="master-tabs">
+                        <button class="tab-link active" data-tab="escudo-mestre">Escudo do Mestre</button>
+                        <button class="tab-link" data-tab="mapa">Mapa</button>
+                    </div>
+        
+                    <!-- Conteúdo das Abas -->
+                    <div class="tab-content active" id="escudo-mestre">
+                        <h4>Recursos do Mestre</h4>
+                        <p>Aqui você verá as fichas dos jogadores e monstros. As notificações e rolagens de dados aparecerão na barra lateral.</p>
+                        <div class="master-tools-grid">
+                            <div class="tool-placeholder">Lista de Jogadores</div>
+                            <div class="tool-placeholder">Fichas de Monstros</div>
+                        </div>
+                    </div>
+        
+                    <div class="tab-content" id="mapa">
+                        <div class="premium-lock">
+                            <span class="lock-icon">🔒</span>
+                            <h3>Recurso Premium</h3>
+                            <p>A funcionalidade de Mapa Interativo está disponível apenas para apoiadores. Considere se tornar um Patrono para desbloquear este e outros recursos incríveis!</p>
+                            <a href="patente.html" class="wizard-btn">Ver Planos de Apoio</a>
+                        </div>
+                        <div class="map-content-unlocked">
+                            <h3>Gerador de Mapa com IA</h3>
+                            <p>Descreva o local em detalhes: a atmosfera, pontos de interesse, perigos e a estética geral. A IA usará sua sinopse para criar um mapa sombrio e detalhado.</p>
+                            <div class="map-generator-container">
+                                <textarea id="map-synopsis" placeholder="Ex: Uma mansão vitoriana abandonada em uma colina, cercada por uma floresta morta. A névoa é constante. Há um cemitério nos fundos e a entrada principal está arrombada..."></textarea>
+                                <button id="generate-map-btn" class="wizard-btn">Gerar Mapa</button>
+                                <div id="map-loader" class="map-loader" style="display: none;">
+                                    <div class="spinner"></div>
+                                </div>
+                                <div id="map-display" class="map-display"></div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div class="campaign-actions-footer">
+                        <span id="save-status-indicator" class="save-status"></span>
+                        <button id="delete-campaign-btn" class="wizard-btn danger-btn">Excluir Campanha</button>
+                    </div>
+        
+                </div>
+            </div>
+
+            <aside class="notification-sidebar">
+                <div class="sidebar-content">
+                    <h3>Log de Atividades</h3>
+                    <div id="real-time-log" class="roll-log">
+                        <p class="log-placeholder">As rolagens de dados e outras ações dos jogadores aparecerão aqui.</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadHeader();
+            updateActiveLinks();
+            checkAuthStatus();
+
+            const tabLinks = document.querySelectorAll('.tab-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    const tabId = link.dataset.tab;
+                    tabLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    tabContents.forEach(c => c.id === tabId ? c.classList.add('active') : c.classList.remove('active'));
+                });
+            });
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
