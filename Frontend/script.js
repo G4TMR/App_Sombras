@@ -4,13 +4,20 @@
  */
 
 // Configuração do Axios para comunicação com a API
+
+// --- MODO DE DESENVOLVIMENTO (para testar no seu PC) ---
+// const API_BASE_URL = 'http://localhost:3000';
+
+// --- MODO DE PRODUÇÃO (para o site online) ---
+const API_BASE_URL = 'https://sombras-do-abismo-backend.onrender.com'; // URL do Render
+
 const api = axios.create({
-    baseURL: 'http://localhost:3000/api',
+    baseURL: `${API_BASE_URL}/api`,
     withCredentials: true, // Permite que cookies de autenticação sejam enviados
 });
 
 const authApi = axios.create({
-    baseURL: 'http://localhost:3000/auth',
+    baseURL: `${API_BASE_URL}/auth`,
     withCredentials: true,
 });
 
@@ -714,7 +721,7 @@ class CharacterCreator {
                 alert(`Erro ao salvar personagem: ${errorData.message || 'Erro desconhecido.'}`);
                 if (error.response.status === 401) {
                     // Se não autorizado, redireciona para o login
-                    window.location.href = 'http://localhost:3000/auth/google';
+                    window.location.href = `${API_BASE_URL}/auth/google`;
                 }
             } else {
                 // Erro de rede ou outro problema
@@ -745,7 +752,7 @@ class CharacterDisplay {
                 console.error('Falha ao carregar personagens. O usuário pode não estar logado.');
                 if (error.response.status === 401) {
                     // Se não estiver autorizado, mostra a mensagem de login
-                    this.container.innerHTML = `<div class="empty-state"><p class="empty-message">Você precisa estar logado para ver seus agentes.</p><a href="http://localhost:3000/auth/google" class="create-character-btn">Login com Google</a></div>`;
+                    this.container.innerHTML = `<div class="empty-state"><p class="empty-message">Você precisa estar logado para ver seus agentes.</p><a href="${API_BASE_URL}/auth/google" class="create-character-btn">Login com Google</a></div>`;
                 }
             } else {
                 // Erro de rede
@@ -851,7 +858,7 @@ class CharacterDisplay {
                 if (error.response) {
                     alert(`Erro ao excluir personagem: ${error.response.data.message || 'Tente novamente.'}`);
                     if (error.response.status === 401) {
-                        window.location.href = 'http://localhost:3000/auth/google';
+                        window.location.href = `${API_BASE_URL}/auth/google`;
                     }
                 } else {
                     console.error('Erro de rede ao excluir personagem:', error.message);
@@ -1680,15 +1687,15 @@ async function checkAuthStatus() {
         // Usando Axios para verificar o status de autenticação
         const response = await authApi.get('/user');
         const user = response.data;
-        authContainer.innerHTML = `<span class="user-info">Olá, ${user.displayName}! <a href="http://localhost:3000/auth/logout" class="auth-link">[Sair]</a></span>`;
+        authContainer.innerHTML = `<span class="user-info">Olá, ${user.displayName}! <a href="${API_BASE_URL}/auth/logout" class="auth-link">[Sair]</a></span>`;
     } catch (error) {
-        if (error.response && error.response.status === 401) {
+        if (error.response && (error.response.status === 401 || error.response.status === 404)) {
             // Erro 401 (Não Autorizado) é esperado se o usuário não estiver logado
-            authContainer.innerHTML = `<a href="http://localhost:3000/auth/google" class="login-btn auth-link">Login com Google</a>`;
+            authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
         } else {
             // Outros erros (como falha de rede) indicam que o backend pode estar offline
             console.log('Servidor backend offline. Mostrando botão de login padrão.');
-            authContainer.innerHTML = `<a href="http://localhost:3000/auth/google" class="login-btn auth-link">Login com Google</a>`;
+            authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
         }
     }
     
