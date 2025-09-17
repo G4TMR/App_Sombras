@@ -1,146 +1,194 @@
 // =================================================================
-// Sombras do Abismo - Servidor Back-end
+// Sombras do Abismo - Servidor Back-end com Autenticação
 // =================================================================
 
 // --- 1. Importações ---
-// Express: nosso framework para criar o servidor e as rotas da API
 const express = require('express');
-// Mongoose: para conectar e interagir com o banco de dados MongoDB
 const mongoose = require('mongoose');
-// Cors: para permitir que o seu front-end (em outra porta) possa fazer requisições para este servidor
 const cors = require('cors');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const session = require('express-session');
 
 // --- 2. Configuração Inicial ---
 const app = express();
-// A porta será fornecida pelo ambiente de produção (como o Render) ou será 3000 em modo local.
 const PORT = process.env.PORT || 3000;
 
 // --- 3. Middlewares ---
-// Permite que o Express entenda requisições com corpo em JSON
 app.use(express.json());
 
-// A URL do front-end virá do ambiente de produção ou será a do Live Server localmente.
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://127.0.0.1:5500';
+const BACKEND_URL = process.env.BACKEND_URL || `http://localhost:${PORT}`;
 
-// Configura o CORS para permitir requisições do seu front-end
-// 'credentials: true' é importante para a autenticação com Google no futuro
 app.use(cors({
     origin: FRONTEND_URL,
     credentials: true
 }));
 
-// --- 4. Conexão com o Banco de Dados (MongoDB) ---
-// A string de conexão virá do ambiente de produção (Render) ou será a local.
+// --- 3.5. Configuração de Sessão e Autenticação ---
+// Habilita o proxy para funcionar corretamente no Render
+app.set('trust proxy', 1); 
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'um_segredo_muito_secreto_para_desenvolvimento',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production', // Usa cookies seguros em produção
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    }
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// --- 4. Conexão com o Banco de Dados ---
 const DATABASE_URL = process.env.DATABASE_URL || 'mongodb://localhost:27017/sombras-do-abismo-db';
-mongoose.connect(DATABASE_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+mongoose.connect(DATABASE_URL)
 .then(() => console.log('✅ Conectado ao MongoDB com sucesso!'))
 .catch(err => console.error('❌ Erro ao conectar ao MongoDB:', err));
 
-// --- 5. Definindo o "Molde" do Personagem (Schema) ---
-// Isso diz ao Mongoose como um personagem deve ser salvo no banco de dados.
-// É flexível, então não precisa listar todos os campos.
+// --- 5. Schemas (Moldes) do Banco de Dados ---
+
+// Novo Schema para Usuários
+const UserSchema = new mongoose.Schema({
+    googleId: { type: String, required: true, unique: true },
+    displayName: { type: String, required: true },
+    email: String,
+    createdAt: { type: Date, default: Date.now }
+});
+const User = mongoose.model('User', UserSchema);
+
+// Schema de Personagem atualizado com referência ao dono (usuário)
 const CharacterSchema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
+    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     class: String,
     element: String,
     attributes: Object,
     personalization: Object,
     status: Object,
-    // Adicione outros campos principais que você queira garantir que existam
     createdAt: { type: Date, default: Date.now }
-    // O Mongoose permite salvar campos que não estão no Schema se você não for estrito,
-    // o que é ótimo para a complexidade da sua ficha.
-}, { strict: false }); // 'strict: false' permite salvar campos não definidos aqui.
+}, { strict: false });
 
 const Character = mongoose.model('Character', CharacterSchema);
 
-// --- 6. Rotas da API (Os "Endpoints") ---
-
-// Rota para CRIAR um novo personagem
-// Corresponde ao `api.post('/characters', ...)` do seu script.js
-app.post('/api/characters', async (req, res) => {
+// --- 5.5. Configuração do Passport (Estratégia Google) ---
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: `${BACKEND_URL}/auth/google/callback`
+},
+async (accessToken, refreshToken, profile, done) => {
     try {
-        const characterData = req.body;
-        // Validação simples para garantir que o ID existe
-        if (!characterData.id) {
-            return res.status(400).json({ message: 'ID do personagem é obrigatório.' });
+        let user = await User.findOne({ googleId: profile.id });
+        if (user) {
+            return done(null, user);
+        } else {
+            const newUser = new User({
+                googleId: profile.id,
+                displayName: profile.displayName,
+                email: profile.emails[0].value
+            });
+            await newUser.save();
+            return done(null, newUser);
         }
+    } catch (err) {
+        return done(err, null);
+    }
+}));
 
-        const newCharacter = new Character(characterData);
-        await newCharacter.save(); // Salva no banco de dados
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
 
-        res.status(201).json(newCharacter); // Responde com sucesso e com o personagem criado
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findById(id);
+        done(null, user);
     } catch (error) {
-        console.error("Erro ao criar personagem:", error);
-        res.status(500).json({ message: 'Erro interno do servidor ao salvar o personagem.' });
+        done(error, null);
     }
 });
 
-// Rota para LISTAR todos os personagens
-// Corresponde ao `api.get('/characters')` do seu script.js
-app.get('/api/characters', async (req, res) => {
+// Middleware para proteger rotas
+function ensureAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.status(401).json({ message: 'Não autorizado. Por favor, faça login.' });
+}
+
+// --- 6. Rotas da API ---
+
+// Rotas de Autenticação
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+app.get('/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: `${FRONTEND_URL}/Home.html` }), // Redireciona para a Home em caso de falha
+    (req, res) => {
+        // Sucesso na autenticação, redireciona para a página de agentes.
+        res.redirect(`${FRONTEND_URL}/agentes.html`);
+    }
+);
+
+app.get('/auth/logout', (req, res, next) => {
+    req.logout(function(err) {
+        if (err) { return next(err); }
+        res.redirect(FRONTEND_URL);
+    });
+});
+
+app.get('/auth/user', (req, res) => {
+    if (req.isAuthenticated()) {
+        res.json(req.user);
+    } else {
+        res.status(401).json({ message: 'Nenhum usuário logado.' });
+    }
+});
+
+// Rotas de Personagens (agora protegidas e associadas ao usuário)
+app.post('/api/characters', ensureAuthenticated, async (req, res) => {
     try {
-        const characters = await Character.find(); // Busca todos os personagens no banco
+        const characterData = { ...req.body, owner: req.user._id };
+        const newCharacter = new Character(characterData);
+        await newCharacter.save();
+        res.status(201).json(newCharacter);
+    } catch (error) {
+        console.error("Erro ao criar personagem:", error);
+        res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+});
+
+app.get('/api/characters', ensureAuthenticated, async (req, res) => {
+    try {
+        const characters = await Character.find({ owner: req.user._id });
         res.status(200).json(characters);
     } catch (error) {
         console.error("Erro ao listar personagens:", error);
-        res.status(500).json({ message: 'Erro interno do servidor ao buscar os personagens.' });
-    }
-});
-
-// Rota para DELETAR um personagem
-// Corresponde ao `api.delete('/characters/:characterId')`
-app.delete('/api/characters/:id', async (req, res) => {
-    try {
-        const characterId = req.params.id;
-        const result = await Character.findOneAndDelete({ id: characterId });
-
-        if (!result) {
-            return res.status(404).json({ message: 'Personagem não encontrado.' });
-        }
-
-        res.status(200).json({ message: 'Personagem excluído com sucesso.' });
-    } catch (error) {
-        console.error("Erro ao deletar personagem:", error);
         res.status(500).json({ message: 'Erro interno do servidor.' });
     }
 });
 
-// Rota para BUSCAR UM personagem específico pelo ID
-// Corresponde ao `api.get('/characters/:charId')` da sua ficha
-app.get('/api/characters/:id', async (req, res) => {
+app.get('/api/characters/:id', ensureAuthenticated, async (req, res) => {
     try {
-        const characterId = req.params.id;
-        const character = await Character.findOne({ id: characterId });
-
-        if (!character) {
-            return res.status(404).json({ message: 'Personagem não encontrado.' });
-        }
-
+        const character = await Character.findOne({ id: req.params.id, owner: req.user._id });
+        if (!character) return res.status(404).json({ message: 'Personagem não encontrado.' });
         res.status(200).json(character);
     } catch (error) {
-        console.error("Erro ao buscar personagem por ID:", error);
+        console.error("Erro ao buscar personagem:", error);
         res.status(500).json({ message: 'Erro interno do servidor.' });
     }
 });
 
-// Rota para ATUALIZAR um personagem
-// Corresponde ao `api.put('/characters/:charId', ...)` da sua ficha
-app.put('/api/characters/:id', async (req, res) => {
+app.put('/api/characters/:id', ensureAuthenticated, async (req, res) => {
     try {
-        const characterId = req.params.id;
-        const updatedData = req.body;
-
-        // { new: true } garante que o objeto retornado seja a versão atualizada
-        const updatedCharacter = await Character.findOneAndUpdate({ id: characterId }, updatedData, { new: true });
-
-        if (!updatedCharacter) {
-            return res.status(404).json({ message: 'Personagem não encontrado para atualizar.' });
-        }
-
+        const updatedCharacter = await Character.findOneAndUpdate(
+            { id: req.params.id, owner: req.user._id },
+            req.body,
+            { new: true }
+        );
+        if (!updatedCharacter) return res.status(404).json({ message: 'Personagem não encontrado.' });
         res.status(200).json(updatedCharacter);
     } catch (error) {
         console.error("Erro ao atualizar personagem:", error);
@@ -148,7 +196,18 @@ app.put('/api/characters/:id', async (req, res) => {
     }
 });
 
+app.delete('/api/characters/:id', ensureAuthenticated, async (req, res) => {
+    try {
+        const result = await Character.findOneAndDelete({ id: req.params.id, owner: req.user._id });
+        if (!result) return res.status(404).json({ message: 'Personagem não encontrado.' });
+        res.status(200).json({ message: 'Personagem excluído com sucesso.' });
+    } catch (error) {
+        console.error("Erro ao deletar personagem:", error);
+        res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+});
+
 // --- 7. Iniciando o Servidor ---
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando na porta ${PORT}. Acesse http://localhost:${PORT}`);
+    console.log(`🚀 Servidor rodando na porta ${PORT}.`);
 });
