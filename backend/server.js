@@ -44,6 +44,13 @@ app.use(passport.session());
 
 // --- 4. Conexão com o Banco de Dados ---
 const DATABASE_URL = process.env.DATABASE_URL || 'mongodb://localhost:27017/sombras-do-abismo-db';
+
+// Validação para garantir que a URL do banco de dados está definida em produção
+if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+    console.error('❌ ERRO CRÍTICO: A variável de ambiente DATABASE_URL não está definida.');
+    process.exit(1);
+}
+
 mongoose.connect(DATABASE_URL)
 .then(() => console.log('✅ Conectado ao MongoDB com sucesso!'))
 .catch(err => console.error('❌ Erro ao conectar ao MongoDB:', err));
@@ -74,6 +81,20 @@ const CharacterSchema = new mongoose.Schema({
 const Character = mongoose.model('Character', CharacterSchema);
 
 // --- 5.5. Configuração do Passport (Estratégia Google) ---
+
+// Validação para garantir que as variáveis de ambiente do Google estão definidas
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    console.error('❌ ERRO CRÍTICO: As variáveis de ambiente GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET não estão definidas.');
+    console.error('A autenticação do Google não funcionará. Verifique a configuração no Render.');
+    process.exit(1); // Encerra o processo se as chaves não estiverem presentes
+}
+
+// Validação extra para o formato do GOOGLE_CLIENT_ID
+if (!process.env.GOOGLE_CLIENT_ID.endsWith('.apps.googleusercontent.com')) {
+    console.warn('⚠️ ALERTA: O GOOGLE_CLIENT_ID parece ter um formato inválido.');
+    console.warn('Ele deve terminar com ".apps.googleusercontent.com". Verifique se não há prefixos ou erros de cópia.');
+}
+
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,

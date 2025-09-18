@@ -9,7 +9,7 @@
 // const API_BASE_URL = 'http://localhost:3000';
 
 // --- MODO DE PRODUÇÃO (para o site online) ---
-const API_BASE_URL = 'https://sombras-do-abismo-backend.onrender.com'; // URL do Render
+const API_BASE_URL = 'https://app-sombras.onrender.com'; // URL CORRIGIDA do seu serviço no Render
 
 const api = axios.create({
     baseURL: `${API_BASE_URL}/api`,
