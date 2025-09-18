@@ -105,6 +105,8 @@ if (!process.env.GOOGLE_CLIENT_ID.endsWith('.apps.googleusercontent.com')) {
     console.warn('Ele deve terminar com ".apps.googleusercontent.com". Verifique se não há prefixos ou erros de cópia.');
 }
 
+console.log(`ℹ️  Verificando ID do Cliente em uso: ...${process.env.GOOGLE_CLIENT_ID.slice(-25)}`);
+
 const GOOGLE_CALLBACK_URL = `${BACKEND_URL}/auth/google/callback`;
 console.log(`ℹ️  Configurando callback do Google para: ${GOOGLE_CALLBACK_URL}`);
 
