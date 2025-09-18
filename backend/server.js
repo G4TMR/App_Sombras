@@ -53,7 +53,10 @@ if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
 
 mongoose.connect(DATABASE_URL)
 .then(() => console.log('✅ Conectado ao MongoDB com sucesso!'))
-.catch(err => console.error('❌ Erro ao conectar ao MongoDB:', err));
+.catch(err => {
+    console.error('❌ Erro CRÍTICO ao conectar ao MongoDB:', err);
+    process.exit(1); // Encerra o processo se a conexão com o DB falhar.
+});
 
 // --- 5. Schemas (Moldes) do Banco de Dados ---
 
@@ -95,10 +98,13 @@ if (!process.env.GOOGLE_CLIENT_ID.endsWith('.apps.googleusercontent.com')) {
     console.warn('Ele deve terminar com ".apps.googleusercontent.com". Verifique se não há prefixos ou erros de cópia.');
 }
 
+const GOOGLE_CALLBACK_URL = `${BACKEND_URL}/auth/google/callback`;
+console.log(`ℹ️  Configurando callback do Google para: ${GOOGLE_CALLBACK_URL}`);
+
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: `${BACKEND_URL}/auth/google/callback`
+    callbackURL: GOOGLE_CALLBACK_URL
 },
 async (accessToken, refreshToken, profile, done) => {
     try {
