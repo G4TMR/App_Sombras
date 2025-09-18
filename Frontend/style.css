@@ -2277,3 +2277,184 @@ body.dev-mode .map-content-unlocked { display: block; }
     filter: brightness(1.2);
     text-shadow: none;
 }
+
+/* =================================================================
+   REGRAS DE RESPONSIVIDADE PARA DISPOSITIVOS MÓVEIS
+   Adicione este bloco ao FINAL do seu arquivo style.css
+================================================================= */
+
+/* Para telas menores que 800px (tablets e celulares em modo paisagem) */
+@media (max-width: 800px) {
+    /* --- GERAL --- */
+    .main-content, .home-main-content {
+        padding: 1rem; /* Reduz o espaçamento lateral para ganhar espaço */
+    }
+
+    .content-box {
+        padding: 1.5rem;
+    }
+
+    h1 { font-size: 2.5rem; }
+    h2 { font-size: 1.8rem; }
+    h3 { font-size: 1.4rem; }
+
+    /* --- CABEÇALHO --- */
+    .home-header {
+        /* Revertendo para um layout de coluna simples e centralizado */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    /* Agrupa e reordena o título e subtítulo */
+    .home-header h1, .home-header p {
+        /* Mantém a ordem natural e o alinhamento central */
+        text-align: center;
+    }
+    .home-header h1 {
+        margin-bottom: 0.25rem;
+    }
+    .home-header p {
+        margin-top: 0;
+    }
+
+    .home-header nav {
+        /* Garante que a navegação se comporte bem no layout de coluna */
+        padding: 0;
+        margin-top: 0;
+        display: flex;
+        flex-wrap: wrap; /* Permite que os links quebrem a linha se não couberem */
+        justify-content: center; /* Centraliza os links */
+        gap: 0.5rem 1rem;
+    }
+
+    .home-header .auth-container {
+        /* Reseta o posicionamento para o fluxo normal do flexbox */
+        position: relative;
+        top: auto;
+        right: auto;
+        width: auto;
+        padding: 0;
+    }
+
+    /* --- PÁGINA INICIAL --- */
+    .home-cards-container {
+        grid-template-columns: 1fr; /* Força os cards a ficarem em uma única coluna */
+    }
+
+    /* --- PÁGINA DE CRIAÇÃO DE AGENTE --- */
+    .horizontal-container {
+        padding: 0;
+    }
+    
+    .wizard-content {
+        padding: 1rem;
+    }
+
+    .step-navigation .step-label {
+        display: none; /* Esconde o texto dos passos ("Classe", "Elemento"), mostrando só os números */
+    }
+
+    .class-selection-container, .element-selection-container {
+        flex-direction: column; /* Empilha os cards de classe/elemento */
+        gap: 1rem;
+    }
+
+    .personalization-form .form-row {
+        flex-direction: column; /* Empilha os campos do formulário que ficavam lado a lado */
+        gap: 0;
+    }
+
+    /* --- PÁGINA DE AGENTES --- */
+    .characters-grid {
+        grid-template-columns: 1fr; /* Uma coluna para a lista de agentes */
+    }
+
+    .character-card .character-attributes {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Ajusta os atributos para caber */
+        gap: 0.5rem;
+    }
+
+    /* --- FICHA DE AGENTE --- */
+    .sheet-container {
+        flex-direction: column; /* Empilha o conteúdo principal e a barra lateral */
+        padding: 0.5rem;
+    }
+
+    .sheet-header {
+        padding: 1rem;
+    }
+
+    .sheet-main-content, .sheet-sidebar {
+        width: 100%;
+    }
+
+    .attributes-grid, .secondary-stats-grid {
+        grid-template-columns: 1fr; /* Uma coluna para os grids de atributos */
+    }
+
+    .status-bars-container {
+        gap: 1.5rem; /* Aumenta o espaço entre as barras de status */
+    }
+
+    /* --- GERENCIAR CAMPANHA --- */
+    .campaign-layout {
+        flex-direction: column;
+    }
+
+    .campaign-main-content, .notification-sidebar {
+        width: 100%;
+    }
+
+    .master-tools-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Ajustes finos para telas muito pequenas (como a de 399px) */
+@media (max-width: 480px) {
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.2rem; }
+
+    .content-box {
+        padding: 1rem;
+    }
+
+    /* --- FICHA DE AGENTE --- */
+    .sheet-header h2 {
+        font-size: 2rem; /* Ajusta o nome do personagem */
+    }
+
+    .status-bar .status-btn {
+        padding: 0.3rem 0.6rem; /* Diminui um pouco os botões de +/- */
+        font-size: 1rem;
+    }
+
+    /* --- CARD DE AGENTE --- */
+    .character-card .character-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch; /* Faz os botões ocuparem a largura total */
+    }
+
+    .character-card .character-actions .view-btn,
+    .character-card .character-actions .delete-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* --- MODAL --- */
+    .element-lore-modal-content {
+        width: 95%; /* Garante que o modal não ocupe 100% da tela */
+        padding: 1.5rem;
+    }
+
+    /* --- BOTÕES --- */
+    .hero-cta-btn, .wizard-btn, .create-agent-btn, .tier-btn {
+        padding: 0.8rem 1.5rem; /* Reduz o padding dos botões principais */
+        font-size: 1rem; /* Diminui a fonte dos botões */
+    }
+}
