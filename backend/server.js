@@ -9,6 +9,7 @@ const cors = require('cors');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
+const MongoStore = require('connect-mongo'); // 1. Importa o MongoStore
 
 // --- 2. Configuração Inicial ---
 const app = express();
@@ -32,6 +33,12 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'um_segredo_muito_secreto_para_desenvolvimento',
     resave: false,
     saveUninitialized: false,
+    // 2. Configura o armazenamento da sessão no MongoDB
+    store: MongoStore.create({
+        mongoUrl: process.env.DATABASE_URL,
+        collectionName: 'sessions', // Nome da coleção para guardar as sessões
+        ttl: 14 * 24 * 60 * 60 // Tempo de vida da sessão: 14 dias
+    }),
     cookie: {
         secure: process.env.NODE_ENV === 'production', // Usa cookies seguros em produção
         httpOnly: true,
