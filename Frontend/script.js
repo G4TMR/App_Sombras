@@ -27,10 +27,199 @@ const CLASS_BASE_ATTRIBUTES = {
     'Erudito': { forca: 1, agilidade: 1, presenca: 2, vitalidade: 2, inteligencia: 4 },
 };
 
+const SPECIALIZATIONS = {
+    'Bélico': [
+        { name: 'Vanguarda', description: 'Focado na resistência e proteção de aliados, capaz de suportar dano massivo e controlar a linha de frente do combate.' },
+        { name: 'Aniquilador', description: 'Especialista em causar o máximo de dano possível, utilizando técnicas brutais para sobrepujar os inimigos rapidamente.' },
+        { name: 'Tático de Guerrilha', description: 'Mestre em agilidade e astúcia, usando o ambiente e armadilhas para obter vantagem tática sobre adversários.' }
+    ],
+    'Esotérico': [
+        { name: 'Lâmina Paranormal', description: 'Canaliza energia paranormal diretamente em sua arma, focando em rituais de curto alcance e ataques corpo a corpo devastadores.' },
+        { name: 'Conduíte Rúnico', description: 'Utiliza símbolos e tatuagens arcanas para conjurar rituais complexos à distância, controlando o campo de batalha com poder elemental.' },
+        { name: 'Ceifador Anímico', description: 'Manipula a energia vital e da morte, drenando a força dos inimigos para fortalecer a si mesmo e a seus aliados.' }
+    ],
+    'Erudito': [
+        { name: 'Estrategista de Campo', description: 'Analisa o combate em tempo real, identificando fraquezas inimigas e coordenando os aliados com precisão letal.' },
+        { name: 'Arquiteto da Realidade', description: 'Manipula as leis fundamentais do universo, reescrevendo a física local para criar barreiras, distorcer o espaço ou anular o poder inimigo.' },
+        { name: 'Médico de Batalha', description: 'Especialista em anatomia e bioquímica, capaz de curar ferimentos graves e criar concoções que aprimoram o desempenho dos aliados.' }
+    ]
+};
+
 const DEFAULT_SKILL_TREES = {
-    'Bélico': {},
-    'Esotérico': {},
-    'Erudito': {},
+    'Bélico': {
+        'Temporal': {
+            'Vanguarda': [
+                { id: 'belico-temporal-vanguarda-1', name: 'Barreira Temporal', description: 'Ao ser atingido, você cria uma distorção que retarda o agressor, reduzindo sua velocidade de movimento e ataque por um turno.', requirements: {}, unlocked: false, children: [] },
+                { id: 'belico-temporal-vanguarda-2', name: 'Resistência Ancestral', description: 'Você canaliza a resiliência de guerreiros passados, ganhando uma redução de dano temporária baseada em quantos inimigos te cercam.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Aniquilador': [
+                { id: 'belico-temporal-aniquilador-1', name: 'Golpe Acelerado', description: 'Manipula uma fração de segundo para realizar um ataque extra com sua arma, com dano ligeiramente reduzido.', requirements: {}, unlocked: false, children: [] },
+                { id: 'belico-temporal-aniquilador-2', name: 'Lâmina do Crepúsculo', description: 'Seu ataque ressoa com a entropia, causando dano adicional a alvos que já estão com pouca vida.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Tático de Guerrilha': [
+                { id: 'belico-temporal-tatico-1', name: 'Armadilha de Estase', description: 'Você marca uma área no chão. O próximo inimigo a pisar nela fica congelado no tempo por um turno, incapaz de agir.', requirements: {}, unlocked: false, children: [] },
+                { id: 'belico-temporal-tatico-2', name: 'Passo Fantasma', description: 'Você se desloca brevemente do fluxo do tempo, tornando-se invisível e inalvejável por um curto período.', requirements: {}, unlocked: false, children: [] }
+            ]
+        },
+        'Cerebral': {
+            'Vanguarda': [
+                { id: 'belico-cerebral-vanguarda-1', name: 'Provocação Psíquica', description: 'Você implanta um comando mental em um alvo, forçando-o a te atacar no próximo turno, ignorando seus aliados.', requirements: {}, unlocked: false, children: [] },
+                { id: 'belico-cerebral-vanguarda-2', name: 'Fortaleza Mental', description: 'Sua mente se torna uma cidadela, concedendo alta resistência a efeitos de medo, confusão e controle mental.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Aniquilador': [
+                { id: 'belico-cerebral-aniquilador-1', name: 'Ponto Fraco Exposto', description: 'Sua análise de combate revela uma falha na defesa do inimigo. Seu próximo ataque contra ele é um acerto crítico garantido.', requirements: {}, unlocked: false, children: [] },
+                { id: 'belico-cerebral-aniquilador-2', name: 'Impacto Mental', description: 'Além do dano físico, seu golpe sobrecarrega a mente do alvo, causando confusão e penalidade em suas ações.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Tático de Guerrilha': [
+                { id: 'belico-cerebral-tatico-1', name: 'Isca Ilusória', description: 'Você projeta uma cópia perfeita de si mesmo que atrai o fogo inimigo por um turno ou até ser atingida.', requirements: {}, unlocked: false, children: [] },
+                { id: 'belico-cerebral-tatico-2', name: 'Campo de Silêncio', description: 'Cria uma pequena área onde todos os sons são completamente abafados, ideal para operações furtivas.', requirements: {}, unlocked: false, children: [] }
+            ]
+        },
+        'Visceral': {
+            'Vanguarda': [
+                { id: 'belico-visceral-vanguarda-1', name: 'Pele de Pedra', description: 'Sua pele endurece como rocha, concedendo uma massiva redução a dano físico por um curto período.', requirements: {}, unlocked: false, children: [] },
+                { id: 'belico-visceral-vanguarda-2', name: 'Fôlego Infinito', description: 'Sua biologia se adapta, eliminando a necessidade de respirar e concedendo imunidade a venenos gasosos e exaustão.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Aniquilador': [
+                { id: 'belico-visceral-aniquilador-1', name: 'Frenesi Sangrento', description: 'Quanto menos vida você tem, mais rápido e forte você ataca. Um ciclo de dor e poder.', requirements: {}, unlocked: false, children: [] },
+                { id: 'belico-visceral-aniquilador-2', name: 'Golpe Esmagador', description: 'Um ataque brutal que quebra ossos, aplicando uma penalidade permanente nos atributos físicos do alvo.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Tático de Guerrilha': [
+                { id: 'belico-visceral-tatico-1', name: 'Mimetismo Biológico', description: 'Você altera a pigmentação e textura da sua pele para se camuflar perfeitamente com o ambiente.', requirements: {}, unlocked: false, children: [] },
+                { id: 'belico-visceral-tatico-2', name: 'Injeção de Veneno', description: 'Suas armas ou ataques desarmados podem aplicar uma toxina que causa dano contínuo e reduz a cura recebida pelo alvo.', requirements: {}, unlocked: false, children: [] }
+            ]
+        },
+        'Vital': {
+            'Vanguarda': [
+                { id: 'belico-vital-vanguarda-1', name: 'Escudo de Força Reativo', description: 'Você projeta um escudo de energia. Se for quebrado, ele explode, causando dano e empurrando inimigos próximos.', requirements: {}, unlocked: false, children: [] },
+                { id: 'belico-vital-vanguarda-2', name: 'Aura Protetora', description: 'Você emana uma aura de energia que concede uma pequena redução de dano a todos os aliados próximos a você.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Aniquilador': [
+                { id: 'belico-vital-aniquilador-1', name: 'Lâmina de Energia Pura', description: 'Sua arma é envolta em energia crepitante, ignorando armaduras e causando dano de energia pura.', requirements: {}, unlocked: false, children: [] },
+                { id: 'belico-vital-aniquilador-2', name: 'Impacto Cinético', description: 'Seu golpe libera uma onda de força telecinética, arremessando o alvo para longe e causando dano de colisão.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Tático de Guerrilha': [
+                { id: 'belico-vital-tatico-1', name: 'Mina de Proximidade', description: 'Você deixa para trás uma armadilha invisível de energia que explode quando um inimigo se aproxima.', requirements: {}, unlocked: false, children: [] },
+                { id: 'belico-vital-tatico-2', name: 'Fio de Força', description: 'Cria um fio de energia quase invisível entre dois pontos. Inimigos que o atravessam sofrem dano e ficam lentos.', requirements: {}, unlocked: false, children: [] }
+            ]
+        }
+    },
+    'Esotérico': {
+        'Temporal': {
+            'Lâmina Paranormal': [
+                { id: 'esoterico-temporal-lamina-1', name: 'Lâmina Entrópica', description: 'Sua arma acelera o tempo no ponto de impacto, causando dano de decadência ao longo do tempo.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-temporal-lamina-2', name: 'Corte Acelerado', description: 'Um ataque tão rápido que dobra o tempo, permitindo um segundo golpe imediato.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Conduíte Rúnico': [
+                { id: 'esoterico-temporal-conduite-1', name: 'Selo de Lentidão', description: 'Desenha uma runa no ar que cria uma área onde o tempo passa mais devagar para seus inimigos.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-temporal-conduite-2', name: 'Rebobinar Ferimento', description: 'Você toca um aliado e reverte um ferimento no tempo, curando uma quantidade significativa de dano.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Ceifador Anímico': [
+                { id: 'esoterico-temporal-ceifador-1', name: 'Toque do Envelhecimento', description: 'Você toca um alvo e acelera sua idade, aplicando penalidades severas em seus atributos físicos.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-temporal-ceifador-2', name: 'Visão da Morte', description: 'Você marca um inimigo. Se ele morrer em breve, você recupera uma grande quantidade de recursos (PA, Sanidade).', requirements: {}, unlocked: false, children: [] }
+            ]
+        },
+        'Cerebral': {
+            'Lâmina Paranormal': [
+                { id: 'esoterico-cerebral-lamina-1', name: 'Lâmina Psíquica', description: 'Sua arma corta a mente do alvo, causando dano de sanidade e ignorando completamente a armadura física.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-cerebral-lamina-2', name: 'Corte da Verdade', description: 'Um golpe que revela uma verdade inconveniente sobre o alvo, expondo uma fraqueza e reduzindo sua defesa.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Conduíte Rúnico': [
+                { id: 'esoterico-cerebral-conduite-1', name: 'Glyfo de Confusão', description: 'Uma runa complexa que, ao ser vista, sobrecarrega a mente do alvo, deixando-o confuso e incapaz de distinguir amigo de inimigo.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-cerebral-conduite-2', name: 'Projétil da Verdade', description: 'Dispara um dardo de luz que revela os atributos e status de um inimigo para toda a equipe.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Ceifador Anímico': [
+                { id: 'esoterico-cerebral-ceifador-1', name: 'Roubo de Memórias', description: 'Um toque que arranca uma memória recente do alvo, causando dano de sanidade e transferindo uma informação útil para você.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-cerebral-ceifador-2', name: 'Sussurros dos Mortos', description: 'Você ouve os ecos psíquicos de mortos recentes na área, podendo obter pistas sobre a causa de suas mortes.', requirements: {}, unlocked: false, children: [] }
+            ]
+        },
+        'Visceral': {
+            'Lâmina Paranormal': [
+                { id: 'esoterico-visceral-lamina-1', name: 'Lâmina Voraz', description: 'Sua arma drena a força vital do alvo a cada golpe, curando uma parte do dano que você causa.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-visceral-lamina-2', name: 'Corte Hemorrágico', description: 'Um golpe que abre uma ferida que não fecha, causando dano de sangramento contínuo.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Conduíte Rúnico': [
+                { id: 'esoterico-visceral-conduite-1', name: 'Marca da Podridão', description: 'Você amaldiçoa um alvo com uma runa de decomposição, fazendo com que ele receba mais dano de todas as fontes.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-visceral-conduite-2', name: 'Drenar Vida à Distância', description: 'Canaliza um feixe de energia que suga a vida de um inimigo para curar a si mesmo ou um aliado.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Ceifador Anímico': [
+                { id: 'esoterico-visceral-ceifador-1', name: 'Peste Contagiosa', description: 'Você infecta um alvo com uma doença paranormal que causa dano contínuo e pode se espalhar para outros inimigos próximos.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-visceral-ceifador-2', name: 'Transferência de Vitalidade', description: 'Você sacrifica uma porção da sua própria vida para curar um aliado instantaneamente por uma quantidade muito maior.', requirements: {}, unlocked: false, children: [] }
+            ]
+        },
+        'Vital': {
+            'Lâmina Paranormal': [
+                { id: 'esoterico-vital-lamina-1', name: 'Lâmina Cinética', description: 'Sua arma é coberta por uma força telecinética, aumentando o dano e arremessando os alvos para trás.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-vital-lamina-2', name: 'Corte Disruptor', description: 'O impacto libera uma onda de energia caótica que pode atordoar o alvo ou cancelar uma habilidade que ele estava preparando.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Conduíte Rúnico': [
+                { id: 'esoterico-vital-conduite-1', name: 'Raio de Força', description: 'Um raio concentrado de pura energia que causa dano massivo a um único alvo.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-vital-conduite-2', name: 'Orbe de Contenção', description: 'Cria uma esfera de energia que aprisiona um inimigo, impedindo-o de se mover ou atacar por um período.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Ceifador Anímico': [
+                { id: 'esoterico-vital-ceifador-1', name: 'Correntes Espectrais', description: 'Invoca correntes de energia que se prendem a um inimigo, imobilizando-o e causando dano contínuo.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-vital-ceifador-2', name: 'Devorar Alma', description: 'Executa um inimigo com vida muito baixa, desintegrando-o e restaurando todos os seus Pontos de Ação (PA).', requirements: {}, unlocked: false, children: [] }
+            ]
+        }
+    },
+    'Erudito': {
+        'Temporal': {
+            'Estrategista de Campo': [
+                { id: 'erudito-temporal-estrategista-1', name: 'Análise Preditiva', description: 'Você analisa os possíveis futuros, concedendo um grande bônus de acerto ou defesa para a próxima ação de um aliado.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-temporal-estrategista-2', name: 'Acelerar Aliado', description: 'Você manipula o fluxo do tempo de um aliado, concedendo a ele uma ação de movimento extra em seu turno.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Arquiteto da Realidade': [
+                { id: 'erudito-temporal-arquiteto-1', name: 'Bolha de Dilatação Temporal', description: 'Cria uma zona onde o tempo passa 50% mais devagar para os inimigos, ou 50% mais rápido para os aliados.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-temporal-arquiteto-2', name: 'Reescrever Evento Menor', description: 'Uma vez por cena, você pode forçar a repetição de uma rolagem de dados (sua ou de um inimigo) para uma ação que não seja de ataque.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Médico de Batalha': [
+                { id: 'erudito-temporal-medico-1', name: 'Reversão de Ferimento', description: 'Você rebobina o tempo em um ferimento, curando dano como se ele nunca tivesse acontecido.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-temporal-medico-2', name: 'Prevenção de Dano', description: 'Aplica um selo temporal em um aliado que irá negar completamente a próxima fonte de dano que ele receber.', requirements: {}, unlocked: false, children: [] }
+            ]
+        },
+        'Cerebral': {
+            'Estrategista de Campo': [
+                { id: 'erudito-cerebral-estrategista-1', name: 'Comando Tático', description: 'Você usa sua superioridade tática para dar um comando a um aliado, permitindo que ele use sua reação para realizar uma ação de movimento ou ataque simples.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-cerebral-estrategista-2', name: 'Expor Fraqueza', description: 'Você grita a fraqueza de um inimigo. Todos os ataques de aliados contra esse alvo recebem um bônus de dano por um turno.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Arquiteto da Realidade': [
+                { id: 'erudito-cerebral-arquiteto-1', name: 'Paradoxo Lógico', description: 'Você apresenta um paradoxo irresolúvel à mente de um alvo, causando dano de sanidade e o deixando atordoado.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-cerebral-arquiteto-2', name: 'Ignorar Física', description: 'Por um curto período, você pode ignorar uma lei da física, permitindo-se andar por paredes ou sobre a água.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Médico de Batalha': [
+                { id: 'erudito-cerebral-medico-1', name: 'Diagnóstico Rápido', description: 'Com um olhar, você sabe instantaneamente todos os status, ferimentos e condições (positivas e negativas) de um alvo.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-cerebral-medico-2', name: 'Cirurgia Psíquica', description: 'Você entra na mente de um aliado para remover cirurgicamente efeitos mentais negativos como medo, charme ou confusão.', requirements: {}, unlocked: false, children: [] }
+            ]
+        },
+        'Visceral': {
+            'Estrategista de Campo': [
+                { id: 'erudito-visceral-estrategista-1', name: 'Injeção de Adrenalina', description: 'Você usa um estimulante para aumentar temporariamente os atributos físicos (Força, Agilidade) de um aliado.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-visceral-estrategista-2', name: 'Análise Biológica', description: 'Você identifica uma vulnerabilidade biológica em uma criatura, concedendo bônus de dano contra ela para toda a equipe.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Arquiteto da Realidade': [
+                { id: 'erudito-visceral-arquiteto-1', name: 'Metamorfose Instável', description: 'Você altera temporariamente a biologia de um alvo, transformando sua mão em pedra para impedi-lo de atacar, por exemplo.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-visceral-arquiteto-2', name: 'Remodelar Terreno', description: 'Você manipula a terra e a matéria orgânica para criar cobertura ou terreno difícil em uma área.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Médico de Batalha': [
+                { id: 'erudito-visceral-medico-1', name: 'Sutura Acelerada', description: 'Uma poderosa cura em um único alvo que também remove condições como sangramento e veneno.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-visceral-medico-2', name: 'Concoção de Combate', description: 'Você mistura reagentes rapidamente para criar um tônico que pode ser usado por um aliado para ganhar um bônus temporário.', requirements: {}, unlocked: false, children: [] }
+            ]
+        },
+        'Vital': {
+            'Estrategista de Campo': [
+                { id: 'erudito-vital-estrategista-1', name: 'Redirecionar Energia', description: 'Você cria um elo entre um aliado e um inimigo. Parte do dano que o aliado receberia é transferido para o inimigo.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-vital-estrategista-2', name: 'Ponto de Foco', description: 'Você marca um alvo com energia. Todos os ataques contra ele têm a precisão aumentada.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Arquiteto da Realidade': [
+                { id: 'erudito-vital-arquiteto-1', name: 'Anular Poder', description: 'Você projeta um campo que anula efeitos paranormais em uma pequena área, funcionando como uma contra-mágica.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-vital-arquiteto-2', name: 'Barreira de Força', description: 'Cria uma parede de energia sólida e transparente que pode bloquear ataques e passagem.', requirements: {}, unlocked: false, children: [] }
+            ],
+            'Médico de Batalha': [
+                { id: 'erudito-vital-medico-1', name: 'Pulso de Cura', description: 'Libera uma onda de energia benigna que cura uma pequena quantidade de vida de todos os aliados próximos.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-vital-medico-2', name: 'Escudo Sanitário', description: 'Cria um escudo de energia em um aliado que o protege de receber status negativos (veneno, paralisia, etc.) por um período.', requirements: {}, unlocked: false, children: [] }
+            ]
+        }
+    },
     'Atributo': {
         'Força': [
             { id: 'forca-5-1', name: 'Golpe Poderoso', description: 'Um ataque básico e potente, que serve como base para técnicas de força mais avançadas.', requirements: { forca: 5 }, unlocked: false, children: [
@@ -38,25 +227,184 @@ const DEFAULT_SKILL_TREES = {
                     { id: 'forca-15-1-1', name: 'Passo de Colosso', description: 'Atravessa inimigos e objetos, causando dano de impacto.', requirements: { forca: 15 }, unlocked: false, children: [] },
                     { id: 'forca-15-1-2', name: 'Despedaçador de Concreto', description: 'Quebra barreiras com força, causando dano em área.', requirements: { forca: 15 }, unlocked: false, children: [] },
                     { id: 'forca-15-1-3', name: 'Pulso de Choque', description: 'Cria uma onda de choque que atordoa e causa dano em área.', requirements: { forca: 15 }, unlocked: false, children: [] },
-                    { id: 'forca-15-1-4', name: 'Imunidade a Quedas', description: 'Ganha resistência ou imunidade a dano de queda.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                    { id: 'forca-15-1-4', name: 'Imunidade a Quedas', description: 'Ganha resistência ou imunidade a dano de queda.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-1-5', name: 'Abalo Sísmico', description: 'Bate no chão, criando um tremor que desequilibra inimigos em área.', requirements: { forca: 15 }, unlocked: false, children: [] }
                 ]},
                 { id: 'forca-10-2', name: 'Arremesso Potente', description: 'Permite arremessar objetos pesados com mais força e alcance.', requirements: { forca: 10 }, unlocked: false, children: [
                     { id: 'forca-15-2-1', name: 'Arremesso Aéreo', description: 'Arremessa um inimigo no ar, deixando-o vulnerável.', requirements: { forca: 15 }, unlocked: false, children: [] },
                     { id: 'forca-15-2-2', name: 'Tiro de Colisão', description: 'Arremessa um inimigo em outro, causando dano a ambos.', requirements: { forca: 15 }, unlocked: false, children: [] },
                     { id: 'forca-15-2-3', name: 'Arremesso Improvável', description: 'Usa objetos do cenário como projéteis mortais.', requirements: { forca: 15 }, unlocked: false, children: [] },
-                    { id: 'forca-15-2-4', name: 'Arma de Arremesso', description: 'Arremessa sua própria arma e a faz retornar à sua mão.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                    { id: 'forca-15-2-4', name: 'Arma de Arremesso', description: 'Arremessa sua própria arma e a faz retornar à sua mão.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-2-5', name: 'Ricochete', description: 'Arremessa um objeto que pode ricochetear para atingir um alvo fora da linha de visão.', requirements: { forca: 15 }, unlocked: false, children: [] }
                 ]},
                 { id: 'forca-10-3', name: 'Quebra de Armadura', description: 'Um golpe focado que danifica a armadura do inimigo, reduzindo sua defesa.', requirements: { forca: 10 }, unlocked: false, children: [
                     { id: 'forca-15-3-1', name: 'Golpe Esmagador', description: 'Um ataque que ignora completamente a armadura do alvo.', requirements: { forca: 15 }, unlocked: false, children: [] },
                     { id: 'forca-15-3-2', name: 'Ataque de Exaustão', description: 'Reduz o vigor ou pontos de ação do inimigo.', requirements: { forca: 15 }, unlocked: false, children: [] },
                     { id: 'forca-15-3-3', name: 'Punho de Ferro', description: 'Aumenta o dano desarmado e permite bloquear ataques com os punhos.', requirements: { forca: 15 }, unlocked: false, children: [] },
-                    { id: 'forca-15-3-4', name: 'Destruidor de Foco', description: 'Interrompe a concentração de inimigos, cancelando habilidades.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                    { id: 'forca-15-3-4', name: 'Destruidor de Foco', description: 'Interrompe a concentração de inimigos, cancelando habilidades.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-3-5', name: 'Ponto de Ruptura', description: 'Após danificar a armadura, seu próximo golpe no mesmo local causa dano massivo.', requirements: { forca: 15 }, unlocked: false, children: [] }
                 ]},
                 { id: 'forca-10-4', name: 'Soco Aéreo', description: 'Cria uma rajada de ar comprimido com um soco, atingindo inimigos à distância.', requirements: { forca: 10 }, unlocked: false, children: [
                     { id: 'forca-15-4-1', name: 'Soco em Câmera Lenta', description: 'A rajada de ar distorce o tempo, deixando os inimigos lentos.', requirements: { forca: 15 }, unlocked: false, children: [] },
                     { id: 'forca-15-4-2', name: 'Vácuo Aéreo', description: 'Puxa inimigos próximos para o ponto de impacto da rajada.', requirements: { forca: 15 }, unlocked: false, children: [] },
                     { id: 'forca-15-4-3', name: 'O Sopro do Trovão', description: 'A rajada de ar tem um efeito sônico, atordoando os alvos.', requirements: { forca: 15 }, unlocked: false, children: [] },
-                    { id: 'forca-15-4-4', name: 'Soco de Repulsão', description: 'Empurra violentamente os inimigos para trás.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                    { id: 'forca-15-4-4', name: 'Soco de Repulsão', description: 'Empurra violentamente os inimigos para trás.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-4-5', name: 'Lâmina de Vento', description: 'A rajada de ar é tão focada que corta como uma lâmina, causando dano de corte à distância.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-5', name: 'Fúria Incontrolável', description: 'Entra em um estado de fúria, aumentando o dano causado mas reduzindo a própria defesa.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-5-1', name: 'Frenesi Implacável', description: 'Enquanto em fúria, cada golpe recebido aumenta a duração da fúria.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-5-2', name: 'Rugido Aterrador', description: 'Solta um rugido que pode causar medo em inimigos próximos.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-5-3', name: 'Ignorar a Dor', description: 'Enquanto em fúria, você ignora penalidades de ferimentos leves.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-5-4', name: 'Sede de Sangue', description: 'Derrotar um inimigo enquanto em fúria restaura uma pequena quantidade de vida.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-5-5', name: 'Fúria Cega', description: 'O bônus de dano da fúria é dobrado, mas você não pode distinguir aliados de inimigos por um turno.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'forca-5-2', name: 'Técnica de Agarrão', description: 'Usa a força para controlar a posição de inimigos em combate.', requirements: { forca: 5 }, unlocked: false, children: [
+                { id: 'forca-10-6', name: 'Imobilizar', description: 'Prende um inimigo, impedindo-o de se mover ou atacar.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-6-1', name: 'Esmagamento de Ossos', description: 'Causa dano contínuo ao alvo imobilizado.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-6-2', name: 'Sufocar', description: 'Corta a respiração do alvo, causando penalidades.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-6-3', name: 'Nó Humano', description: 'Torce o corpo do alvo de forma a dificultar sua fuga.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-6-4', name: 'Quebrar Articulação', description: 'Aplica uma penalidade permanente a um atributo físico do alvo.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-6-5', name: 'Arremesso de Corpo', description: 'Após imobilizar, arremessa o alvo para longe.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-7', name: 'Escudo Humano', description: 'Usa um inimigo agarrado como cobertura contra ataques.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-7-1', name: 'Cobertura Total', description: 'Aumenta a eficácia do escudo humano, bloqueando mais dano.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-7-2', name: 'Retaliação do Escudo', description: 'Força o inimigo usado como escudo a atacar seus próprios aliados.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-7-3', name: 'Absorção de Impacto', description: 'Reduz o dano que você recebe quando o escudo humano é atingido.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-7-4', name: 'Descarte Explosivo', description: 'Arremessa o escudo humano contra um grupo de inimigos.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-7-5', name: 'Mover com Refém', description: 'Move-se em velocidade normal enquanto usa o escudo humano.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-8', name: 'Empurrão Poderoso', description: 'Empurra um inimigo com força, criando distância ou jogando-o em perigos.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-8-1', name: 'Onda de Choque', description: 'O empurrão afeta inimigos em um cone à sua frente.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-8-2', name: 'Abrir Caminho', description: 'Empurra múltiplos inimigos de uma vez para criar uma passagem.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-8-3', name: 'Empurrar para Armadilha', description: 'Empurra um inimigo para uma armadilha ou área perigosa.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-8-4', name: 'Desequilibrar', description: 'O inimigo empurrado fica desequilibrado e vulnerável.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-8-5', name: 'Empurrão em Área', description: 'Empurra todos os inimigos adjacentes para longe de você.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-9', name: 'Quebra-costas', description: 'Um agarrão poderoso que causa dano massivo e pode paralisar.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-9-1', name: 'Paralisia Momentânea', description: 'O alvo fica paralisado por um turno.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-9-2', name: 'Dano de Coluna', description: 'Causa uma penalidade de agilidade permanente no alvo.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-9-3', name: 'Levantar e Quebrar', description: 'Levanta o alvo no ar antes de quebrar suas costas no joelho.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-9-4', name: 'Finalização', description: 'Causa dano extra a alvos já feridos.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-9-5', name: 'Arremesso Suplex', description: 'Arremessa o alvo para trás por cima da cabeça.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-10', name: 'Arremesso de Inimigo', description: 'Arremessa um inimigo agarrado contra outro alvo.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-10-1', name: 'Arremesso Giratório', description: 'Gira o inimigo antes de arremessar, atingindo múltiplos alvos.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-10-2', name: 'Usar como Projétil', description: 'O dano do arremesso é baseado no peso do inimigo arremessado.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-10-3', name: 'Arremesso em Arco', description: 'Arremessa o inimigo por cima de obstáculos.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-10-4', name: 'Impulso de Queda', description: 'Arremessa o inimigo para o alto, aumentando o dano da queda.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-10-5', name: 'Arremesso Múltiplo', description: 'Arremessa dois inimigos leves de uma vez.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'forca-5-3', name: 'Uso de Arma Pesada', description: 'Especialização no manejo de armas grandes e desajeitadas.', requirements: { forca: 5 }, unlocked: false, children: [
+                { id: 'forca-10-11', name: 'Maestria com Machados', description: 'Aumenta o dano e a eficácia com machados de batalha.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-11-1', name: 'Corte Decapitador', description: 'Chance de causar morte instantânea em alvos com vida baixa.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-11-2', name: 'Giro do Lenhador', description: 'Um ataque em área que atinge todos os inimigos ao redor.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-11-3', name: 'Arremesso de Machado', description: 'Arremessa o machado com precisão mortal.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-11-4', name: 'Quebrar Escudo', description: 'Destrói o escudo do inimigo com um golpe poderoso.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-11-5', name: 'Fúria do Berserker', description: 'Aumenta o dano a cada golpe consecutivo.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-12', name: 'Maestria com Martelos', description: 'Aumenta o dano e a capacidade de atordoar com martelos.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-12-1', name: 'Golpe Sísmico', description: 'Bate o martelo no chão, criando uma onda de choque.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-12-2', name: 'Esmagar Crânio', description: 'Um golpe na cabeça que pode atordoar ou confundir o alvo.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-12-3', name: 'Arremesso de Martelo', description: 'Arremessa o martelo, que retorna à sua mão.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-12-4', name: 'Atordoamento por Impacto', description: 'Aumenta a chance de atordoar inimigos com cada golpe.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-12-5', name: 'Forja de Batalha', description: 'Usa o martelo para reparar armas e armaduras em campo.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-13', name: 'Maestria com Espadas Grandes', description: 'Maximiza o alcance e o poder de corte de espadas de duas mãos.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-13-1', name: 'Corte Transversal', description: 'Um golpe amplo que atinge múltiplos inimigos em um arco.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-13-2', name: 'Postura de Defesa', description: 'Usa a lâmina larga para bloquear ataques com eficácia.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-13-3', name: 'Estocada Perfurante', description: 'Um ataque focado que perfura armaduras.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-13-4', name: 'Lâmina Larga', description: 'Pode aparar projéteis com a espada.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-13-5', name: 'Dança da Lâmina Pesada', description: 'Uma sequência de ataques fluidos e poderosos.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-14', name: 'Maestria com Lanças', description: 'Usa o alcance da lança para controlar o campo de batalha.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-14-1', name: 'Investida', description: 'Um ataque poderoso enquanto corre em direção ao alvo.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-14-2', name: 'Defesa em Falange', description: 'Cria uma barreira defensiva com a lança, protegendo aliados.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-14-3', name: 'Arremesso de Javelin', description: 'Arremessa a lança com grande força e precisão.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-14-4', name: 'Varredura', description: 'Derruba inimigos em uma área com um movimento de varredura.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-14-5', name: 'Empalar', description: 'Um ataque que pode prender o inimigo no lugar.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-15', name: 'Arma Improvisada', description: 'Capacidade de usar qualquer objeto pesado como uma arma eficaz.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-15-1', name: 'Usar Poste como Clava', description: 'Arranca postes ou canos para usar como armas.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-15-2', name: 'Arremessar Mobília', description: 'Usa mesas, cadeiras e outros móveis como projéteis.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-15-3', name: 'Escudo de Porta', description: 'Arranca uma porta para usar como um escudo improvisado.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-15-4', name: 'Mestre do Inusitado', description: 'Causa dano extra com armas improvisadas.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-15-5', name: 'Durabilidade Improvisada', description: 'Armas improvisadas duram mais tempo antes de quebrar.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'forca-5-4', name: 'Resistência Bruta', description: 'Capacidade de suportar punições físicas extremas.', requirements: { forca: 5 }, unlocked: false, children: [
+                { id: 'forca-10-16', name: 'Pele Grossa', description: 'Sua pele se torna mais resistente a danos.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-16-1', name: 'Resistência a Cortes', description: 'Reduz o dano de lâminas e garras.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-16-2', name: 'Resistência a Perfuração', description: 'Reduz o dano de balas e estocadas.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-16-3', name: 'Resistência a Impacto', description: 'Reduz o dano de socos e quedas.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-16-4', name: 'Pele Rochosa', description: 'Concede uma camada de armadura natural.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-16-5', name: 'Redução de Dano Crítico', description: 'Reduz o dano extra recebido de acertos críticos.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-17', name: 'Vigor de Touro', description: 'Sua estamina e capacidade de esforço são sobre-humanas.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-17-1', name: 'Fôlego de Ferro', description: 'Pode prender a respiração por períodos muito longos.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-17-2', name: 'Recuperação Rápida', description: 'Recupera pontos de ação mais rapidamente.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-17-3', name: 'Resistência a Exaustão', description: 'Demora mais para sofrer penalidades por cansaço.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-17-4', name: 'Ignorar Ferimentos Leves', description: 'Não sofre penalidades por estar com vida baixa.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-17-5', name: 'Correr sem Cansar', description: 'Pode correr por longas distâncias sem se cansar.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-18', name: 'Ossos Densos', description: 'Seus ossos são mais difíceis de quebrar e podem ser usados ofensivamente.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-18-1', name: 'Resistência a Fraturas', description: 'Reduz a chance de ter ossos quebrados.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-18-2', name: 'Soco de Nudillos de Aço', description: 'Aumenta o dano de ataques desarmados.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-18-3', name: 'Cabeçada', description: 'Um ataque de cabeçada que pode atordoar.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-18-4', name: 'Redução de Dano de Queda', description: 'Recebe menos dano de quedas.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-18-5', name: 'Corpo como Arma', description: 'Seu corpo é considerado uma arma de impacto.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-19', name: 'Determinação Inabalável', description: 'Sua força de vontade te torna resistente a influências externas.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-19-1', name: 'Resistir à Dor', description: 'Pode ignorar penalidades de dor por um tempo.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-19-2', name: 'Ignorar Medo', description: 'Resistência a efeitos de medo e intimidação.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-19-3', name: 'Foco sob Pressão', description: 'Mantém a calma e o foco mesmo sob ataque.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-19-4', name: 'Levantar após Queda', description: 'Levanta-se rapidamente após ser derrubado.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-19-5', name: 'Vontade de Ferro', description: 'Resistência a controle mental e possessão.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-20', name: 'Sobrevivente', description: 'Capacidade de suportar condições ambientais extremas.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-20-1', name: 'Resistência a Veneno', description: 'Reduz o efeito de venenos.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-20-2', name: 'Resistência a Doenças', description: 'Reduz a chance de contrair doenças.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-20-3', name: 'Suportar Fome e Sede', description: 'Pode passar mais tempo sem comida e água.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-20-4', name: 'Suportar Temperaturas Extremas', description: 'Resistência a calor e frio intensos.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-20-5', name: 'Cicatrização Lenta', description: 'Recupera vida lentamente fora de combate.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'forca-5-5', name: 'Intimidação Física', description: 'Usa seu tamanho e força para aterrorizar e controlar os outros.', requirements: { forca: 5 }, unlocked: false, children: [
+                { id: 'forca-10-21', name: 'Postura Ameaçadora', description: 'Adota uma postura que exala perigo.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-21-1', name: 'Olhar Penetrante', description: 'Um olhar que pode fazer um alvo hesitar.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-21-2', name: 'Flexionar Músculos', description: 'Uma demonstração de força que pode intimidar.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-21-3', name: 'Aura de Perigo', description: 'Inimigos próximos sentem um perigo iminente.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-21-4', name: 'Silêncio Ameaçador', description: 'Seu silêncio se torna mais intimidador que palavras.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-21-5', name: 'Invasão de Espaço Pessoal', description: 'Aproxima-se de um alvo para deixá-lo desconfortável.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-22', name: 'Rugido de Batalha', description: 'Um grito que pode desmoralizar inimigos.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-22-1', name: 'Causar Hesitação', description: 'Inimigos afetados perdem sua próxima ação.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-22-2', name: 'Forçar Recuo', description: 'Inimigos fracos recuam com o rugido.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-22-3', name: 'Interromper Ação', description: 'Pode interromper a concentração de um inimigo.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-22-4', name: 'Desmoralizar', description: 'Aplica uma penalidade de ataque aos inimigos afetados.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-22-5', name: 'Rugido em Área', description: 'O rugido afeta uma área maior.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-23', name: 'Demonstração de Força', description: 'Usa o ambiente para mostrar sua força.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-23-1', name: 'Quebrar Objeto', description: 'Quebra um objeto com as mãos para intimidar.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-23-2', name: 'Levantar Peso Impossível', description: 'Levanta um objeto extremamente pesado.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-23-3', name: 'Soco no Chão', description: 'Um soco no chão que cria um pequeno tremor.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-23-4', name: 'Dobrar Metal', description: 'Dobra uma barra de metal com as mãos.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-23-5', name: 'Marca de Força', description: 'Deixa a marca de sua mão em uma parede de pedra.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-24', name: 'Reputação de Brutamontes', description: 'Sua fama o precede.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-24-1', name: 'Fama de Invencível', description: 'Inimigos hesitam em te atacar.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-24-2', name: 'Histórias de Violência', description: 'Sua reputação é conhecida em certos círculos.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-24-3', name: 'Reconhecimento Imediato', description: 'Inimigos podem te reconhecer e evitar o confronto.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-24-4', name: 'Medo Preventivo', description: 'Inimigos fazem testes de moral ao te ver.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-24-5', name: 'Submissão de Fracos', description: 'Inimigos muito mais fracos se rendem sem lutar.', requirements: { forca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'forca-10-25', name: 'Interrogatório Físico', description: 'Usa a força para extrair informações.', requirements: { forca: 10 }, unlocked: false, children: [
+                    { id: 'forca-15-25-1', name: 'Aperto de Mão', description: 'Um aperto de mão que pode quebrar ossos.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-25-2', name: 'Pressionar contra Parede', description: 'Imobiliza um alvo contra uma parede para interrogatório.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-25-3', name: 'Ameaça Velada', description: 'Faz uma ameaça física sutil, mas clara.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-25-4', name: 'Quebrar Dedos', description: 'Uma técnica de tortura para obter informações.', requirements: { forca: 15 }, unlocked: false, children: [] },
+                    { id: 'forca-15-25-5', name: 'Bom Policial, Mau Policial', description: 'Alterna entre gentileza e brutalidade para confundir o alvo.', requirements: { forca: 15 }, unlocked: false, children: [] }
                 ]}
             ]}
         ],
@@ -66,13 +414,184 @@ const DEFAULT_SKILL_TREES = {
                     { id: 'agilidade-15-1-1', name: 'Salto Fantasma', description: 'Ao usar o Ataque Rápido, você deixa uma ilusão de si mesmo para trás, confundindo inimigos e aumentando sua chance de esquiva.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
                     { id: 'agilidade-15-1-2', name: 'Ataque de Sombra', description: 'Seus ataques rápidos agora têm a chance de teleportá-lo para trás do inimigo, permitindo que você atinja pontos fracos.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
                     { id: 'agilidade-15-1-3', name: 'Rajada de Lâminas', description: 'Você lança uma série de golpes tão rápidos que eles perfuram a defesa de um inimigo, ignorando parte de sua armadura.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
-                    { id: 'agilidade-15-1-4', name: 'Ataque de Reflexo', description: 'Você pode realizar um ataque rápido em resposta a um ataque inimigo que errou.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                    { id: 'agilidade-15-1-4', name: 'Ataque de Reflexo', description: 'Você pode realizar um ataque rápido em resposta a um ataque inimigo que errou.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-1-5', name: 'Fluxo Contínuo', description: 'Após um Ataque Rápido, seu próximo movimento não provoca ataques de oportunidade.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
                 ]},
                 { id: 'agilidade-10-2', name: 'Desarmar', description: 'Com um ataque rápido e preciso, você pode fazer um inimigo derrubar a arma dele.', requirements: { agilidade: 10 }, unlocked: false, children: [
                     { id: 'agilidade-15-2-1', name: 'Passo no Vazio', description: 'Você pode se mover através de objetos sólidos e inimigos, ignorando barreiras e bloqueios.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
                     { id: 'agilidade-15-2-2', name: 'Mãos Invisíveis', description: 'Você pode desarmar um inimigo sem que ele perceba que você o tocou, como se a arma dele tivesse caído sozinha.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
                     { id: 'agilidade-15-2-3', name: 'Roubo de Arma', description: 'Ao desarmar um inimigo, você também pode roubar a arma dele.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
-                    { id: 'agilidade-15-2-4', name: 'Dança da Desorientação', description: 'Ao desarmar um inimigo, você o desorienta, diminuindo a precisão e a chance de acerto dos seus próximos ataques.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                    { id: 'agilidade-15-2-4', name: 'Dança da Desorientação', description: 'Ao desarmar um inimigo, você o desorienta, diminuindo a precisão e a chance de acerto dos seus próximos ataques.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-2-5', name: 'Arma Bumerangue', description: 'Você pode usar a arma desarmada do inimigo para um ataque imediato antes de jogá-la no chão.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-3', name: 'Acrobacia de Combate', description: 'Usa o ambiente para se mover de forma imprevisível, ganhando bônus de defesa.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-3-1', name: 'Escalada Rápida', description: 'Sobe paredes e obstáculos com velocidade surpreendente.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-3-2', name: 'Salto Mortal', description: 'Realiza um salto acrobático para passar por cima de um inimigo, posicionando-se em suas costas.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-3-3', name: 'Ataque em Queda', description: 'Ataca de um ponto elevado, adicionando o dano da queda ao seu golpe.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-3-4', name: 'Esquiva Perfeita', description: 'Uma vez por combate, pode evitar completamente o dano de um ataque.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-3-5', name: 'Chute Impulsionado', description: 'Usa uma parede ou aliado para se impulsionar e dar um chute poderoso.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-4', name: 'Mestre da Fuga', description: 'Especialista em escapar de situações perigosas.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-4-1', name: 'Desvencilhar', description: 'Escapa de agarrões e amarras com facilidade.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-4-2', name: 'Bomba de Fumaça', description: 'Cria uma nuvem de fumaça para cobrir sua fuga.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-4-3', name: 'Rastro Falso', description: 'Deixa pistas falsas para confundir perseguidores.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-4-4', name: 'Corrida Parkour', description: 'Move-se por terrenos difíceis sem penalidade de velocidade.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-4-5', name: 'Instinto de Sobrevivência', description: 'Ganha um bônus de velocidade quando está com vida baixa.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-5', name: 'Precisão Cirúrgica', description: 'Seus ataques visam pontos vitais, aumentando a chance de crítico.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-5-1', name: 'Golpe no Tendão', description: 'Um ataque que reduz a velocidade de movimento do alvo.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-5-2', name: 'Ataque nos Olhos', description: 'Um ataque que pode cegar temporariamente o alvo.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-5-3', name: 'Corte na Artéria', description: 'Causa dano de sangramento contínuo.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-5-4', name: 'Ponto de Pressão', description: 'Um golpe que pode paralisar um membro do alvo por um turno.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-5-5', name: 'Golpe Fatal', description: 'Aumenta massivamente o dano de um ataque furtivo ou contra um alvo desprevenido.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'agilidade-5-2', name: 'Furtividade', description: 'A arte de se mover sem ser visto ou ouvido.', requirements: { agilidade: 5 }, unlocked: false, children: [
+                { id: 'agilidade-10-6', name: 'Movimento Silencioso', description: 'Reduz o ruído que você faz ao se mover.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-6-1', name: 'Passos de Gato', description: 'Você não faz barulho ao andar ou correr lentamente.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-6-2', name: 'Ignorar Terreno Ruidoso', description: 'Move-se silenciosamente sobre superfícies como cascalho ou folhas secas.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-6-3', name: 'Corrida Silenciosa', description: 'Pode correr sem fazer barulho por um curto período.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-6-4', name: 'Aterrissagem Suave', description: 'Reduz o barulho e o dano de quedas.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-6-5', name: 'Mover-se sem Rastro', description: 'Dificulta o rastreamento de suas pegadas.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-7', name: 'Ocultar-se nas Sombras', description: 'Usa a escuridão para se esconder eficazmente.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-7-1', name: 'Um com a Noite', description: 'Torna-se quase invisível em escuridão total.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-7-2', name: 'Camuflagem Urbana', description: 'Usa multidões e becos para se esconder em cidades.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-7-3', name: 'Manto de Sombras', description: 'Cria uma pequena área de escuridão mágica ao seu redor.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-7-4', name: 'Esconderijo Rápido', description: 'Esconde-se rapidamente após quebrar a linha de visão.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-7-5', name: 'Invisibilidade Momentânea', description: 'Fica invisível por um único turno.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-8', name: 'Ataque Furtivo', description: 'Causa dano extra ao atacar um inimigo desprevenido.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-8-1', name: 'Golpe pelas Costas', description: 'Dano massivamente aumentado ao atacar por trás.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-8-2', name: 'Dano Crítico Aumentado', description: 'Aumenta o multiplicador de dano de acertos críticos furtivos.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-8-3', name: 'Veneno na Lâmina', description: 'Aplica veneno em seu primeiro ataque furtivo.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-8-4', name: 'Ataque Surpresa', description: 'O alvo atacado furtivamente fica atordoado por um turno.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-8-5', name: 'Execução Silenciosa', description: 'Derrotar um inimigo com um ataque furtivo não alerta outros próximos.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-9', name: 'Distração', description: 'Cria distrações para desviar a atenção dos inimigos.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-9-1', name: 'Arremessar Pedra', description: 'Arremessa um objeto para criar um som em outro local.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-9-2', name: 'Som Fantasma', description: 'Cria um som ilusório (passos, sussurros) à distância.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-9-3', name: 'Ilusão Menor', description: 'Cria uma pequena ilusão visual estática para enganar guardas.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-9-4', name: 'Bater e Correr', description: 'Realiza um ataque rápido e se esconde novamente no mesmo turno.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-9-5', name: 'Alvo Falso', description: 'Cria um boneco ou objeto que atrai a atenção por um momento.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-10', name: 'Mãos Leves', description: 'Perícia em bater carteiras e abrir fechaduras.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-10-1', name: 'Batedor de Carteira Mestre', description: 'Chance maior de roubar itens sem ser notado.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-10-2', name: 'Abrir Fechaduras', description: 'Usa ferramentas para abrir fechaduras simples.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-10-3', name: 'Desarmar Armadilhas', description: 'Detecta e desativa armadilhas mecânicas.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-10-4', name: 'Plantio de Itens', description: 'Coloca um item no bolso de alguém sem que percebam.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-10-5', name: 'Toque Rápido', description: 'Pode pegar ou plantar um item como uma ação rápida.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'agilidade-5-3', name: 'Ataques à Distância', description: 'Perícia com armas de projéteis, como arcos e bestas.', requirements: { agilidade: 5 }, unlocked: false, children: [
+                { id: 'agilidade-10-11', name: 'Maestria com Arco', description: 'Aumenta o dano e a precisão com arcos.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-11-1', name: 'Flecha Perfurante', description: 'Seu tiro ignora parte da armadura do alvo.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-11-2', name: 'Chuva de Flechas', description: 'Atira uma saraivada de flechas em uma área.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-11-3', name: 'Flecha com Corda', description: 'Atira uma flecha com uma corda para escalar ou criar tirolesas.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-11-4', name: 'Tiro Duplo', description: 'Atira duas flechas em um único alvo ou em dois alvos próximos.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-11-5', name: 'Flecha de Distração', description: 'Atira uma flecha barulhenta para atrair inimigos.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-12', name: 'Maestria com Besta', description: 'Aumenta o dano e a capacidade de perfuração de bestas.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-12-1', name: 'Virote Pesado', description: 'Um tiro que pode derrubar ou empurrar um inimigo.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-12-2', name: 'Recarga Rápida', description: 'Reduz o tempo necessário para recarregar sua besta.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-12-3', name: 'Virote com Gancho', description: 'Dispara um virote com um gancho para se prender a superfícies.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-12-4', name: 'Tiro na Perna', description: 'Um tiro preciso que reduz a velocidade de movimento do alvo.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-12-5', name: 'Besta de Repetição', description: 'Modifica sua besta para atirar múltiplos virotes antes de recarregar.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-13', name: 'Arremesso de Lâminas', description: 'Perícia em arremessar facas, adagas e outras armas leves.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-13-1', name: 'Leque de Facas', description: 'Arremessa múltiplas facas em um cone à sua frente.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-13-2', name: 'Lâmina Ricochete', description: 'Sua lâmina arremessada pode atingir um segundo alvo próximo.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-13-3', name: 'Arremesso Preciso', description: 'Aumenta a chance de acerto crítico com armas de arremesso.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-13-4', name: 'Lâminas Ocultas', description: 'Saca e arremessa uma lâmina como uma ação muito rápida.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-13-5', name: 'Retorno da Lâmina', description: 'Sua arma de arremesso favorita retorna magicamente à sua mão.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-14', name: 'Tiro Rápido', description: 'Foca em velocidade em detrimento da precisão.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-14-1', name: 'Rajada de Tiros', description: 'Descarrega sua arma rapidamente em uma área para suprimir inimigos.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-14-2', name: 'Atirar em Movimento', description: 'Remove penalidades por atirar enquanto se move.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-14-3', name: 'Foco Rápido', description: 'Reduz o tempo para mirar em um novo alvo.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-14-4', name: 'Tiro de Supressão', description: 'Força inimigos em uma área a procurar cobertura.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-14-5', name: 'Sem Tempo para Mirar', description: 'Pode atirar com sua arma à distância em combate corpo a corpo sem penalidade.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-15', name: 'Tiro Preciso', description: 'Foca em um único tiro devastador.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-15-1', name: 'Olho de Águia', description: 'Aumenta o alcance efetivo de suas armas de distância.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-15-2', name: 'Mira em Ponto Vital', description: 'Gasta uma ação para mirar, garantindo um acerto crítico no próximo tiro.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-15-3', name: 'Atirar através de Cobertura', description: 'Seus tiros podem penetrar coberturas leves.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-15-4', name: 'Fôlego Preso', description: 'Ignora penalidades por tremores ou movimento ao mirar.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-15-5', name: 'Um Tiro, Uma Morte', description: 'Dano massivamente aumentado se seu tiro for o único ataque que você faz no turno.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'agilidade-5-4', name: 'Mestre de Lâminas Leves', description: 'Especialização no uso de adagas, rapieiras e espadas curtas.', requirements: { agilidade: 5 }, unlocked: false, children: [
+                { id: 'agilidade-10-16', name: 'Esgrima', description: 'Técnicas de duelo com armas de uma mão.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-16-1', name: 'Estocada Perfurante', description: 'Um ataque rápido que ignora parte da armadura.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-16-2', name: 'Finta', description: 'Engana o inimigo para que seu próximo ataque seja mais fácil de acertar.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-16-3', name: 'Mobilidade do Duelista', description: 'Pode se mover antes e depois de atacar.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-16-4', name: 'Aparar e Ripostar', description: 'Após aparar um ataque, pode realizar um contra-ataque imediato.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-16-5', name: 'Toque da Morte', description: 'Um ataque preciso em um ponto vital que causa dano extra.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-17', name: 'Combate com Duas Armas', description: 'Luta com uma arma em cada mão.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-17-1', name: 'Ataque Duplo', description: 'Ataca com ambas as armas em uma única ação.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-17-2', name: 'Defesa com Duas Lâminas', description: 'Usa a segunda arma para um bônus de defesa.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-17-3', name: 'Redemoinho de Aço', description: 'Um ataque que atinge todos os inimigos adjacentes.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-17-4', name: 'Ritmo de Combate', description: 'Cada acerto consecutivo aumenta sua velocidade de ataque.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-17-5', name: 'Ambidesteridade Perfeita', description: 'Remove todas as penalidades por lutar com duas armas.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-18', name: 'Dança das Lâminas', description: 'Um estilo de luta fluido e acrobático.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-18-1', name: 'Fluxo de Combate', description: 'Move-se graciosamente entre os inimigos, evitando ataques de oportunidade.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-18-2', name: 'Esquiva Acrobática', description: 'Usa acrobacias para aumentar sua chance de esquiva.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-18-3', name: 'Ataque em Movimento', description: 'Pode realizar seu turno de ataque completo enquanto se move.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-18-4', name: 'Imprevisível', description: 'Inimigos têm desvantagem ao tentar te atacar.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-18-5', name: 'Ataque Giratório', description: 'Um ataque giratório que atinge múltiplos alvos.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-19', name: 'Cortes Rápidos', description: 'Foca em velocidade para infligir ferimentos múltiplos.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-19-1', name: 'Hemorragia', description: 'Seus cortes causam dano de sangramento contínuo.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-19-2', name: 'Mil Cortes', description: 'Um ataque rápido que atinge o mesmo alvo várias vezes.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-19-3', name: 'Lâmina Veloz', description: 'Sua velocidade de ataque com lâminas leves é aumentada.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-19-4', name: 'Ataque nos Pontos de Pressão', description: 'Seus cortes podem causar paralisia ou fraqueza.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-19-5', name: 'Ataque Incansável', description: 'Após derrotar um inimigo, ganha uma ação de ataque extra.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-20', name: 'Lançador de Adagas', description: 'Uso de adagas tanto em combate corpo a corpo quanto arremessadas.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-20-1', name: 'Troca Rápida', description: 'Alterna entre segurar e arremessar adagas sem custo de ação.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-20-2', name: 'Adaga Envenenada', description: 'Aplica veneno rapidamente em suas adagas.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-20-3', name: 'Arremesso Duplo', description: 'Arremessa duas adagas de uma vez.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-20-4', name: 'Precisão de Perto', description: 'Ganha bônus de acerto ao arremessar adagas em alvos próximos.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-20-5', name: 'Chuva de Adagas', description: 'Arremessa todas as suas adagas em uma área.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'agilidade-5-5', name: 'Reflexos Sobre-humanos', description: 'Sua capacidade de reação é mais rápida que o normal.', requirements: { agilidade: 5 }, unlocked: false, children: [
+                { id: 'agilidade-10-21', name: 'Esquiva Instintiva', description: 'Esquiva-se de perigos quase sem pensar.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-21-1', name: 'Desvio Mínimo', description: 'Usa o mínimo de movimento para desviar, economizando energia.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-21-2', name: 'Prever Ataque', description: 'Ganha um bônus de defesa contra o primeiro ataque de cada inimigo.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-21-3', name: 'Esquiva Perfeita', description: 'Uma vez por combate, pode evitar completamente o dano de um ataque.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-21-4', name: 'Sombra Escorregadia', description: 'É mais difícil de ser agarrado ou imobilizado.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-21-5', name: 'Intocável', description: 'Após uma esquiva bem-sucedida, o próximo ataque contra você tem desvantagem.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-22', name: 'Aparar Projéteis', description: 'Capaz de desviar ou aparar ataques à distância.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-22-1', name: 'Desviar Balas', description: 'Pode tentar desviar balas com uma lâmina ou objeto.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-22-2', name: 'Devolver ao Remetente', description: 'Pode aparar um projétil e devolvê-lo ao atacante.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-22-3', name: 'Escudo de Lâmina', description: 'Gira sua arma rapidamente para criar uma barreira contra projéteis.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-22-4', name: 'Aparar Explosão', description: 'Pode reduzir o dano de explosões se estiver perto do epicentro.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-22-5', name: 'Campo de Deflexão', description: 'Cria uma aura que tem chance de desviar projéteis automaticamente.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-23', name: 'Agir Primeiro', description: 'Sua velocidade te permite tomar a iniciativa.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-23-1', name: 'Iniciativa Aprimorada', description: 'Ganha um bônus significativo em testes de iniciativa.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-23-2', name: 'Emboscada', description: 'Se você age primeiro no combate, seu primeiro ataque causa dano extra.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-23-3', name: 'Ataque de Oportunidade Aprimorado', description: 'Pode realizar ataques de oportunidade com mais frequência.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-23-4', name: 'Velocidade do Pensamento', description: 'Pode realizar uma ação de movimento antes do combate começar.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-23-5', name: 'Sempre Alerta', description: 'Você não pode ser surpreendido.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-24', name: 'Sentido de Perigo', description: 'Uma percepção aguçada de ameaças iminentes.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-24-1', name: 'Sexto Sentido', description: 'Sente quando está sendo observado ou mirado.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-24-2', name: 'Percepção 360°', description: 'Não pode ser flanqueado facilmente.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-24-3', name: 'Sentir Armadilhas', description: 'Tem uma chance de detectar armadilhas antes de ativá-las.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-24-4', name: 'Intuição de Combate', description: 'Sente qual inimigo é a maior ameaça.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-24-5', name: 'Alerta de Emboscada', description: 'Alerta aliados próximos de uma emboscada iminente.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'agilidade-10-25', name: 'Contra-ataque Imediato', description: 'Responde a ataques inimigos com velocidade letal.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                    { id: 'agilidade-15-25-1', name: 'Riposta Rápida', description: 'Após uma esquiva, seu próximo ataque é mais rápido.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-25-2', name: 'Punição por Erro', description: 'Se um inimigo erra um ataque contra você, você pode realizar um ataque de oportunidade.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-25-3', name: 'Quebrar o Ritmo', description: 'Interrompe a sequência de ataques de um inimigo com um golpe rápido.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-25-4', name: 'Ataque Reativo', description: 'Pode usar sua reação para atacar um inimigo que se move para perto de você.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
+                    { id: 'agilidade-15-25-5', name: 'Vingança Veloz', description: 'Se um aliado próximo é atingido, você pode usar sua reação para atacar o agressor.', requirements: { agilidade: 15 }, unlocked: false, children: [] }
                 ]}
             ]}
         ],
@@ -82,13 +601,100 @@ const DEFAULT_SKILL_TREES = {
                     { id: 'presenca-15-1-1', name: 'O Olhar Vazio', description: 'Um olhar que lança um terror paralisante, forçando inimigos mais fracos a fugir ou ficar atordoados.', requirements: { presenca: 15 }, unlocked: false, children: [] },
                     { id: 'presenca-15-1-2', name: 'Presença Opressora', description: 'Você emite uma aura que diminui a moral de todos os inimigos próximos, reduzindo a precisão e o dano de seus ataques.', requirements: { presenca: 15 }, unlocked: false, children: [] },
                     { id: 'presenca-15-1-3', name: 'Conexão da Multidão', description: 'Você pode se misturar perfeitamente em uma multidão, como se não existisse, tornando impossível para inimigos te detectarem.', requirements: { presenca: 15 }, unlocked: false, children: [] },
-                    { id: 'presenca-15-1-4', name: 'Ancoragem Psíquica', description: 'Com sua presença, você pode se conectar com a mente dos seus aliados, melhorando a iniciativa e a coordenação de todo o grupo em combate.', requirements: { presenca: 15 }, unlocked: false, children: [] }
+                    { id: 'presenca-15-1-4', name: 'Ancoragem Psíquica', description: 'Com sua presença, você pode se conectar com a mente dos seus aliados, melhorando a iniciativa e a coordenação de todo o grupo em combate.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-1-5', name: 'Voz de Comando', description: 'Sua voz inspira tanta autoridade que ordens simples são obedecidas por NPCs de vontade fraca.', requirements: { presenca: 15 }, unlocked: false, children: [] }
                 ]},
                 { id: 'presenca-10-2', name: 'Foco Compartilhado', description: 'Permite ajudar um aliado a focar em uma tarefa, dando a ele um bônus para sua próxima ação.', requirements: { presenca: 10 }, unlocked: false, children: [
                     { id: 'presenca-15-2-1', name: 'Conjurador de Medo', description: 'Você manipula as emoções de um inimigo para criar manifestações de seu maior medo, paralisando-o.', requirements: { presenca: 15 }, unlocked: false, children: [] },
                     { id: 'presenca-15-2-2', name: 'Mente Coletiva', description: 'Cria uma conexão mental com seus aliados, permitindo que eles ajam em perfeita sincronia, ignorando o caos da batalha.', requirements: { presenca: 15 }, unlocked: false, children: [] },
                     { id: 'presenca-15-2-3', name: 'Transferência de Habilidade', description: 'Você pode transferir uma de suas habilidades para um aliado, permitindo que ele a use por um curto período.', requirements: { presenca: 15 }, unlocked: false, children: [] },
-                    { id: 'presenca-15-2-4', name: 'Sentido de Perigo', description: 'Você pode sentir perigos e armadilhas próximos e alertar seus aliados sobre eles, dando um bônus para que eles os evitem.', requirements: { presenca: 15 }, unlocked: false, children: [] }
+                    { id: 'presenca-15-2-4', name: 'Sentido de Perigo', description: 'Você pode sentir perigos e armadilhas próximos e alertar seus aliados sobre eles, dando um bônus para que eles os evitem.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-2-5', name: 'Elo de Sacrifício', description: 'Você pode receber parte do dano que seria direcionado a um aliado com quem tem foco.', requirements: { presenca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'presenca-10-3', name: 'Manipulador Social', description: 'Mestre em enganar, persuadir e ler as intenções dos outros.', requirements: { presenca: 10 }, unlocked: false, children: [
+                    { id: 'presenca-15-3-1', name: 'Detectar Mentiras', description: 'Você tem uma alta chance de saber quando alguém está mentindo para você.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-3-2', name: 'Charme', description: 'Consegue fazer um pedido razoável a um alvo, que o atenderá como se fosse amigo.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-3-3', name: 'Personificação', description: 'Imita a voz e os maneirismos de outra pessoa com perfeição.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-3-4', name: 'Infiltrar Confiança', description: 'Rapidamente ganha a confiança de um grupo ou indivíduo.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-3-5', name: 'Espalhar Boato', description: 'Planta uma informação falsa que se espalha rapidamente.', requirements: { presenca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'presenca-10-4', name: 'Aura Inspiradora', description: 'Sua presença motiva e fortalece seus aliados.', requirements: { presenca: 10 }, unlocked: false, children: [
+                    { id: 'presenca-15-4-1', name: 'Discurso Motivacional', description: 'Concede bônus temporários de ataque ou defesa para toda a equipe.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-4-2', name: 'Remover Medo', description: 'Remove o efeito de medo de um aliado e o torna imune por um tempo.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-4-3', name: 'Segundo Fôlego', description: 'Inspira um aliado exausto, restaurando parte de seus pontos de ação.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-4-4', name: 'Lealdade Inabalável', description: 'Aliados próximos a você ganham resistência a controle mental.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-4-5', name: 'Grito de Reunião', description: 'Chama aliados dispersos para sua posição.', requirements: { presenca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'presenca-10-5', name: 'Vínculo Paranormal', description: 'Cria uma conexão com o paranormal, sentindo sua presença.', requirements: { presenca: 10 }, unlocked: false, children: [
+                    { id: 'presenca-15-5-1', name: 'Sentir Entidade', description: 'Detecta a presença e a direção geral de criaturas paranormais próximas.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-5-2', name: 'Comunicação Espiritual', description: 'Tenta se comunicar com espíritos ou ecos psíquicos.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-5-3', name: 'Ler Objeto', description: 'Toca em um objeto para sentir emoções ou eventos fortes associados a ele.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-5-4', name: 'Aura da Verdade', description: 'Emite uma aura que torna difícil para outros mentirem perto de você.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-5-5', name: 'Proteção contra Espíritos', description: 'Você e aliados próximos recebem um bônus de defesa contra ataques de entidades incorpóreas.', requirements: { presenca: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'presenca-5-2', name: 'Liderança', description: 'Capacidade de inspirar e comandar aliados em batalha.', requirements: { presenca: 5 }, unlocked: false, children: [
+                { id: 'presenca-10-6', name: 'Inspirar Coragem', description: 'Remove o efeito de medo de um aliado e concede um bônus temporário.', requirements: { presenca: 10 }, unlocked: false, children: [
+                    { id: 'presenca-15-6-1', name: 'Aura de Bravura', description: 'Aliados próximos a você ganham resistência a medo.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-6-2', name: 'Grito de Batalha', description: 'Concede a todos os aliados um bônus de dano no próximo ataque.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-6-3', name: 'Nunca Desista', description: 'Um aliado pode ignorar os efeitos de estar com vida baixa por um turno.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-6-4', name: 'Exemplo Heroico', description: 'Ao realizar um acerto crítico, você inspira um aliado a ganhar uma ação extra.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-6-5', name: 'Discurso Inspirador', description: 'Fora de combate, pode restaurar a sanidade de seus aliados.', requirements: { presenca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'presenca-10-7', name: 'Comando Tático', description: 'Dá ordens diretas a aliados em combate.', requirements: { presenca: 10 }, unlocked: false, children: [
+                    { id: 'presenca-15-7-1', name: 'Foco no Alvo', description: 'Ordena que todos os aliados foquem em um único inimigo, aumentando o dano contra ele.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-7-2', name: 'Reposicionar', description: 'Permite que um aliado use sua reação para se mover para uma posição mais vantajosa.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-7-3', name: 'Ataque Coordenado', description: 'Você e um aliado atacam o mesmo alvo simultaneamente.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-7-4', name: 'Formação Defensiva', description: 'Ordena que aliados próximos formem uma linha defensiva, aumentando a defesa de todos.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-7-5', name: 'Plano B', description: 'Quando um plano falha, você rapidamente bola outro, concedendo um bônus para a equipe.', requirements: { presenca: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'presenca-5-3', name: 'Manipulação Social', description: 'Influencia sutilmente os pensamentos e ações dos outros.', requirements: { presenca: 5 }, unlocked: false, children: [
+                { id: 'presenca-10-8', name: 'Persuasão', description: 'Convence outros a concordarem com você ou a fazerem pequenos favores.', requirements: { presenca: 10 }, unlocked: false, children: [
+                    { id: 'presenca-15-8-1', name: 'Lábia', description: 'Mente de forma convincente.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-8-2', name: 'Diplomacia', description: 'Acalma situações tensas e negocia acordos.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-8-3', name: 'Charme', description: 'Faz com que um alvo o veja de forma amigável por um tempo.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-8-4', name: 'Barganha', description: 'Consegue preços melhores ao comprar e vender.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-8-5', name: 'Argumento Lógico', description: 'Usa a lógica para convencer até os mais céticos.', requirements: { presenca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'presenca-10-9', name: 'Intimidação', description: 'Usa ameaças e postura para conseguir o que quer.', requirements: { presenca: 10 }, unlocked: false, children: [
+                    { id: 'presenca-15-9-1', name: 'Olhar Ameaçador', description: 'Força um alvo a desviar o olhar e hesitar.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-9-2', name: 'Ameaça Velada', description: 'Faz uma ameaça sutil que deixa o alvo desconfortável.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-9-3', name: 'Interrogatório', description: 'Usa intimidação para extrair informações.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-9-4', name: 'Reputação', description: 'Sua fama o precede, fazendo com que alguns evitem confronto.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-9-5', 'name': 'Causar Medo', 'description': 'Pode forçar um inimigo de vontade fraca a fugir.', 'requirements': { 'presenca': 15 }, 'unlocked': false, 'children': [] }
+                ]}
+            ]},
+            { id: 'presenca-5-4', name: 'Percepção Paranormal', description: 'Sente e interage com o mundo invisível e sobrenatural.', requirements: { presenca: 5 }, unlocked: false, children: [
+                { id: 'presenca-10-10', name: 'Sentir o Paranormal', description: 'Detecta a presença de entidades ou fenômenos anormais.', requirements: { presenca: 10 }, unlocked: false, children: [
+                    { id: 'presenca-15-10-1', name: 'Localizar Fonte', description: 'Determina a direção e a distância de uma presença paranormal.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-10-2', name: 'Identificar Tipo', description: 'Tenta identificar o tipo de entidade (fantasma, demônio, etc.).', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-10-3', name: 'Sentir Emoções', description: 'Sente as emoções ou intenções de uma entidade.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-10-4', name: 'Ver o Invisível', description: 'Por um momento, pode ver criaturas ou objetos invisíveis.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-10-5', name: 'Aviso Prévio', description: 'Sente um perigo paranormal momentos antes de acontecer.', requirements: { presenca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'presenca-10-11', name: 'Interagir com Espíritos', description: 'Comunica-se e influencia entidades não-físicas.', requirements: { presenca: 10 }, unlocked: false, children: [
+                    { id: 'presenca-15-11-1', name: 'Falar com os Mortos', description: 'Pode fazer perguntas simples a espíritos.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-11-2', name: 'Acalmar Espírito', description: 'Tenta acalmar um espírito raivoso ou assustado.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-11-3', name: 'Exorcismo Menor', description: 'Pode forçar uma entidade fraca a abandonar um local ou objeto.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-11-4', name: 'Barganha Espiritual', description: 'Tenta negociar com uma entidade em troca de informação ou passagem segura.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-11-5', name: 'Proteção Espiritual', description: 'Cria uma barreira temporária que espíritos fracos não podem cruzar.', requirements: { presenca: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'presenca-5-5', name: 'Performance', description: 'A arte de atuar, cantar ou tocar um instrumento com um efeito cativante.', requirements: { presenca: 5 }, unlocked: false, children: [
+                { id: 'presenca-10-12', name: 'Atuação', description: 'Capacidade de se passar por outra pessoa ou fingir emoções.', requirements: { presenca: 10 }, unlocked: false, children: [
+                    { id: 'presenca-15-12-1', name: 'Disfarce', description: 'Usa maquiagem e roupas para criar um disfarce convincente.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-12-2', name: 'Imitar Voz', description: 'Imita a voz de outra pessoa com precisão.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-12-3', name: 'Fingir de Morto', description: 'Consegue se passar por morto de forma convincente.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-12-4', name: 'Infiltrado', description: 'Consegue se misturar em um grupo e ganhar sua confiança.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-12-5', name: 'Manipular Emoções', description: 'Usa a atuação para fazer outros sentirem alegria, tristeza ou raiva.', requirements: { presenca: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'presenca-10-13', name: 'Música', description: 'Usa um instrumento ou a voz para criar efeitos.', requirements: { presenca: 10 }, unlocked: false, children: [
+                    { id: 'presenca-15-13-1', name: 'Canção Calmante', description: 'Acalma animais ou pessoas hostis.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-13-2', name: 'Hino de Batalha', description: 'Inspira aliados, concedendo um bônus de ataque.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-13-3', name: 'Melodia Hipnótica', description: 'Pode prender a atenção de alvos, deixando-os distraídos.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-13-4', name: 'Réquiem Sombrio', description: 'Uma música que causa desconforto e medo em inimigos.', requirements: { presenca: 15 }, unlocked: false, children: [] },
+                    { id: 'presenca-15-13-5', 'name': 'Música do Silêncio', 'description': 'Cria uma área onde sons são abafados.', 'requirements': { 'presenca': 15 }, 'unlocked': false, 'children': [] }
                 ]}
             ]}
         ],
@@ -98,13 +704,100 @@ const DEFAULT_SKILL_TREES = {
                     { id: 'vitalidade-15-1-1', name: 'Pulso de Vigor', description: 'Você libera um pulso de sua própria energia vital que afeta aliados e inimigos próximos. Os aliados são curados e têm seu vigor restaurado. Os inimigos, por sua vez, sentem sua energia vital sendo drenada, sofrendo dano e ficando mais lentos.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
                     { id: 'vitalidade-15-1-2', name: 'Vitalidade Compartilhada', description: 'Você pode transferir seu vigor e parte de sua energia vital para um aliado, curando-o e permitindo que ele use mais habilidades.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
                     { id: 'vitalidade-15-1-3', name: 'Pele de Ferro', description: 'Por um curto período, sua pele se torna tão dura quanto o ferro, concedendo resistência a dano físico.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
-                    { id: 'vitalidade-15-1-4', name: 'Morte Falsa', description: 'Você pode entrar em um estado de "morte falsa" para enganar inimigos. Sua respiração e pulso param, e seu corpo fica frio, parecendo morto.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
+                    { id: 'vitalidade-15-1-4', name: 'Morte Falsa', description: 'Você pode entrar em um estado de "morte falsa" para enganar inimigos. Sua respiração e pulso param, e seu corpo fica frio, parecendo morto.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-1-5', name: 'Indomável', description: 'Você pode gastar pontos de vida para se livrar de efeitos de atordoamento ou paralisia.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
                 ]},
                 { id: 'vitalidade-10-2', name: 'Escudo de Vigor', description: 'Você pode usar seu vigor como um escudo, absorvendo parte do dano recebido.', requirements: { vitalidade: 10 }, unlocked: false, children: [
                     { id: 'vitalidade-15-2-1', name: 'Escudo de Absorção', description: 'Seu escudo de vigor não apenas absorve dano, mas o converte em energia para curar a si mesmo.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
                     { id: 'vitalidade-15-2-2', name: 'Barreira de Energia', description: 'Seu escudo de vigor se torna uma barreira de energia que pode ser usada para proteger aliados de ataques.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
                     { id: 'vitalidade-15-2-3', name: 'Vigor Inesgotável', description: 'Aumenta seu vigor total para que você possa usar mais habilidades.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
-                    { id: 'vitalidade-15-2-4', name: 'Segunda Chance', description: 'Você pode evitar a morte uma vez por dia, sobrevivendo com 1 de vida após um ataque fatal.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
+                    { id: 'vitalidade-15-2-4', name: 'Segunda Chance', description: 'Você pode evitar a morte uma vez por dia, sobrevivendo com 1 de vida após um ataque fatal.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-2-5', name: 'Retaliação Energética', description: 'Quando seu escudo absorve um ataque corpo a corpo, ele devolve parte do dano como energia.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'vitalidade-10-3', name: 'Fortitude Inabalável', description: 'Sua resistência a elementos e condições é sobre-humana.', requirements: { vitalidade: 10 }, unlocked: false, children: [
+                    { id: 'vitalidade-15-3-1', name: 'Resistência Elemental', description: 'Ganha resistência a um tipo de dano elemental (fogo, frio, etc.).', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-3-2', name: 'Imunidade a Veneno', description: 'Seu corpo processa e anula toxinas comuns.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-3-3', name: 'Tolerância à Fadiga', description: 'Demora muito mais para ficar exausto por esforço físico.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-3-4', name: 'Corpo Estabilizado', description: 'Resiste a efeitos de sangramento e doenças.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-3-5', name: 'Mente Sã em Corpo São', description: 'Sua vitalidade reforça sua mente, dando bônus em testes de sanidade.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'vitalidade-10-4', name: 'Metabolismo Adaptativo', description: 'Seu corpo se adapta rapidamente a ambientes hostis.', requirements: { vitalidade: 10 }, unlocked: false, children: [
+                    { id: 'vitalidade-15-4-1', name: 'Respiração Aquática', description: 'Pode respirar debaixo d\'água por longos períodos.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-4-2', name: 'Visão no Escuro', description: 'Seus olhos se adaptam para enxergar na escuridão total.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-4-3', name: 'Sobrevivente do Deserto', description: 'Requer muito menos água e comida para sobreviver.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-4-4', name: 'Resistência a Temperaturas', description: 'Suporta calor ou frio extremos com mais facilidade.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-4-5', name: 'Regeneração Lenta', description: 'Recupera uma pequena quantidade de vida passivamente fora de combate.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'vitalidade-10-5', name: 'Guardião Resiliente', description: 'Você se especializa em proteger os outros com sua própria vitalidade.', requirements: { vitalidade: 10 }, unlocked: false, children: [
+                    { id: 'vitalidade-15-5-1', name: 'Interceptar', description: 'Você pode se mover para receber um ataque que seria direcionado a um aliado próximo.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-5-2', name: 'Corpo de Escudo', description: 'Você pode usar seu próprio corpo como cobertura para um aliado.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-5-3', name: 'Aura de Cura', description: 'Aliados próximos a você recuperam uma pequena quantidade de vida a cada turno.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-5-4', name: 'Provocação Heroica', description: 'Força um inimigo poderoso a focar os ataques em você.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-5-5', name: 'Último Recurso', description: 'Ao chegar a 0 de vida, você pode realizar uma última ação antes de cair.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'vitalidade-5-2', name: 'Resistência Passiva', description: 'Aumenta suas defesas naturais contra vários tipos de dano.', requirements: { vitalidade: 5 }, unlocked: false, children: [
+                { id: 'vitalidade-10-6', name: 'Pele de Couro', description: 'Aumenta a resistência a dano físico (corte, perfuração, impacto).', requirements: { vitalidade: 10 }, unlocked: false, children: [
+                    { id: 'vitalidade-15-6-1', name: 'Resistência a Cortes', description: 'Reduz significativamente o dano de lâminas.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-6-2', name: 'Resistência a Perfuração', description: 'Reduz significativamente o dano de balas e estocadas.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-6-3', name: 'Resistência a Impacto', description: 'Reduz significativamente o dano de quedas e golpes contundentes.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-6-4', name: 'Pele Rochosa', description: 'Ganha uma camada de armadura natural que absorve dano.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-6-5', name: 'Redução de Dano Crítico', description: 'Transforma acertos críticos recebidos em acertos normais.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'vitalidade-10-7', name: 'Fortitude Elemental', description: 'Seu corpo se adapta para resistir a energias destrutivas.', requirements: { vitalidade: 10 }, unlocked: false, children: [
+                    { id: 'vitalidade-15-7-1', name: 'Resistência ao Fogo', description: 'Suporta altas temperaturas e reduz dano de fogo.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-7-2', name: 'Resistência ao Frio', description: 'Suporta baixas temperaturas e reduz dano de gelo.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-7-3', name: 'Resistência Elétrica', description: 'O dano de eletricidade é reduzido e tem chance de ser ignorado.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-7-4', name: 'Resistência a Ácido', description: 'Sua pele resiste a substâncias corrosivas.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-7-5', name: 'Resistência Paranormal', description: 'Ganha resistência a dano de fontes sobrenaturais.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'vitalidade-5-3', name: 'Bio-Adaptação', description: 'Altera seu próprio corpo para obter vantagens temporárias.', requirements: { vitalidade: 5 }, unlocked: false, children: [
+                { id: 'vitalidade-10-8', name: 'Adaptação Ofensiva', description: 'Modifica partes do corpo para se tornarem armas.', requirements: { vitalidade: 10 }, unlocked: false, children: [
+                    { id: 'vitalidade-15-8-1', name: 'Garras Retráteis', description: 'Suas unhas se transformam em garras afiadas.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-8-2', name: 'Espinhos Ósseos', description: 'Pode projetar espinhos de seus braços ou costas.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-8-3', name: 'Mordida Poderosa', description: 'Sua mandíbula ganha força para uma mordida devastadora.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-8-4', name: 'Cuspe Ácido', description: 'Pode cuspir uma substância corrosiva a curta distância.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-8-5', name: 'Membros Elásticos', description: 'Pode esticar seus braços para alcançar alvos distantes.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'vitalidade-10-9', name: 'Adaptação Ambiental', description: 'Modifica seu corpo para sobreviver em ambientes hostis.', requirements: { vitalidade: 10 }, unlocked: false, children: [
+                    { id: 'vitalidade-15-9-1', name: 'Pele Camaleão', description: 'Altera a cor da pele para se camuflar.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-9-2', name: 'Guelras', description: 'Desenvolve guelras para respirar debaixo d\'água.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-9-3', name: 'Visão Noturna', description: 'Seus olhos se adaptam para enxergar na escuridão total.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-9-4', name: 'Membranas de Escalada', description: 'Desenvolve pequenas membranas nas mãos e pés para escalar superfícies.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-9-5', name: 'Corpo Isolante', description: 'Seu corpo regula a temperatura interna, protegendo contra calor e frio extremos.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'vitalidade-5-4', name: 'Sobrevivencialismo', description: 'Técnicas para sobreviver em ambientes hostis e situações de perigo.', requirements: { vitalidade: 5 }, unlocked: false, children: [
+                { id: 'vitalidade-10-10', name: 'Mestre da Natureza', description: 'Conhecimento profundo sobre a vida selvagem e plantas.', requirements: { vitalidade: 10 }, unlocked: false, children: [
+                    { id: 'vitalidade-15-10-1', name: 'Encontrar Comida e Água', description: 'Sabe como encontrar sustento em qualquer ambiente.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-10-2', name: 'Criar Abrigo', description: 'Constrói abrigos improvisados rapidamente.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-10-3', name: 'Rastreamento', description: 'Segue rastros de animais e pessoas.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-10-4', name: 'Conhecimento Herbal', description: 'Identifica plantas medicinais e venenosas.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-10-5', name: 'Domador de Animais', description: 'Pode acalmar e até fazer amizade com animais selvagens.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'vitalidade-10-11', name: 'Resiliência Extrema', description: 'Capacidade de suportar condições adversas por longos períodos.', requirements: { vitalidade: 10 }, unlocked: false, children: [
+                    { id: 'vitalidade-15-11-1', name: 'Tolerância a Venenos', description: 'Ganha vantagem em testes para resistir a venenos.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-11-2', 'name': 'Tolerância a Doenças', 'description': 'Ganha vantagem em testes para resistir a doenças.', 'requirements': { 'vitalidade': 15 }, 'unlocked': false, 'children': [] },
+                    { id: 'vitalidade-15-11-3', name: 'Suportar Fome e Sede', description: 'Pode passar dias sem comida ou água com penalidades reduzidas.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-11-4', name: 'Não Precisa Dormir', description: 'Pode ficar acordado por vários dias sem penalidades de exaustão.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-11-5', name: 'Vontade de Sobreviver', description: 'Ganha um bônus em testes de morte.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'vitalidade-5-5', name: 'Protetor', description: 'Habilidades focadas em defender e proteger aliados.', requirements: { vitalidade: 5 }, unlocked: false, children: [
+                { id: 'vitalidade-10-12', name: 'Posição de Guarda', description: 'Aumenta sua defesa e a de um aliado adjacente.', requirements: { vitalidade: 10 }, unlocked: false, children: [
+                    { id: 'vitalidade-15-12-1', name: 'Muralha Humana', description: 'Você pode bloquear completamente um caminho estreito.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-12-2', name: 'Atenção Dividida', description: 'Pode proteger dois aliados ao mesmo tempo com penalidade reduzida.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-12-3', name: 'Escudo Aliado', description: 'Usa seu escudo para proteger um aliado adjacente.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-12-4', name: 'Vigília', description: 'Ganha bônus em testes de percepção para notar ameaças a um aliado.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-12-5', name: 'Defesa Coordenada', description: 'Concede seu bônus de defesa a um aliado por um turno.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'vitalidade-10-13', name: 'Grito de Provocação', description: 'Chama a atenção de inimigos para si.', requirements: { vitalidade: 10 }, unlocked: false, children: [
+                    { id: 'vitalidade-15-13-1', name: 'Provocação em Massa', description: 'Afeta todos os inimigos em uma área.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-13-2', name: 'Desafio do Campeão', description: 'Força um inimigo poderoso a lutar apenas com você.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-13-3', name: 'Insulto Pessoal', description: 'Enfurece um alvo, fazendo-o atacar de forma imprudente.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-13-4', name: 'Marca do Protetor', description: 'Inimigos que ignoram sua provocação recebem dano.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
+                    { id: 'vitalidade-15-13-5', name: 'Aura Ameaçadora', description: 'Inimigos próximos têm mais dificuldade em atacar seus aliados.', requirements: { vitalidade: 15 }, unlocked: false, children: [] }
                 ]}
             ]}
         ],
@@ -114,13 +807,107 @@ const DEFAULT_SKILL_TREES = {
                     { id: 'inteligencia-15-1-1', name: 'Previsão de Falhas', description: 'Você analisa a realidade e o ambiente ao seu redor tão rapidamente que pode prever as falhas mais prováveis em um inimigo ou na estrutura.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
                     { id: 'inteligencia-15-1-2', name: 'Leitura de Mente', description: 'Você pode ler os pensamentos de um inimigo para descobrir seus planos, fraquezas ou segredos.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
                     { id: 'inteligencia-15-1-3', name: 'Conhecimento Arcano', description: 'Você pode identificar rituais, feitiços e outros poderes esotéricos que seriam invisíveis para outros.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
-                    { id: 'inteligencia-15-1-4', name: 'Estrategista de Batalha', description: 'Sua mente funciona tão rapidamente em combate que você e seus aliados ganham um bônus de iniciativa e tática, permitindo que ajam antes dos inimigos.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
+                    { id: 'inteligencia-15-1-4', name: 'Estrategista de Batalha', description: 'Sua mente funciona tão rapidamente em combate que você e seus aliados ganham um bônus de iniciativa e tática, permitindo que ajam antes dos inimigos.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-1-5', name: 'Mímica de Movimento', description: 'Após observar uma ação física, você pode replicá-la com precisão em sua próxima tentativa.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
                 ]},
                 { id: 'inteligencia-10-2', name: 'Construção Improvisada', description: 'Permite que o personagem use materiais básicos para criar itens simples, armadilhas e ferramentas.', requirements: { inteligencia: 10 }, unlocked: false, children: [
                     { id: 'inteligencia-15-2-1', name: 'Transferência de Habilidade', description: 'Você analisa e entende tão bem uma habilidade de um inimigo que consegue reproduzi-la por um curto período.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
                     { id: 'inteligencia-15-2-2', name: 'Engenheiro de Batalha', description: 'Você pode usar materiais ao seu redor para criar armas e armaduras no meio da batalha.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
                     { id: 'inteligencia-15-2-3', name: 'Mestre em Armadilhas', description: 'Você tem um bônus para sentir a presença de armadilhas e desarmá-las.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
-                    { id: 'inteligencia-15-2-4', name: 'Tinkerer', description: 'Você pode fazer modificações em armas e equipamentos para dar a eles um bônus temporário de dano ou defesa.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
+                    { id: 'inteligencia-15-2-4', name: 'Tinkerer', description: 'Você pode fazer modificações em armas e equipamentos para dar a eles um bônus temporário de dano ou defesa.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-2-5', name: 'Química de Campo', description: 'Mistura itens comuns para criar ácidos, bombas de fumaça ou antídotos simples.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'inteligencia-10-3', name: 'Hacker Intuitivo', description: 'Especialista em invadir e manipular sistemas eletrônicos.', requirements: { inteligencia: 10 }, unlocked: false, children: [
+                    { id: 'inteligencia-15-3-1', name: 'Bypass de Segurança', description: 'Ignora senhas e travas eletrônicas simples.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-3-2', name: 'Vírus de Distração', description: 'Envia um vírus que desliga luzes, ativa alarmes ou causa caos em um sistema.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-3-3', name: 'Rastrear Sinal', description: 'Localiza a origem de um sinal de rádio ou celular.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-3-4', name: 'Apagar Rastros', description: 'Remove evidências digitais de sua presença em um sistema.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-3-5', name: 'Controle de Drones', description: 'Assume o controle de drones de segurança ou outros dispositivos simples.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'inteligencia-10-4', name: 'Poliglota', description: 'Capacidade de entender e falar múltiplas línguas rapidamente.', requirements: { inteligencia: 10 }, unlocked: false, children: [
+                    { id: 'inteligencia-15-4-1', name: 'Decifrar Código', description: 'Usa seu conhecimento de linguística para decifrar códigos e cifras.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-4-2', name: 'Linguagem Corporal', description: 'Lê a linguagem corporal de alguém para entender suas verdadeiras intenções.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-4-3', name: 'Compreensão Universal', description: 'Consegue entender a essência de línguas desconhecidas ou paranormais.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-4-4', name: 'Sotaque Perfeito', description: 'Fala uma língua sem sotaque, passando-se por um nativo.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-4-5', name: 'Tradução Instantânea', description: 'Atua como tradutor em tempo real para sua equipe.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'inteligencia-10-5', name: 'Detetive Paranormal', description: 'Usa a lógica para investigar o inexplicável.', requirements: { inteligencia: 10 }, unlocked: false, children: [
+                    { id: 'inteligencia-15-5-1', name: 'Conectar Pistas', description: 'Encontra padrões e conexões entre evidências aparentemente não relacionadas.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-5-2', name: 'Reconstruir Cena', description: 'Analisa uma cena para deduzir a sequência de eventos que ocorreram.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-5-3', name: 'Perfil Psicológico', description: 'Cria um perfil preciso de uma pessoa ou criatura com base em suas ações.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-5-4', name: 'Intuição Guiada', description: 'Sua lógica te leva a ter "palpites" corretos sobre onde procurar a próxima pista.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-5-5', name: 'Enfraquecer pelo Conhecimento', description: 'Descobrir o nome verdadeiro ou a origem de uma entidade a enfraquece.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'inteligencia-5-2', name: 'Conhecimento Acadêmico', description: 'Perícia em áreas do saber como história, ciência ou ocultismo.', requirements: { inteligencia: 5 }, unlocked: false, children: [
+                { id: 'inteligencia-10-6', name: 'Historiador', description: 'Conhecimento profundo sobre eventos passados, culturas e civilizações.', requirements: { inteligencia: 10 }, unlocked: false, children: [
+                    { id: 'inteligencia-15-6-1', name: 'Lembrar Detalhe', description: 'Lembra-se de um fato histórico relevante para a situação atual.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-6-2', name: 'Analisar Artefato', description: 'Determina a origem e a idade de um objeto antigo.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-6-3', name: 'Conhecer Lendas', description: 'Conhece mitos e lendas que podem conter verdades ocultas.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-6-4', name: 'Prever Padrões', description: 'Usa o conhecimento histórico para prever as ações de um grupo ou pessoa.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-6-5', name: 'Línguas Mortas', description: 'Capaz de decifrar ou entender fragmentos de línguas antigas.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'inteligencia-10-7', name: 'Cientista', description: 'Conhecimento em física, química e outras ciências naturais.', requirements: { inteligencia: 10 }, unlocked: false, children: [
+                    { id: 'inteligencia-15-7-1', name: 'Análise Química', description: 'Analisa uma substância para determinar sua composição.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-7-2', name: 'Cálculo Rápido', description: 'Realiza cálculos complexos de cabeça rapidamente.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-7-3', name: 'Entender Física', description: 'Explica um fenômeno físico e como explorá-lo.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-7-4', name: 'Criar Composto', description: 'Mistura produtos químicos para criar um ácido, explosivo ou antídoto simples.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-7-5', name: 'Método Científico', description: 'Cria um experimento para testar uma hipótese.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'inteligencia-10-8', name: 'Ocultista', description: 'Conhecimento sobre o paranormal, rituais e entidades.', requirements: { inteligencia: 10 }, unlocked: false, children: [
+                    { id: 'inteligencia-15-8-1', name: 'Identificar Ritual', description: 'Reconhece os sinais e o propósito de um ritual paranormal.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-8-2', name: 'Conhecer Entidade', description: 'Lembra-se de informações sobre uma criatura ou entidade específica.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-8-3', name: 'Ler Símbolos', description: 'Decifra símbolos arcanos e runas.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-8-4', name: 'Contra-ritual', description: 'Sabe como interromper ou enfraquecer um ritual em andamento.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-8-5', name: 'Usar Artefato', description: 'Entende como ativar ou usar um item paranormal.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'inteligencia-5-3', name: 'Medicina e Biologia', description: 'Conhecimento sobre o corpo humano e outras formas de vida.', requirements: { inteligencia: 5 }, unlocked: false, children: [
+                { id: 'inteligencia-10-9', name: 'Médico de Campo', description: 'Capacidade de tratar ferimentos em situações de combate.', requirements: { inteligencia: 10 }, unlocked: false, children: [
+                    { id: 'inteligencia-15-9-1', name: 'Primeiros Socorros Avançado', description: 'Estabiliza um alvo morrendo e remove condições como sangramento.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-9-2', name: 'Cirurgia Improvisada', description: 'Realiza cirurgias complexas com ferramentas improvisadas.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-9-3', name: 'Diagnóstico Rápido', description: 'Determina a causa de ferimentos ou doenças com um olhar.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-9-4', name: 'Tratar Veneno', description: 'Neutraliza os efeitos da maioria dos venenos.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-9-5', name: 'Reanimação', description: 'Tem uma chance de trazer de volta alguém que acabou de morrer.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'inteligencia-10-10', name: 'Biólogo', description: 'Conhecimento sobre a fauna e flora, normal e paranormal.', requirements: { inteligencia: 10 }, unlocked: false, children: [
+                    { id: 'inteligencia-15-10-1', name: 'Análise de Criatura', description: 'Identifica as fraquezas e habilidades de uma criatura.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-10-2', name: 'Coletar Amostras', description: 'Coleta amostras biológicas de criaturas para estudo.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-10-3', name: 'Entender Ecossistema', description: 'Entende como as criaturas e o ambiente interagem.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-10-4', name: 'Xenobiologia', description: 'Especialista em formas de vida anormais ou alienígenas.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-10-5', name: 'Criar Isca', description: 'Usa conhecimento biológico para criar uma isca para uma criatura específica.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'inteligencia-5-4', name: 'Engenharia e Tecnologia', description: 'Habilidade para criar, consertar e entender máquinas e sistemas.', requirements: { inteligencia: 5 }, unlocked: false, children: [
+                { id: 'inteligencia-10-11', name: 'Mecânico', description: 'Perícia em consertar e construir dispositivos mecânicos.', requirements: { inteligencia: 10 }, unlocked: false, children: [
+                    { id: 'inteligencia-15-11-1', name: 'Conserto Rápido', description: 'Conserta um item quebrado temporariamente.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-11-2', name: 'Melhorar Equipamento', description: 'Faz um upgrade em uma arma ou armadura.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-11-3', name: 'Sabotagem', description: 'Sabota um dispositivo mecânico para que ele falhe mais tarde.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-11-4', name: 'Construir Armadilha', description: 'Cria armadilhas mecânicas com sucata.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-11-5', name: 'Engenharia Reversa', description: 'Desmonta um dispositivo para entender como ele funciona.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'inteligencia-10-12', name: 'Hacker', description: 'Perícia em invadir e manipular sistemas de computador.', requirements: { inteligencia: 10 }, unlocked: false, children: [
+                    { id: 'inteligencia-15-12-1', name: 'Invadir Sistema', description: 'Ganha acesso a um sistema de computador protegido.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-12-2', name: 'Desativar Segurança', description: 'Desliga câmeras, alarmes e travas eletrônicas.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-12-3', name: 'Roubar Dados', description: 'Copia arquivos de um sistema sem ser detectado.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-12-4', name: 'Apagar Rastros', description: 'Remove qualquer evidência de sua invasão.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-12-5', name: 'Vírus', description: 'Envia um vírus para sobrecarregar ou controlar um sistema.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
+                ]}
+            ]},
+            { id: 'inteligencia-5-5', name: 'Investigação', description: 'A arte de encontrar pistas, seguir rastros e resolver mistérios.', requirements: { inteligencia: 5 }, unlocked: false, children: [
+                { id: 'inteligencia-10-13', name: 'Detetive', description: 'Perícia em encontrar e analisar evidências físicas.', requirements: { inteligencia: 10 }, unlocked: false, children: [
+                    { id: 'inteligencia-15-13-1', name: 'Procurar Pistas', description: 'Encontra pistas escondidas em uma cena de crime.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-13-2', name: 'Análise Forense', description: 'Analisa impressões digitais, pegadas e outras evidências.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-13-3', name: 'Reconstruir Cena', description: 'Deduz a sequência de eventos que ocorreram em um local.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-13-4', name: 'Notar Detalhes', description: 'Percebe detalhes que outros ignorariam.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-13-5', name: 'Conectar Evidências', description: 'Encontra a ligação entre duas peças de evidência aparentemente não relacionadas.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
+                ]},
+                { id: 'inteligencia-10-14', name: 'Interrogador', description: 'Perícia em extrair informações de pessoas.', requirements: { inteligencia: 10 }, unlocked: false, children: [
+                    { id: 'inteligencia-15-14-1', name: 'Detectar Mentiras', description: 'Sabe quando alguém está mentindo.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-14-2', name: 'Ler Linguagem Corporal', description: 'Entende as verdadeiras intenções de alguém pela sua postura.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-14-3', name: 'Bom Policial/Mau Policial', description: 'Alterna táticas para confundir e extrair informações.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-14-4', name: 'Pressionar', description: 'Usa uma informação para pressionar o alvo a confessar mais.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
+                    { id: 'inteligencia-15-14-5', name: 'Obter Confissão', description: 'Consegue uma confissão completa de um alvo culpado.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
                 ]}
             ]}
         ]
@@ -138,26 +925,86 @@ class SkillTreeEditor {
         this.attributeEditorContainer = document.getElementById('attribute-skill-tree-editor');
         this.loadSkillTrees();
         this.render();
+        this.setupSaveButton();
+    }
+
+    setupSaveButton() {
+        const saveButton = document.getElementById('save-skill-tree-changes');
+        if (saveButton) {
+            saveButton.addEventListener('click', () => {
+                this.saveSkillTrees();
+                alert('Alterações nas habilidades foram salvas com sucesso!');
+            });
+        }
     }
 
     loadSkillTrees() {
         const storedSkills = localStorage.getItem('sombras-skill-trees');
-        if (storedSkills) {
-            const loadedSkills = JSON.parse(storedSkills);
-            // Migration for old data: ensure 'Atributo' tree exists.
-            if (!loadedSkills['Atributo']) {
-                loadedSkills['Atributo'] = DEFAULT_SKILL_TREES['Atributo'];
+        try {
+            if (!storedSkills) {
+                // Se não há nada salvo, usa o padrão e termina.
+                SKILL_TREES = JSON.parse(JSON.stringify(DEFAULT_SKILL_TREES));
+                return;
             }
-            // Migração mais robusta: verifica se a estrutura de dados é a nova (aninhada).
-            // Se a primeira habilidade de Força não tiver a propriedade 'children', é a estrutura antiga.
-            if (loadedSkills.Atributo?.Força?.length > 0) {
-                // Se a estrutura antiga (lista plana) for detectada (mais de 1 item na raiz ou sem a propriedade 'children'), força a atualização.
-                if (loadedSkills.Atributo.Força.length > 1 || typeof loadedSkills.Atributo.Força[0].children === 'undefined') {
-                    console.log("Detectada estrutura de habilidades antiga ou inválida. Forçando a atualização para a nova estrutura em árvore.");
-                    loadedSkills['Atributo'] = DEFAULT_SKILL_TREES['Atributo'];
+
+            const loadedSkills = JSON.parse(storedSkills);
+
+            // Se os dados são inválidos (não é um objeto), reseta tudo.
+            if (!loadedSkills || typeof loadedSkills !== 'object') {
+                throw new Error("Dados de habilidades inválidos no localStorage.");
+            }
+
+            // Garante que as árvores de CLASSE existam e não estejam vazias.
+            ['Bélico', 'Esotérico', 'Erudito'].forEach(className => {
+                if (!loadedSkills[className] || typeof loadedSkills[className] !== 'object' || Object.keys(loadedSkills[className]).length === 0) {
+                    console.warn(`Árvore de habilidades de '${className}' ausente ou vazia. Restaurando do padrão.`);
+                    loadedSkills[className] = DEFAULT_SKILL_TREES[className];
+                    return; // Próxima classe
+                }
+
+                // Verifica a integridade dos elementos e especializações dentro da classe
+                for (const element in DEFAULT_SKILL_TREES[className]) {
+                    if (!loadedSkills[className][element] || typeof loadedSkills[className][element] !== 'object' || Array.isArray(loadedSkills[className][element])) {
+                        console.warn(`Elemento '${element}' na classe '${className}' é inválido ou um array. Restaurando.`);
+                        loadedSkills[className][element] = DEFAULT_SKILL_TREES[className][element];
+                        continue; // Próximo elemento
+                    }
+
+                    // Verifica as especializações dentro do elemento
+                    for (const specName in DEFAULT_SKILL_TREES[className][element]) {
+                        if (!loadedSkills[className][element][specName] || !Array.isArray(loadedSkills[className][element][specName])) {
+                            console.warn(`Especialização '${specName}' ausente no elemento '${element}' da classe '${className}'. Restaurando.`);
+                            loadedSkills[className][element][specName] = DEFAULT_SKILL_TREES[className][element][specName];
+                        }
+                    }
+                }
+            });
+
+            // Garante que a árvore de 'Atributo' exista e não esteja vazia. Se estiver, restaura do padrão.
+            if (!loadedSkills.Atributo || typeof loadedSkills.Atributo !== 'object' || Object.keys(loadedSkills.Atributo).length === 0) {
+                console.warn("Árvore de habilidades de 'Atributo' ausente ou vazia. Restaurando do padrão.");
+                loadedSkills.Atributo = DEFAULT_SKILL_TREES.Atributo;
+            } else {
+                // Verificação mais profunda: garante que cada sub-categoria de atributo é um array.
+                for (const attrName in DEFAULT_SKILL_TREES.Atributo) {
+                    if (!loadedSkills.Atributo[attrName] || !Array.isArray(loadedSkills.Atributo[attrName])) {
+                        console.warn(`Sub-categoria de atributo '${attrName}' ausente ou inválida. Restaurando.`);
+                        loadedSkills.Atributo[attrName] = DEFAULT_SKILL_TREES.Atributo[attrName];
+                    }
                 }
             }
+
+            // Migração para garantir que a estrutura de dados seja a aninhada correta.
+            if (loadedSkills.Atributo?.Força?.length > 0 && typeof loadedSkills.Atributo.Força[0].children === 'undefined') {
+                console.warn("Detectada estrutura de habilidades de Atributo antiga. Forçando a atualização para a nova estrutura em árvore.");
+                loadedSkills.Atributo = DEFAULT_SKILL_TREES.Atributo;
+            }
+
             SKILL_TREES = loadedSkills;
+        } catch (error) {
+            console.error("Erro ao carregar ou analisar a árvore de habilidades do localStorage. Usando a árvore padrão.", error);
+            SKILL_TREES = JSON.parse(JSON.stringify(DEFAULT_SKILL_TREES));
+            localStorage.removeItem('sombras-skill-trees'); // Limpa os dados corrompidos para evitar erros futuros.
         }
     }
 
@@ -188,24 +1035,6 @@ class SkillTreeEditor {
         return categoryContainer;
     }
 
-    saveSkillTrees() {
-        localStorage.setItem('sombras-skill-trees', JSON.stringify(SKILL_TREES));
-    }
-
-    render() {
-        this.editorContainer.innerHTML = '';
-        if (this.attributeEditorContainer) this.attributeEditorContainer.innerHTML = '';
-
-        for (const category in SKILL_TREES) {
-            const categoryElement = this._createCategoryElement(category);
-            if (category === 'Atributo') {
-                this.attributeEditorContainer?.appendChild(categoryElement);
-            } else {
-                this.editorContainer.appendChild(categoryElement);
-            }
-        }
-    }
-
     _createSubCategoryElement(category, subCategory) {
         const subCategoryContainer = document.createElement('div');
         subCategoryContainer.className = 'skill-tree-subcategory';
@@ -226,38 +1055,108 @@ class SkillTreeEditor {
             content.style.display = content.style.display === 'block' ? 'none' : 'block';
         });
 
+        if (category === 'Atributo') {
+            const skillListElement = this._createSkillListElement(SKILL_TREES[category][subCategory]);
+            subCategoryContent.appendChild(skillListElement);
+        } else {
+            const specializations = SKILL_TREES[category][subCategory];
+            for (const specName in specializations) {
+                const specElement = this._createSpecializationElement(specName, specializations[specName]);
+                subCategoryContent.appendChild(specElement);
+            }
+        }
+
+        return subCategoryContainer;
+    }
+
+    _createSpecializationElement(specName, skillArray) {
+        const specContainer = document.createElement('div');
+        specContainer.className = 'skill-tree-specialization';
+
+        const specHeader = document.createElement('h5');
+        specHeader.textContent = specName;
+        specHeader.classList.add('collapsible-header');
+        specContainer.appendChild(specHeader);
+
+        const specContent = document.createElement('div');
+        specContent.className = 'collapsible-content';
+        specContainer.appendChild(specContent);
+
+        specHeader.addEventListener('click', (e) => {
+            e.stopPropagation();
+            specHeader.classList.toggle('active');
+            const content = specHeader.nextElementSibling;
+            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        });
+
+        const skillListElement = this._createSkillListElement(skillArray);
+        specContent.appendChild(skillListElement);
+
+        return specContainer;
+    }
+
+    _createSkillListElement(skillArray) {
+        const container = document.createElement('div');
+
         const skillTreeContainer = document.createElement('div');
         skillTreeContainer.className = 'skill-list-tree';
 
-        const rootSkills = SKILL_TREES[category][subCategory];
-        rootSkills.forEach(skill => {
-            this._renderSkillRecursive(skill, skillTreeContainer, rootSkills);
-        });
+        // Blindagem: Garante que o código não quebre se skillArray não for um array.
+        if (Array.isArray(skillArray)) {
+            skillArray.forEach(skill => {
+                this._renderSkillRecursive(skill, skillTreeContainer, skillArray);
+            });
+        } else {
+            console.error("Erro de renderização: os dados da lista de habilidades não são um array.", skillArray);
+        }
 
         const addRootSkillButton = document.createElement('button');
         addRootSkillButton.textContent = 'Adicionar Habilidade Raiz';
         addRootSkillButton.className = 'add-skill-btn';
         addRootSkillButton.addEventListener('click', () => {
             const newSkill = { id: `new-skill-${Date.now()}`, name: 'Nova Habilidade', description: '', requirements: {}, children: [] };
-            rootSkills.push(newSkill);
+            skillArray.push(newSkill);
             this.render();
-            this.saveSkillTrees();
         });
 
-        subCategoryContent.appendChild(skillTreeContainer);
-        subCategoryContent.appendChild(addRootSkillButton);
+        container.appendChild(skillTreeContainer);
+        container.appendChild(addRootSkillButton);
 
-        return subCategoryContainer;
+        return container;
+    }
+
+    saveSkillTrees() {
+        localStorage.setItem('sombras-skill-trees', JSON.stringify(SKILL_TREES));
+    }
+
+    render() {
+        this.editorContainer.innerHTML = '';
+        if (this.attributeEditorContainer) this.attributeEditorContainer.innerHTML = '';
+
+        for (const category in SKILL_TREES) {
+            const categoryElement = this._createCategoryElement(category);
+            if (category === 'Atributo') {
+                this.attributeEditorContainer?.appendChild(categoryElement);
+            } else {
+                this.editorContainer.appendChild(categoryElement);
+            }
+        }
     }
 
     _renderSkillRecursive(skill, parentContainer, parentArray) {
+        // Adiciona uma verificação de segurança para evitar que dados corrompidos quebrem a renderização.
+        if (!skill) {
+            console.warn("Encontrada uma habilidade nula nos dados salvos. Ignorando para evitar erros.");
+            return;
+        }
+
         const skillWrapper = document.createElement('div');
         skillWrapper.className = 'skill-node-wrapper';
 
         const skillNode = this.createSkillNode(skill, parentArray);
         skillWrapper.appendChild(skillNode);
 
-        if (skill.children && skill.children.length > 0) {
+        if (Array.isArray(skill.children) && skill.children.length > 0) {
             skillNode.classList.add('has-children');
             const nodeHeader = skillNode.querySelector('.skill-node-header');
 
@@ -308,7 +1207,8 @@ class SkillTreeEditor {
             nameDisplay.textContent = val || 'Nova Habilidade'; // Update display name
         });
         const descTextarea = this._createInput('textarea', skill.description, 'Descrição', (val) => skill.description = val);
-        const reqsInput = this._createInput('text', Object.entries(skill.requirements).map(([k, v]) => `${k}:${v}`).join(', '), 'Requisitos (ex: forca:5)', (val) => {
+        const reqsValue = skill.requirements ? Object.entries(skill.requirements).map(([k, v]) => `${k}:${v}`).join(', ') : '';
+        const reqsInput = this._createInput('text', reqsValue, 'Requisitos (ex: forca:5)', (val) => {
             const reqs = {};
             val.split(',').forEach(req => {
                 const [key, value] = req.split(':');
@@ -326,18 +1226,16 @@ class SkillTreeEditor {
         actionsContainer.className = 'skill-node-actions';
 
         const addChildBtn = this._createButton('+ Ramificação', 'add-child', () => {
-            if (!skill.children) skill.children = [];
+            if (!Array.isArray(skill.children)) skill.children = [];
             skill.children.push({ id: `new-skill-${Date.now()}`, name: 'Nova Ramificação', description: '', requirements: {}, children: [] });
             this.render();
-            this.saveSkillTrees();
         });
 
         const deleteBtn = this._createButton('Excluir', 'delete', () => {
-            const index = parentArray.findIndex(s => s.id === skill.id);
+            const index = parentArray.findIndex(s => s && s.id === skill.id);
             if (index > -1) {
                 parentArray.splice(index, 1);
                 this.render();
-                this.saveSkillTrees();
             }
         });
 
@@ -369,7 +1267,6 @@ class SkillTreeEditor {
         input.placeholder = placeholder;
         input.addEventListener('change', (e) => {
             onChange(e.target.value);
-            this.saveSkillTrees();
         });
         return input;
     }
@@ -423,6 +1320,7 @@ class CharacterCreator {
             id: `char_${Date.now()}`,
             class: '',
             element: '',
+            specialization: null,
             level: 1,
             xp: 0,
             attributePoints: 0,
@@ -915,6 +1813,7 @@ class CharacterSheet {
 
                 // Garante que todas as propriedades essenciais existam
                 if (typeof this.character.level === 'undefined') { this.character.level = 1; needsSave = true; }
+                if (typeof this.character.specialization === 'undefined') { this.character.specialization = null; needsSave = true; }
                 if (typeof this.character.xp === 'undefined') { this.character.xp = 0; needsSave = true; }
                 if (typeof this.character.attributePoints === 'undefined') { this.character.attributePoints = 0; needsSave = true; }
                 if (typeof this.character.skillPoints === 'undefined') { this.character.skillPoints = 0; needsSave = true; }
@@ -977,7 +1876,11 @@ class CharacterSheet {
         }
         header.querySelector('h2').textContent = personalization.name || 'Agente Sem Nome';
         header.querySelector('#sheet-char-element').textContent = `Elemento: ${this.character.element || 'Nenhum'}`;
-        header.querySelector('#sheet-char-class-player').textContent = `${this.character.class || 'Classe'} | Jogador: ${personalization.player || 'N/A'}`;
+        
+        let classDisplay = this.character.class || 'Classe';
+        if (this.character.specialization) classDisplay += ` (${this.character.specialization})`;
+        header.querySelector('#sheet-char-class-player').textContent = `${classDisplay} | Jogador: ${personalization.player || 'N/A'}`;
+
         document.title = `${personalization.name || 'Agente'} | Ficha de Agente`;
 
         document.getElementById('sheet-level').textContent = level;
@@ -1171,13 +2074,59 @@ class CharacterSheet {
         const xpToNextLevel = this.character.level * 100;
         if (this.character.xp >= xpToNextLevel) {
             this.character.level++;
-            this.character.xp -= xpToNextLevel;
+            this.character.xp -= xpToNextLevel; // Deduz o XP usado para upar
             this.character.attributePoints += 2;
             this.character.skillPoints += 1;
             document.getElementById('level-up-btn').style.display = 'none';
+
             this.saveCharacterChanges();
             this.renderSheet();
         }
+    }
+
+    showSpecializationChoice() {
+        const modalOverlay = document.getElementById('specialization-choice-overlay');
+        const optionsContainer = document.getElementById('specialization-options-container');
+        if (!modalOverlay || !optionsContainer) return;
+
+        optionsContainer.innerHTML = ''; // Limpa opções anteriores
+
+        const availableSpecs = SPECIALIZATIONS[this.character.class];
+        if (!availableSpecs) return;
+
+        availableSpecs.forEach(spec => {
+            const card = document.createElement('div');
+            card.className = 'specialization-card';
+            card.innerHTML = `<h3>${spec.name}</h3><p>${spec.description}</p>`;
+            card.addEventListener('click', () => this.selectSpecialization(spec.name));
+            optionsContainer.appendChild(card);
+        });
+
+        modalOverlay.classList.add('visible');
+    }
+
+    selectSpecialization(specName) {
+        if (confirm(`Tem certeza que deseja escolher a especialização "${specName}"? Esta escolha é permanente e custará 1 Ponto de Habilidade.`)) {
+            if (this.character.skillPoints < 1) {
+                alert("Ação cancelada. Você não tem mais Pontos de Habilidade suficientes.");
+                return;
+            }
+            this.character.skillPoints--;
+            this.character.specialization = specName;
+            document.getElementById('specialization-choice-overlay').classList.remove('visible');
+            this.saveCharacterChanges();
+            this.renderSheet();
+            this.renderSkillTree();
+        }
+    }
+
+    handleSpecializationChoice() {
+        if (this.character.skillPoints < 1) {
+            alert("Você não tem Pontos de Habilidade suficientes.");
+            return;
+        }
+        // Se tiver pontos, mostra o modal. O ponto será deduzido na confirmação.
+        this.showSpecializationChoice();
     }
 
     rollDice(sides, count, bonus, label) {
@@ -1226,15 +2175,40 @@ class CharacterSheet {
         classContainer.innerHTML = '';
         attributeContainer.innerHTML = '';
 
-        const classTree = SKILL_TREES[this.character.class] ? SKILL_TREES[this.character.class][this.character.element] || [] : [];
-        const attributeTree = SKILL_TREES['Atributo'];
+        const specialization = this.character.specialization;
+        const charClass = this.character.class;
+        const charElement = this.character.element;
 
-        if (classTree.length === 0) {
-            classContainer.innerHTML = '<p class="empty-skill-tree">Nenhuma árvore de habilidades de classe disponível.</p>';
+        if (specialization) {
+            // Personagem já tem especialização, renderiza a árvore ou uma mensagem se estiver vazia.
+            const classTree = (SKILL_TREES[charClass]?.[charElement]?.[specialization]) || [];
+            if (classTree.length > 0) {
+                classTree.forEach(skill => {
+                    this._renderSkillNodeRecursive(skill, classContainer, null);
+                });
+            } else {
+                classContainer.innerHTML = `<p class="empty-skill-tree">Nenhuma habilidade definida para a especialização "${specialization}" ainda.</p>`;
+            }
         } else {
-            classTree.forEach(skill => {
-                this._renderSkillNodeRecursive(skill, classContainer, null);
-            });
+            // Personagem ainda não tem especialização. Mostra mensagem e botão se for elegível.
+            let message = '';
+            let contentHTML = '';
+            if (this.character.level < 5) {
+                message = 'As habilidades de classe estarão disponíveis ao atingir o nível 5 e escolher uma especialização.';
+                contentHTML = `<p class="empty-skill-tree">${message}</p>`;
+            } else { // Nível 5 ou maior
+                message = 'Você atingiu o nível necessário para se especializar. Esta escolha definirá suas futuras habilidades de classe e custará 1 Ponto de Habilidade.';
+                const buttonHTML = this.character.skillPoints > 0
+                    ? `<button id="choose-spec-btn" class="wizard-btn">Escolher Especialização</button>`
+                    : `<p class="info-text">Você precisa de pelo menos 1 Ponto de Habilidade para escolher uma especialização.</p>`;
+                contentHTML = `<p class="empty-skill-tree">${message}</p><div style="text-align:center; margin-top: 1rem;">${buttonHTML}</div>`;
+            }
+            classContainer.innerHTML = contentHTML;
+
+            const chooseSpecBtn = classContainer.querySelector('#choose-spec-btn');
+            if (chooseSpecBtn) {
+                chooseSpecBtn.addEventListener('click', () => this.handleSpecializationChoice());
+            }
         }
 
         for (const attribute in attributeTree) {
@@ -1623,6 +2597,20 @@ function initializeCampaignManagement() {
             }, 3500); // 3.5 segundos de "geração"
         });
     }
+
+    // Configura a lógica das abas (tabs)
+    const tabLinks = document.querySelectorAll('.tab-link');
+    const tabContents = documentquerySelectorAll('.tab-content');
+    if (tabLinks.length > 0 && tabContents.length > 0) {
+        tabLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                const tabId = link.dataset.tab;
+                tabLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                tabContents.forEach(c => c.id === tabId ? c.classList.add('active') : c.classList.remove('active'));
+            });
+        });
+    }
 }
 
 // =================================================================================
@@ -1699,7 +2687,13 @@ async function checkAuthStatus() {
         }
     }
     
-    header.appendChild(authContainer);
+    // Anexa o container de autenticação à navegação para funcionar bem no mobile
+    const nav = header.querySelector('#primary-navigation');
+    if (nav) {
+        nav.appendChild(authContainer);
+    } else {
+        header.appendChild(authContainer);
+    }
 }
 
 // Função para carregar o header dinamicamente
@@ -1743,6 +2737,7 @@ function checkAndApplyDevMode() {
 // Inicialização do Script quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', async () => {
     await loadHeader();
+
     checkAndApplyDevMode(); // Verifica o modo dev logo no início
     updateActiveLinks();
     checkAuthStatus();
@@ -1767,7 +2762,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (path.includes('elemento-lore.html')) {
         new ElementLorePage();
     }
-    if (path.includes('dev-dashboard.html')) {
+    // O editor de habilidades agora é carregado na página 'patente.html' quando o dev mode está ativo.
+    const isDevMode = document.body.classList.contains('dev-mode');
+    if ((path.includes('patente.html') || path.includes('dev-dashboard.html')) && isDevMode) {
         new SkillTreeEditor();
     }
 
@@ -1778,10 +2775,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             const input = document.getElementById('dev-mode-input');
             if (input.value === '503038.123') {
                 localStorage.setItem('devMode', 'true');
-                alert('Modo Desenvolvedor Ativado! As funcionalidades pagas foram liberadas. A página será recarregada.');
+                alert('Modo Desenvolvedor Ativado! As ferramentas de edição de habilidades foram liberadas nesta página. A página será recarregada.');
                 window.location.reload();
             } else {
                 alert('Código de acesso incorreto.');
+            }
+        });
+    }
+
+    const deactivateDevBtn = document.getElementById('deactivate-dev-mode');
+    if (deactivateDevBtn) {
+        deactivateDevBtn.addEventListener('click', () => {
+            if (confirm('Deseja realmente sair do Modo Desenvolvedor?')) {
+                localStorage.removeItem('devMode');
+                alert('Modo Desenvolvedor Desativado. A página será recarregada.');
+                window.location.reload();
             }
         });
     }

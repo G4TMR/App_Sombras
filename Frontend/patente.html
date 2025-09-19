@@ -96,6 +96,24 @@
                     </form>
                 </div>
             </section>
+
+            <!-- Seção de Ferramentas do Desenvolvedor (visível apenas em dev mode) -->
+            <section id="dev-tools-section" class="content-section">
+                <div class="content-box">
+                    <h2>Editor de Habilidades de Classe</h2>
+                    <p class="info-text">Edite as árvores de habilidades para as classes Bélico, Esotérico e Erudito.</p>
+                    <div id="skill-tree-editor" class="skill-tree-editor"></div>
+                </div>
+                <div class="content-box" style="margin-top: 2rem;">
+                    <h2>Editor de Habilidades de Atributo</h2>
+                    <p class="info-text">Edite as árvores de habilidades comuns a todos, baseadas em atributos.</p>
+                    <div id="attribute-skill-tree-editor" class="skill-tree-editor"></div>
+                </div>
+                <div class="dev-tools-actions">
+                    <button id="save-skill-tree-changes" class="wizard-btn">Aceitar Mudanças</button>
+                    <button id="deactivate-dev-mode" class="wizard-btn danger-btn">Sair do Modo Dev</button>
+                </div>
+            </section>
         </div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
