@@ -26,6 +26,14 @@
                         <label for="campaign-synopsis">Sinopse</label>
                         <textarea id="campaign-synopsis" name="synopsis" placeholder="Descreva a premissa principal, os mistérios e o tom da sua campanha."></textarea>
                     </div>
+                    <div class="form-group image-upload-group">
+                        <label for="campaign-image-input">Imagem de Capa</label>
+                        <div class="image-preview-container">
+                            <img id="campaign-image-preview" src="https://via.placeholder.com/300x180" alt="Pré-visualização da capa">
+                            <input type="file" id="campaign-image-input" name="imageFile" accept="image/*" style="display: none;">
+                            <button type="button" class="wizard-btn" onclick="document.getElementById('campaign-image-input').click()">Escolher Imagem</button>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <button type="button" class="wizard-btn" onclick="alert('Funcionalidade em desenvolvimento!')">Adicionar Jogadores</button>
                     </div>
@@ -111,12 +119,30 @@
 
             // Lógica para salvar a campanha
             const campaignForm = document.getElementById('create-campaign-form');
+            const imageInput = document.getElementById('campaign-image-input');
+            const imagePreview = document.getElementById('campaign-image-preview');
+
+            imageInput.addEventListener('change', () => {
+                const file = imageInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => { imagePreview.src = e.target.result; };
+                    reader.readAsDataURL(file);
+                }
+            });
+
             if (campaignForm) {
-                campaignForm.addEventListener('submit', (event) => {
+                campaignForm.addEventListener('submit', async (event) => {
                     event.preventDefault();
 
                     const title = document.getElementById('campaign-title').value.trim();
                     const synopsis = document.getElementById('campaign-synopsis').value.trim();
+                    const imageFile = imageInput.files[0];
+
+                    let imageUrl = '';
+                    if (imageFile) {
+                        imageUrl = await readFileAsDataURL(imageFile);
+                    }
 
                     if (!title) {
                         alert('Por favor, dê um título para a sua campanha.');
@@ -128,6 +154,7 @@
                         id: `camp_${Date.now()}`,
                         title: title,
                         synopsis: synopsis,
+                        imageUrl: imageUrl,
                         createdAt: new Date().toISOString()
                     };
                     saveCampaign(newCampaign);

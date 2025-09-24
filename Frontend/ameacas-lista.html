@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Ameaças | Sombras do Abismo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="ameacas">
+    <div class="background-overlay"></div>
+    <div id="header-placeholder"></div>
+
+    <main class="main-content">
+        <div class="content-box">
+            <h2 id="threat-list-title">Carregando...</h2>
+            <a href="ameacas.html" class="back-to-threats-btn">&larr; Voltar para Categorias</a>
+            <div id="threat-list-container" class="threat-list-grid">
+                <!-- As ameaças serão inseridas aqui pelo script.js -->
+                <p class="loading-message">Carregando ameaças...</p>
+            </div>
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

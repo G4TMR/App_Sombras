@@ -1503,11 +1503,27 @@ class CharacterCreator {
         const form = this.elements.personalizationForm;
         if (!form) return;
 
-        form.addEventListener('input', (e) => {
+        // Lida com campos de texto
+        form.addEventListener('input', debounce((e) => {
+            if (e.target.type === 'file') return; // Ignora o input de arquivo aqui
             const formData = new FormData(form);
-            this.currentCharacter.personalization = Object.fromEntries(formData.entries());
+            // Filtra para não incluir o campo de arquivo no objeto
+            const formEntries = Object.fromEntries(formData.entries());
+            delete formEntries.imageFile;
+            this.currentCharacter.personalization = { ...this.currentCharacter.personalization, ...formEntries };
             this.updateCharacterSummary();
             this.saveFormData();
+        }, 300));
+
+        // Lida com o campo de imagem
+        const imageInput = document.getElementById('char-image-input');
+        const imagePreview = document.getElementById('char-image-preview');
+        imageInput.addEventListener('change', async () => {
+            const file = imageInput.files[0];
+            if (file) {
+                this.currentCharacter.personalization.imageUrl = await readFileAsDataURL(file);
+                imagePreview.src = this.currentCharacter.personalization.imageUrl;
+            }
         });
     }
 
@@ -1522,8 +1538,9 @@ class CharacterCreator {
 
         navSteps.forEach(nav => {
             nav.addEventListener('click', () => {
-                const stepMatch = nav.id.match(/nav-step-(\d+)/);
-                if (stepMatch && stepMatch[1]) {
+                // Regex corrigido para pegar o segundo número, que representa a etapa de destino
+                const stepMatch = nav.id.match(/nav-step-\d+-(\d+)/);
+                if (stepMatch && stepMatch[1]) { 
                     const step = parseInt(stepMatch[1]);
                     this.navigateToStep(step);
                 }
@@ -1569,6 +1586,11 @@ class CharacterCreator {
                     if (input) {
                         input.value = this.currentCharacter.personalization[key];
                     }
+                }
+                // Restaura a pré-visualização da imagem
+                if (this.currentCharacter.personalization.imageUrl) {
+                    const imagePreview = document.getElementById('char-image-preview');
+                    if (imagePreview) imagePreview.src = this.currentCharacter.personalization.imageUrl;
                 }
             }
             this.updateAttributeUI();
@@ -1695,15 +1717,19 @@ class CharacterDisplay {
         const p = character.personalization || {};
         const attrs = character.attributes || { forca: '?', agilidade: '?', presenca: '?', vitalidade: '?', inteligencia: '?' };
         const creationDate = character.createdAt ? new Date(character.createdAt).toLocaleDateString('pt-BR') : 'Data inválida';
-        const elementClass = character.element ? character.element.toLowerCase() : '';
 
         card.dataset.id = character.id;
 
+        const imageHtml = p.imageUrl 
+            ? `<img src="${p.imageUrl}" alt="Retrato de ${p.name}" class="character-card-image">`
+            : '';
+
        card.innerHTML = `
+            ${imageHtml}
             <div class="character-header">
                 <h3>${p.name || 'Agente Sem Nome'}</h3>
                 <span class="character-class">${character.class || 'Classe Desconhecida'}</span>
-                <span class="character-element ${elementClass}">${character.element || ''}</span>
+                <span class="character-element">${character.element || ''}</span>
             </div>
             <div class="character-info">
                 <p><strong>Profissão:</strong> ${p.profession || 'Não informado'}</p> 
@@ -2211,6 +2237,7 @@ class CharacterSheet {
             }
         }
 
+        const attributeTree = SKILL_TREES.Atributo || {};
         for (const attribute in attributeTree) {
             const attributeSubContainer = document.createElement('div');
             attributeSubContainer.className = 'skill-tree-sub-category';
@@ -2379,6 +2406,84 @@ class ElementLorePage {
 }
 
 // =================================================================================
+// CLASSE: ThreatListPage - Gerencia a página de listagem de ameaças
+// =================================================================================
+class ThreatListPage {
+    constructor() {
+        this.params = new URLSearchParams(window.location.search);
+        this.category = this.params.get('categoria');
+        this.element = this.params.get('elemento');
+        this.container = document.getElementById('threat-list-container');
+        this.titleElement = document.getElementById('threat-list-title');
+
+        // Dados de exemplo. No futuro, isso viria de uma API.
+        this.allThreats = {
+            entidades_menores: [
+                { name: 'Sombra Sussurrante', description: 'Uma entidade que se alimenta de segredos e medos, manifestando-se através de sussurros no escuro.', level: 'Alto', levelClass: 'danger', element: 'Temporal' },
+                { name: 'Poltergeist Ruidoso', description: 'Espírito travesso que move objetos e causa desordem para atrair atenção.', level: 'Baixo', levelClass: 'medium', element: 'Vital' },
+            ],
+            aberracoes: [
+                { name: 'Espelho Fragmentado', description: 'Reflexos distorcidos que ganham vida própria, capazes de trocar de lugar com suas vítimas.', level: 'Médio', levelClass: 'medium', element: 'Visceral' },
+                { name: 'Carne Rastejante', description: 'Uma massa amorfa de tecido orgânico que absorve matéria para crescer.', level: 'Alto', levelClass: 'danger', element: 'Visceral' },
+            ],
+            horrores_ancestrais: [
+                { name: 'Colecionador de Memórias', description: 'Criatura que rouba lembranças preciosas, deixando apenas vazios dolorosos em suas vítimas.', level: 'Extremo', levelClass: 'high', element: 'Cerebral' },
+                { name: 'O Geômetra Cego', description: 'Uma entidade de outra dimensão que reescreve a realidade local com geometria impossível.', level: 'Extremo', levelClass: 'high', element: 'Cerebral' },
+            ]
+        };
+
+        this.render();
+    }
+
+    render() {
+        if ((!this.category || !this.allThreats[this.category]) && !this.element) {
+            this.titleElement.textContent = 'Categoria não encontrada';
+            this.container.innerHTML = '<p class="loading-message">A categoria de ameaças que você procurou não existe.</p>';
+            return;
+        }
+
+        const categoryTitle = this.element ? `Ameaças do Elemento ${this.element}` : this.category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        this.titleElement.textContent = categoryTitle;
+        document.title = `${categoryTitle} | Sombras do Abismo`;
+
+        let threats = [];
+        if (this.category) {
+            threats = this.allThreats[this.category] || [];
+        } else if (this.element) {
+            // Filtra todas as ameaças de todas as categorias pelo elemento
+            Object.values(this.allThreats).forEach(categoryList => {
+                threats.push(...categoryList.filter(threat => threat.element === this.element));
+            });
+        }
+
+        this.container.innerHTML = ''; // Limpa a mensagem de "carregando"
+
+        if (threats.length === 0) {
+            this.container.innerHTML = '<p class="loading-message">Nenhuma ameaça encontrada nesta categoria.</p>';
+            return;
+        }
+
+        threats.forEach(threat => {
+            const card = this.createThreatCard(threat);
+            this.container.appendChild(card);
+        });
+    }
+
+    createThreatCard(threat) {
+        const card = document.createElement('div');
+        card.className = 'threat-item'; // Reutiliza o estilo de item de ameaça
+
+        card.innerHTML = `
+            <h4>${threat.name}</h4>
+            <p>${threat.description}</p>
+            <span class="threat-level ${threat.levelClass}">Nível: ${threat.level}</span>
+        `;
+
+        return card;
+    }
+}
+
+// =================================================================================
 // FUNÇÕES DE GERENCIAMENTO DE CAMPANHA
 // =================================================================================
 
@@ -2491,8 +2596,13 @@ function displayCampaigns() {
             const card = document.createElement('div');
             card.className = 'campaign-card';
             const synopsisSnippet = campaign.synopsis ? campaign.synopsis.substring(0, 150) + (campaign.synopsis.length > 150 ? '...' : '') : 'Nenhuma sinopse fornecida.';
+            
+            const imageHtml = campaign.imageUrl
+                ? `<img src="${campaign.imageUrl}" alt="Capa da campanha ${campaign.title}" class="campaign-card-image">`
+                : '';
 
             card.innerHTML = `
+                ${imageHtml}
                 <h3>${campaign.title}</h3>
                 <p>${synopsisSnippet}</p>
                 <div class="campaign-card-footer">
@@ -2527,33 +2637,73 @@ function initializeCampaignManagement() {
         return;
     }
 
-    const titleInput = document.getElementById('campaign-title');
-    const synopsisTextarea = document.getElementById('campaign-synopsis');
+    // Elementos de exibição
+    const titleDisplay = document.getElementById('campaign-title-display');
+    const synopsisDisplay = document.getElementById('campaign-synopsis-display');
+    const coverImageDisplay = document.getElementById('campaign-cover-image-display');
+
+    // Elementos do modal
+    const modalOverlay = document.getElementById('edit-campaign-modal-overlay');
+    const titleModalInput = document.getElementById('campaign-title-modal');
+    const synopsisModalTextarea = document.getElementById('campaign-synopsis-modal');
+    const imageModalInput = document.getElementById('campaign-image-modal');
+    const imageModalPreview = document.getElementById('campaign-image-modal-preview');
 
     // Preenche os campos do formulário
-    titleInput.value = campaign.title;
-    synopsisTextarea.value = campaign.synopsis;
+    titleDisplay.textContent = campaign.title;
+    synopsisDisplay.textContent = campaign.synopsis || 'Nenhuma sinopse fornecida.';
+    if (campaign.imageUrl) {
+        coverImageDisplay.style.backgroundImage = `url('${campaign.imageUrl}')`;
+    }
+    
+    // Lida com a mudança de imagem no modal
+    const imageFileInput = document.getElementById('campaign-image-modal-input');
+    imageFileInput.addEventListener('change', () => {
+        const file = imageFileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => { imageModalPreview.src = e.target.result; };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Abrir o modal
+    document.getElementById('edit-campaign-info-btn').addEventListener('click', () => {
+        titleModalInput.value = campaign.title;
+        synopsisModalTextarea.value = campaign.synopsis;
+        imageModalPreview.src = campaign.imageUrl || 'https://via.placeholder.com/300x180';
+        imageFileInput.value = ''; // Limpa o seletor de arquivo
+        modalOverlay.classList.add('visible');
+    });
+
+    // Fechar o modal
+    document.getElementById('cancel-edit-btn').addEventListener('click', () => {
+        modalOverlay.classList.remove('visible');
+    });
 
     // Função que lida com a atualização
-    const handleUpdate = () => {
-        const title = titleInput.value.trim();
-        const synopsis = synopsisTextarea.value.trim();
+    document.getElementById('save-edit-btn').addEventListener('click', async () => {
+        const title = titleModalInput.value.trim();
+        const synopsis = synopsisModalTextarea.value.trim();
+        const imageFile = imageFileInput.files[0];
+
+        let imageUrl = campaign.imageUrl; // Mantém a imagem antiga por padrão
+        if (imageFile) {
+            imageUrl = await readFileAsDataURL(imageFile); // Se uma nova foi escolhida, converte
+        }
 
         if (!title) {
-            // Não salva se o título estiver vazio, mas não alerta para não atrapalhar
+            alert('O título da campanha não pode ficar vazio.');
             return;
         }
 
-        const updatedCampaignData = { id: campaign.id, title, synopsis };
-        updateCampaign(updatedCampaignData, true); // Passa true para mostrar o indicador "Salvo!"
-    };
-
-    // Debounce para salvar em tempo real sem sobrecarregar
-    const debouncedUpdate = debounce(handleUpdate, 750);
-
-    // Adiciona os listeners de input
-    titleInput.addEventListener('input', debouncedUpdate);
-    synopsisTextarea.addEventListener('input', debouncedUpdate);
+        const updatedCampaignData = { id: campaign.id, title, synopsis, imageUrl };
+        updateCampaign(updatedCampaignData, true);
+        
+        // Atualiza a UI e fecha o modal
+        initializeCampaignManagement(); // Recarrega os dados na tela
+        modalOverlay.classList.remove('visible');
+    });
 
     // Configura o botão de exclusão
     const deleteBtn = document.getElementById('delete-campaign-btn');
@@ -2630,6 +2780,20 @@ function debounce(func, delay) {
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(context, args), delay);
     };
+}
+
+/**
+ * Lê um arquivo de imagem e retorna uma Data URL (base64).
+ * @param {File} file - O arquivo de imagem a ser lido.
+ * @returns {Promise<string>} Uma promessa que resolve com a Data URL da imagem.
+ */
+function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
+    });
 }
 
 // Função para marcar o link de navegação ativo
@@ -2762,9 +2926,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (path.includes('elemento-lore.html')) {
         new ElementLorePage();
     }
+    if (path.includes('ameacas-lista.html')) {
+        new ThreatListPage();
+    }
     // O editor de habilidades agora é carregado na página 'patente.html' quando o dev mode está ativo.
     const isDevMode = document.body.classList.contains('dev-mode');
-    if ((path.includes('patente.html') || path.includes('dev-dashboard.html')) && isDevMode) {
+    if (path.includes('dev-dashboard.html') || (path.includes('patente.html') && isDevMode)) {
         new SkillTreeEditor();
     }
 

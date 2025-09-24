@@ -181,6 +181,14 @@
                                     <input type="text" id="char-profession" name="profession" placeholder="Ex: Detetive Particular">
                                 </div>
                             </div>
+                            <div class="form-group image-upload-group">
+                                <label for="char-image-input">Imagem de Retrato</label>
+                                <div class="image-preview-container">
+                                    <img id="char-image-preview" src="https://via.placeholder.com/150" alt="Pré-visualização do retrato">
+                                    <input type="file" id="char-image-input" name="imageFile" accept="image/*" style="display: none;">
+                                    <button type="button" class="wizard-btn" onclick="document.getElementById('char-image-input').click()">Escolher Imagem</button>
+                                </div>
+                            </div>
                         </div>
     
                         <div class="form-section">
