@@ -1365,6 +1365,8 @@ class CharacterCreator {
             }
         };
 
+        this.creationMode = new URLSearchParams(window.location.search).get('mode') || 'online';
+
         this.initialize();
     }
 
@@ -1376,8 +1378,23 @@ class CharacterCreator {
         this.setupAttributeDistribution();
         this.setupPersonalizationForm();
         this.setupWizardButtons();
+        this.displayLocalModeWarning();
         this.restoreFormData();
         this.updateCharacterSummary();
+    }
+
+    displayLocalModeWarning() {
+        if (this.creationMode !== 'local') return;
+
+        const placeholder = document.getElementById('local-mode-warning-placeholder');
+        if (placeholder) {
+            placeholder.innerHTML = `
+                <div class="content-box" style="background-color: rgba(255, 193, 7, 0.1); border-color: #ffc107; text-align: center; margin-bottom: 2rem;">
+                    <h3 style="color: #ffc107; font-family: var(--font-display); font-size: 1.8rem; margin-top: 0;">⚠️ MODO DE TESTE ATIVADO ⚠️</h3>
+                    <p style="color: #f0f0f0; margin-bottom: 0;">Você está criando um agente de teste. Esta ficha será salva <strong>apenas no seu navegador</strong> e será perdida se você limpar os dados do site.</p>
+                </div>
+            `;
+        }
     }
 
     navigateToStep(stepNumber) {
@@ -1601,10 +1618,33 @@ class CharacterCreator {
         sessionStorage.removeItem('character-in-progress'); 
     }
 
+    async saveCharacterLocally() {
+        try {
+            let localCharacters = JSON.parse(localStorage.getItem('sombras-local-characters')) || [];
+            // Garante que não haja IDs duplicados
+            localCharacters = localCharacters.filter(char => char.id !== this.currentCharacter.id);
+            localCharacters.unshift(this.currentCharacter); // Adiciona no início
+            localStorage.setItem('sombras-local-characters', JSON.stringify(localCharacters));
+            
+            this.clearFormData();
+            window.location.href = 'agentes.html';
+
+        } catch (error) {
+            console.error('Erro ao salvar personagem localmente:', error);
+            alert('Ocorreu um erro ao salvar a ficha de teste. Verifique o console.');
+        }
+    }
+
     async saveCharacter() {
         const { name, player } = this.currentCharacter.personalization;
         if (!name || !player) {
             alert('Por favor, preencha os campos obrigatórios (Nome do Agente e Nome do Jogador) para finalizar.');
+            return;
+        }
+
+        // Se estiver em modo local, usa a função de salvamento local
+        if (this.creationMode === 'local') {
+            this.saveCharacterLocally();
             return;
         }
 
@@ -1657,57 +1697,73 @@ class CharacterCreator {
 // =================================================================================
 class CharacterDisplay {
     constructor() {
-        this.container = document.querySelector('.agentes-content');
-        this.loadCharacters();
+        this.onlineContainer = document.getElementById('online-agents-content');
+        this.localContainer = document.getElementById('local-agents-content');
+        this.loadOnlineCharacters();
+        this.loadLocalCharacters();
     }
 
-    async loadCharacters() {
+    async loadOnlineCharacters() {
+        if (!this.onlineContainer) return;
         try {
             // Usando Axios para buscar os personagens do usuário logado
             const response = await api.get('/characters');
-            this.renderCharacters(response.data);
+            this.renderCharacters(response.data, this.onlineContainer, 'online');
         } catch (error) {
             if (error.response) {
                 // O servidor respondeu com um status de erro
                 console.error('Falha ao carregar personagens. O usuário pode não estar logado.');
                 if (error.response.status === 401) {
                     // Se não estiver autorizado, mostra a mensagem de login
-                    this.container.innerHTML = `<div class="empty-state"><p class="empty-message">Você precisa estar logado para ver seus agentes.</p><a href="${API_BASE_URL}/auth/google" class="create-character-btn">Login com Google</a></div>`;
+                    this.onlineContainer.innerHTML = `<div class="empty-state" style="padding: 2rem 0;"><p class="empty-message">Você precisa estar logado para ver seus agentes online.</p><a href="${API_BASE_URL}/auth/google" class="create-character-btn">Fazer Login com Google</a></div>`;
                 }
             } else {
                 // Erro de rede
                 console.error('Erro de rede ao carregar personagens:', error.message);
-                this.container.innerHTML = `<div class="empty-state"><p class="empty-message">Erro de conexão com o servidor.</p><p class="empty-submessage">Verifique se o backend está rodando e tente novamente.</p></div>`;
+                this.onlineContainer.innerHTML = `<div class="empty-state" style="padding: 2rem 0;"><p class="empty-message">Erro de conexão com o servidor.</p><p class="empty-submessage">Verifique se o backend está rodando e tente novamente.</p></div>`;
             }
         }
     }
 
-    renderCharacters(characters) {
-        if (!this.container) return;
+    loadLocalCharacters() {
+        if (!this.localContainer) return;
+        try {
+            const localCharacters = JSON.parse(localStorage.getItem('sombras-local-characters')) || [];
+            this.renderCharacters(localCharacters, this.localContainer, 'local');
+        } catch (error) {
+            console.error('Erro ao carregar personagens locais:', error);
+            this.localContainer.innerHTML = `<p>Ocorreu um erro ao ler os agentes de teste.</p>`;
+        }
+    }
 
-        const emptyMessage = this.container.querySelector('.empty-message');
+    renderCharacters(characters, container, mode) {
+        if (!container) return;
+
+        container.innerHTML = ''; // Limpa o container
+
         if (characters.length === 0) {
-            if (emptyMessage) emptyMessage.style.display = 'block';
+            const message = mode === 'online' 
+                ? 'Nenhum agente online criado ainda.'
+                : 'Nenhum agente de teste criado. Crie um para vê-lo aqui!';
+            container.innerHTML = `<p class="empty-message" style="text-align: center; padding: 2rem 0;">${message}</p>`;
             return;
         }
 
-        if (emptyMessage) emptyMessage.style.display = 'none';
-
-        let grid = this.container.querySelector('.characters-grid');
+        let grid = container.querySelector('.characters-grid');
         if (!grid) {
             grid = document.createElement('div');
             grid.className = 'characters-grid';
-            this.container.appendChild(grid);
+            container.appendChild(grid);
         }
         grid.innerHTML = '';
 
         characters.forEach(char => {
-            const card = this.createCharacterCard(char);
+            const card = this.createCharacterCard(char, mode);
             grid.appendChild(card);
         });
     }
 
-    createCharacterCard(character) {
+    createCharacterCard(character, mode = 'online') {
         const card = document.createElement('div');
         card.className = 'character-card';
         if (character.element) {
@@ -1719,6 +1775,7 @@ class CharacterDisplay {
         const creationDate = character.createdAt ? new Date(character.createdAt).toLocaleDateString('pt-BR') : 'Data inválida';
 
         card.dataset.id = character.id;
+        card.dataset.mode = mode;
 
         const imageHtml = p.imageUrl 
             ? `<img src="${p.imageUrl}" alt="Retrato de ${p.name}" class="character-card-image">`
@@ -1765,19 +1822,32 @@ class CharacterDisplay {
             </div>
         `;
 
-        card.querySelector('.view-btn').addEventListener('click', () => window.location.href = `ficha-agente.html?id=${character.id}`);
-        card.querySelector('.delete-btn').addEventListener('click', () => this.deleteCharacter(character.id));
+        const viewUrl = mode === 'local' 
+            ? `ficha-agente.html?id=${character.id}&mode=local`
+            : `ficha-agente.html?id=${character.id}`;
+
+        card.querySelector('.view-btn').addEventListener('click', () => window.location.href = viewUrl);
+        card.querySelector('.delete-btn').addEventListener('click', () => this.deleteCharacter(character.id, mode));
 
         return card;
     }
 
-    async deleteCharacter(characterId) {
+    async deleteCharacter(characterId, mode) {
         if (confirm('Tem certeza que deseja excluir este agente? Esta ação não pode ser desfeita.')) {
+            if (mode === 'local') {
+                let localCharacters = JSON.parse(localStorage.getItem('sombras-local-characters')) || [];
+                localCharacters = localCharacters.filter(char => char.id !== characterId);
+                localStorage.setItem('sombras-local-characters', JSON.stringify(localCharacters));
+                this.loadLocalCharacters(); // Recarrega apenas a lista local
+                return;
+            }
+
+            // Lógica para deletar online
             try {
                 // Usando Axios para deletar o personagem
                 await api.delete(`/characters/${characterId}`);
-                // Recarrega a lista de personagens para refletir a exclusão
-                this.loadCharacters();
+                // Recarrega a lista de personagens online para refletir a exclusão
+                this.loadOnlineCharacters();
             } catch (error) {
                 if (error.response) {
                     alert(`Erro ao excluir personagem: ${error.response.data.message || 'Tente novamente.'}`);
@@ -1805,31 +1875,42 @@ class CharacterSheet {
     async initialize() {
         await this.loadCharacter();
         this.renderSheet();
-        this.setupEventListeners();
-        this.renderSkillTree();
-        this.checkLevelUp();
+        if (this.character) {
+            this.setupEventListeners();
+            this.renderSkillTree();
+            this.checkSpecialization(); // Verifica se a escolha de especialização deve ser mostrada
+            this.renderProficiencies();
+            this.checkLevelUp();
+        }
     }
 
     async loadCharacter() {
         const params = new URLSearchParams(window.location.search);
         const charId = params.get('id');
-        if (!charId) {
-            document.getElementById('character-not-found').style.display = 'block';
-            return;
-        }
-        
+        const mode = params.get('mode');
+
         try {
-            // Usando Axios para buscar um personagem específico pelo ID
-            const response = await api.get(`/characters/${charId}`);
-            this.character = response.data;
+            if (mode === 'local') {
+                // Carrega do localStorage para modo de teste
+                const localCharacters = JSON.parse(localStorage.getItem('sombras-local-characters')) || [];
+                this.character = localCharacters.find(char => char.id === charId) || null;
+            } else if (charId) {
+                // Carrega da API para modo online
+                const response = await api.get(`/characters/${charId}`);
+                this.character = response.data;
+            } else {
+                // Nenhum ID e não é modo local, então não há o que carregar.
+                this.character = null;
+            }
         } catch (error) {
             console.error('Erro ao carregar a ficha do personagem:', error);
             this.character = null; // Garante que o personagem é nulo em caso de erro
-            if (error.response && error.response.status === 401) {
-                alert('Sua sessão expirou. Por favor, faça login novamente.');
+            if (error.response && (error.response.status === 401 || error.response.status === 404)) {
+                alert('Sua sessão expirou ou você não tem permissão para ver esta ficha. Por favor, faça login novamente.');
                 window.location.href = 'agentes.html';
             }
         } finally {
+            // Este bloco agora executa para AMBOS os modos (local e online)
             if (!this.character) {
                 document.getElementById('character-not-found').style.display = 'block';
             } else {
@@ -1841,12 +1922,18 @@ class CharacterSheet {
                 if (typeof this.character.level === 'undefined') { this.character.level = 1; needsSave = true; }
                 if (typeof this.character.specialization === 'undefined') { this.character.specialization = null; needsSave = true; }
                 if (typeof this.character.xp === 'undefined') { this.character.xp = 0; needsSave = true; }
+                if (typeof this.character.nf === 'undefined') { this.character.nf = 0; needsSave = true; }
                 if (typeof this.character.attributePoints === 'undefined') { this.character.attributePoints = 0; needsSave = true; }
                 if (typeof this.character.skillPoints === 'undefined') { this.character.skillPoints = 0; needsSave = true; }
                 if (!this.character.skills) { this.character.skills = []; needsSave = true; }
                 if (!this.character.inventario) { this.character.inventario = []; needsSave = true; }
                 if (!this.character.personalization) { this.character.personalization = {}; needsSave = true; }
                 
+                // Garante que os atributos base da classe estão salvos no personagem
+                if (!this.character.baseAttributes) {
+                    this.character.baseAttributes = CLASS_BASE_ATTRIBUTES[this.character.class] || { forca: 1, agilidade: 1, presenca: 1, vitalidade: 1, inteligencia: 1 };
+                    needsSave = true;
+                }
                 // Migração de atributos mais robusta para garantir que todos existam.
                 const defaultAttributes = { forca: 1, agilidade: 1, presenca: 1, vitalidade: 1, inteligencia: 1 };
                 const currentAttributes = this.character.attributes || {};
@@ -1889,28 +1976,40 @@ class CharacterSheet {
 
         // Com a migração em loadCharacter, podemos confiar que a estrutura de dados principal está completa.
         const {
-            level, xp, attributePoints, skillPoints, attributes, classStats,
+            level, xp, nf, attributePoints, skillPoints, attributes, classStats,
             personalization = {}, status, pericias = {}, inventario = []
         } = this.character;
 
         const sheetContainer = document.getElementById('sheet-container');
         const header = document.querySelector('.sheet-header');
-        sheetContainer.className = 'sheet-container';
+        const charImage = document.getElementById('sheet-char-image');
+        // Limpa classes de elementos anteriores e adiciona a classe base e a do elemento atual
+        sheetContainer.className = 'sheet-container'; // Reseta para a classe base
         if (this.character.element) {
-            const elementClass = this.character.element.toLowerCase();
+            const elementClass = this.character.element.toLowerCase(); 
+            // Adiciona a classe do elemento para aplicar o tema visual
             sheetContainer.classList.add(elementClass);
+        }
+
+        // Atualiza o cabeçalho
+        if (charImage) {
+            charImage.src = personalization.imageUrl || 'https://via.placeholder.com/150';
+            charImage.alt = `Retrato de ${personalization.name || 'Agente Sem Nome'}`;
         }
         header.querySelector('h2').textContent = personalization.name || 'Agente Sem Nome';
         header.querySelector('#sheet-char-element').textContent = `Elemento: ${this.character.element || 'Nenhum'}`;
         
-        let classDisplay = this.character.class || 'Classe';
-        if (this.character.specialization) classDisplay += ` (${this.character.specialization})`;
-        header.querySelector('#sheet-char-class-player').textContent = `${classDisplay} | Jogador: ${personalization.player || 'N/A'}`;
+        // Atualiza o display da classe/especialização no cabeçalho e no bloco de atributos
+        const classDisplay = this.character.class || 'Classe';
+        const specDisplay = this.character.specialization ? ` (${this.character.specialization})` : '';
+        header.querySelector('#sheet-char-class-player').textContent = `${classDisplay}${specDisplay} | Jogador: ${personalization.player || 'N/A'}`;
+        
+        const classSpecLabel = document.getElementById('sheet-class-specialization');
+        if (classSpecLabel) classSpecLabel.textContent = this.character.specialization || this.character.class;
 
         document.title = `${personalization.name || 'Agente'} | Ficha de Agente`;
-
         document.getElementById('sheet-level').textContent = level;
-        document.getElementById('sheet-xp').textContent = xp;
+        document.getElementById('sheet-nf').textContent = nf;
         document.getElementById('sheet-attribute-points').textContent = attributePoints;
         document.getElementById('sheet-skill-points').textContent = skillPoints;
 
@@ -1932,9 +2031,93 @@ class CharacterSheet {
         document.getElementById('sheet-res-paranormal').textContent = this.character.resParanormal || 0;
         document.getElementById('sheet-proficiencies').textContent = this.character.proficiencies || 'Armas simples.';
 
+        // Controla a visibilidade do botão de especialização
+        const specBlock = document.getElementById('class-specialization-block');
+        if (specBlock) {
+            specBlock.classList.toggle('can-specialize', this.character.skillPoints > 0 && !this.character.specialization);
+        }
+
         this.renderActionsPanel();
 
         document.getElementById('sheet-container').style.display = 'flex';
+    }
+
+    renderProficiencies() {
+        const container = document.getElementById('proficiencies-list');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        const proficiencies = [
+            { name: 'Acrobacia', attr: 'AGI' },
+            { name: 'Adestramento', attr: 'PRE' },
+            { name: 'Artes', attr: 'PRE' },
+            { name: 'Atletismo', attr: 'FOR' },
+            { name: 'Atualidades', attr: 'INT' },
+            { name: 'Ciências', attr: 'INT' },
+            { name: 'Crime', attr: 'AGI' },
+            { name: 'Diplomacia', attr: 'PRE' },
+            { name: 'Enganação', attr: 'PRE' },
+            { name: 'Fortitude', attr: 'VIT' },
+            { name: 'Furtividade', attr: 'AGI' },
+            { name: 'Iniciativa', attr: 'AGI' },
+            { name: 'Intimidação', attr: 'PRE' },
+            { name: 'Intuição', attr: 'PRE' },
+            { name: 'Investigação', attr: 'INT' },
+            { name: 'Luta', attr: 'FOR' },
+            { name: 'Medicina', attr: 'INT' },
+            { name: 'Ocultismo', attr: 'INT' },
+            { name: 'Percepção', attr: 'PRE' },
+            { name: 'Pilotagem', attr: 'AGI' },
+            { name: 'Pontaria', attr: 'AGI' },
+            { name: 'Profissão (___)', attr: 'INT' },
+            { name: 'Profissão (___)', attr: 'INT' },
+            { name: 'Reflexos', attr: 'AGI' },
+            { name: 'Religião', attr: 'INT' },
+            { name: 'Sobrevivência', attr: 'INT' },
+            { name: 'Tática', attr: 'INT' },
+            { name: 'Tecnologia', attr: 'INT' },
+            { name: 'Vontade', attr: 'PRE' },
+        ];
+
+        proficiencies.forEach(prof => {
+            const li = document.createElement('li');
+            li.className = 'proficiency-item';
+            li.dataset.proficiency = prof.name;
+
+            // Lógica para carregar o estado (treinada, outros) virá aqui no futuro
+            const isTrained = false;
+
+            li.innerHTML = `
+                <div class="checkbox-container">
+                    <input type="checkbox" ${isTrained ? 'checked' : ''}>
+                </div>
+                <div class="proficiency-name-container"><span class="proficiency-name">${prof.name}</span> <span class="proficiency-attr">(${prof.attr})</span></div>
+                <div class="proficiency-roll-container">
+                    <span class="dice-icon">🎲</span>
+                </div>
+                <div class="proficiency-total-container"><span class="proficiency-total">-</span></div>
+            `;
+
+            const rollBtn = li.querySelector('.proficiency-roll-container');
+            const totalSpan = li.querySelector('.proficiency-total');
+            const diceIcon = li.querySelector('.dice-icon');
+
+            rollBtn.addEventListener('click', () => {
+                // Lógica simplificada para a rolagem
+                diceIcon.classList.add('rolling');
+                totalSpan.textContent = '...';
+
+                // Simula a rolagem e atualiza o resultado após a animação
+                setTimeout(() => {
+                    const roll = Math.floor(Math.random() * 20) + 1;
+                    totalSpan.textContent = roll;
+                    diceIcon.classList.remove('rolling');
+                }, 500); // Duração da animação de giro do ícone
+            });
+
+            container.appendChild(li);
+        });
     }
 
     renderActionsPanel() {
@@ -2016,6 +2199,78 @@ class CharacterSheet {
                 }
             }
         });
+
+        document.querySelector('.primary-attributes-display').addEventListener('click', (e) => {
+            if (e.target.classList.contains('attr-btn')) {
+                const block = e.target.closest('.primary-attr-block');
+                const attrName = block.dataset.attr;
+                const action = e.target.dataset.action;
+
+                if (action === 'increase') {
+                    if (this.character.attributePoints > 0) {
+                        this.character.attributePoints--;
+                        this.character.attributes[attrName]++;
+                        this.recalculateDerivedStats();
+                        this.saveCharacterChanges();
+                        this.renderSheet();
+                    } else {
+                        alert('Você não tem Pontos de Atributo para gastar.');
+                    }
+                }
+                // A lógica para diminuir o atributo (e devolver o ponto) pode ser adicionada aqui se necessário.
+                // Por enquanto, o foco é apenas em gastar os pontos.
+            }
+        });
+
+        // Adiciona listener para o novo botão de especialização
+        const specBlock = document.getElementById('class-specialization-block');
+        if (specBlock) {
+            specBlock.addEventListener('click', (e) => {
+                if (e.target.closest('[data-action="specialize"]')) {
+                    this.handleSpecializationChoice();
+                }
+            });
+        }
+
+        document.getElementById('nf-control').addEventListener('click', (e) => {
+            if (e.target.classList.contains('progression-btn')) {
+                const amount = parseInt(e.target.dataset.amount, 10);
+                if (!isNaN(amount)) {
+                    const oldNf = this.character.nf || 0;
+                    this.character.nf = (this.character.nf || 0) + amount;
+                    if (this.character.nf < 0) this.character.nf = 0; // Não permite NF negativo
+                    const newNf = this.character.nf;
+
+                    if (amount > 0) { // Aumentando o NF
+                        // Ganha 1 ponto de atributo (simples) para cada +1 de NF
+                        this.character.attributePoints = (this.character.attributePoints || 0) + 1;
+                        // Se o novo NF é múltiplo de 5, ganha 1 ponto de habilidade (especial)
+                        if (newNf > 0 && newNf % 5 === 0) {
+                            this.character.skillPoints = (this.character.skillPoints || 0) + 1;
+                        }
+                    } else if (amount < 0 && oldNf > 0) { // Diminuindo o NF
+                        // Perde 1 ponto de atributo (simples)
+                        this.character.attributePoints = (this.character.attributePoints || 0) - 1;
+                        // Se o NF antigo era múltiplo de 5, perde 1 ponto de habilidade (especial)
+                        if (oldNf > 0 && oldNf % 5 === 0) {
+                            this.character.skillPoints = (this.character.skillPoints || 0) - 1;
+                        }
+                    }
+
+                    // Garante que os pontos não fiquem negativos
+                    if (this.character.attributePoints < 0) this.character.attributePoints = 0;
+                    if (this.character.skillPoints < 0) this.character.skillPoints = 0;
+
+                    document.getElementById('sheet-attribute-points').textContent = this.character.attributePoints;
+                    document.getElementById('sheet-skill-points').textContent = this.character.skillPoints;
+
+                    document.getElementById('sheet-nf').textContent = this.character.nf;
+                    this.saveCharacterChanges();
+                    this.checkSpecialization(); // Verifica se a escolha de especialização deve ser mostrada
+                }
+            }
+        });
+
 
         document.getElementById('hp-max').addEventListener('change', (e) => this.updateStatus('hp_max', e.target.value));
         document.getElementById('sanity-max').addEventListener('change', (e) => this.updateStatus('sanity_max', e.target.value));
@@ -2110,11 +2365,25 @@ class CharacterSheet {
         }
     }
 
+    checkSpecialization() {
+        // Condições para mostrar o modal:
+        // 1. NF é 5 ou maior.
+        // 2. O personagem ainda não tem uma especialização.
+        // 3. O personagem tem pelo menos 1 ponto de habilidade para gastar.
+        if (this.character.nf >= 5 && !this.character.specialization && this.character.skillPoints > 0) {
+            this.showSpecializationChoice();
+        }
+    }
+
     showSpecializationChoice() {
         const modalOverlay = document.getElementById('specialization-choice-overlay');
         const optionsContainer = document.getElementById('specialization-options-container');
-        if (!modalOverlay || !optionsContainer) return;
+        const confirmationContainer = document.getElementById('spec-confirmation-content');
+        if (!modalOverlay || !optionsContainer || !confirmationContainer) return;
 
+        // Reseta o modal para o estado inicial (mostrando opções)
+        optionsContainer.style.display = 'grid';
+        confirmationContainer.style.display = 'none';
         optionsContainer.innerHTML = ''; // Limpa opções anteriores
 
         const availableSpecs = SPECIALIZATIONS[this.character.class];
@@ -2123,27 +2392,57 @@ class CharacterSheet {
         availableSpecs.forEach(spec => {
             const card = document.createElement('div');
             card.className = 'specialization-card';
-            card.innerHTML = `<h3>${spec.name}</h3><p>${spec.description}</p>`;
-            card.addEventListener('click', () => this.selectSpecialization(spec.name));
+            card.innerHTML = `<h3>${spec.name}</h3><p>${spec.description}</p><button class="wizard-btn">Escolher</button>`;
+            card.addEventListener('click', () => this.showSpecializationConfirmation(spec));
             optionsContainer.appendChild(card);
         });
 
+        modalOverlay.classList.add('sticky-modal'); // Impede o fechamento por clique externo
         modalOverlay.classList.add('visible');
     }
 
-    selectSpecialization(specName) {
-        if (confirm(`Tem certeza que deseja escolher a especialização "${specName}"? Esta escolha é permanente e custará 1 Ponto de Habilidade.`)) {
-            if (this.character.skillPoints < 1) {
-                alert("Ação cancelada. Você não tem mais Pontos de Habilidade suficientes.");
-                return;
-            }
-            this.character.skillPoints--;
-            this.character.specialization = specName;
-            document.getElementById('specialization-choice-overlay').classList.remove('visible');
-            this.saveCharacterChanges();
-            this.renderSheet();
-            this.renderSkillTree();
-        }
+    showSpecializationConfirmation(spec) {
+        const optionsContainer = document.getElementById('specialization-options-container');
+        const confirmationContainer = document.getElementById('spec-confirmation-content');
+        
+        // Preenche os dados da confirmação
+        confirmationContainer.querySelector('h2').textContent = `Confirmar: ${spec.name}`;
+        confirmationContainer.querySelector('p').innerHTML = `Você está prestes a gastar <strong>1 Ponto de Habilidade</strong> para se tornar um(a) <strong>${spec.name}</strong>. Esta escolha é permanente e definirá seu caminho. Deseja continuar?`;
+
+        // Troca a visibilidade dos painéis
+        optionsContainer.style.display = 'none';
+        confirmationContainer.style.display = 'flex';
+
+        // Limpa listeners antigos e adiciona novos para os botões de confirmação
+        const confirmBtn = document.getElementById('confirm-spec-btn');
+        const cancelBtn = document.getElementById('cancel-spec-btn');
+
+        const confirmHandler = () => {
+            this.finalizeSpecialization(spec.name);
+            cleanup();
+        };
+        const cancelHandler = () => {
+            // Volta para a tela de seleção
+            optionsContainer.style.display = 'grid';
+            confirmationContainer.style.display = 'none';
+            cleanup();
+        };
+        const cleanup = () => {
+            confirmBtn.removeEventListener('click', confirmHandler);
+            cancelBtn.removeEventListener('click', cancelHandler);
+        };
+
+        confirmBtn.addEventListener('click', confirmHandler);
+        cancelBtn.addEventListener('click', cancelHandler);
+    }
+
+    finalizeSpecialization(specName) {
+        this.character.skillPoints--;
+        this.character.specialization = specName;
+        document.getElementById('specialization-choice-overlay').classList.remove('visible', 'sticky-modal');
+        this.saveCharacterChanges();
+        this.renderSheet();
+        this.renderSkillTree();
     }
 
     handleSpecializationChoice() {
@@ -2193,64 +2492,55 @@ class CharacterSheet {
         this.saveCharacterChanges();
     }
 
+    // Função para buscar uma habilidade pelo ID em toda a árvore
+    findSkillById(skillId, tree = SKILL_TREES) {
+        for (const key in tree) {
+            if (Array.isArray(tree[key])) {
+                for (const skill of tree[key]) {
+                    if (skill.id === skillId) return skill;
+                    if (skill.children) {
+                        const found = this.findSkillById(skillId, { children: skill.children });
+                        if (found) return found;
+                    }
+                }
+            } else if (typeof tree[key] === 'object' && tree[key] !== null) {
+                const found = this.findSkillById(skillId, tree[key]);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+
     renderSkillTree() {
-        const classContainer = document.getElementById('class-skill-tree-container');
-        const attributeContainer = document.getElementById('attribute-skill-tree-container');
-        if (!classContainer || !attributeContainer) return;
+        const container = document.getElementById('unlocked-skills-container');
+        if (!container) return;
 
-        classContainer.innerHTML = '';
-        attributeContainer.innerHTML = '';
+        container.innerHTML = ''; // Limpa o container
 
-        const specialization = this.character.specialization;
-        const charClass = this.character.class;
-        const charElement = this.character.element;
+        const unlockedSkillIds = this.character.skills || [];
 
-        if (specialization) {
-            // Personagem já tem especialização, renderiza a árvore ou uma mensagem se estiver vazia.
-            const classTree = (SKILL_TREES[charClass]?.[charElement]?.[specialization]) || [];
-            if (classTree.length > 0) {
-                classTree.forEach(skill => {
-                    this._renderSkillNodeRecursive(skill, classContainer, null);
-                });
-            } else {
-                classContainer.innerHTML = `<p class="empty-skill-tree">Nenhuma habilidade definida para a especialização "${specialization}" ainda.</p>`;
-            }
-        } else {
-            // Personagem ainda não tem especialização. Mostra mensagem e botão se for elegível.
-            let message = '';
-            let contentHTML = '';
-            if (this.character.level < 5) {
-                message = 'As habilidades de classe estarão disponíveis ao atingir o nível 5 e escolher uma especialização.';
-                contentHTML = `<p class="empty-skill-tree">${message}</p>`;
-            } else { // Nível 5 ou maior
-                message = 'Você atingiu o nível necessário para se especializar. Esta escolha definirá suas futuras habilidades de classe e custará 1 Ponto de Habilidade.';
-                const buttonHTML = this.character.skillPoints > 0
-                    ? `<button id="choose-spec-btn" class="wizard-btn">Escolher Especialização</button>`
-                    : `<p class="info-text">Você precisa de pelo menos 1 Ponto de Habilidade para escolher uma especialização.</p>`;
-                contentHTML = `<p class="empty-skill-tree">${message}</p><div style="text-align:center; margin-top: 1rem;">${buttonHTML}</div>`;
-            }
-            classContainer.innerHTML = contentHTML;
-
-            const chooseSpecBtn = classContainer.querySelector('#choose-spec-btn');
-            if (chooseSpecBtn) {
-                chooseSpecBtn.addEventListener('click', () => this.handleSpecializationChoice());
-            }
+        if (unlockedSkillIds.length === 0) {
+            container.innerHTML = `<p class="empty-skill-tree">Nenhuma habilidade foi desbloqueada ainda.</p>`;
+            return;
         }
 
-        const attributeTree = SKILL_TREES.Atributo || {};
-        for (const attribute in attributeTree) {
-            const attributeSubContainer = document.createElement('div');
-            attributeSubContainer.className = 'skill-tree-sub-category';
-            attributeSubContainer.innerHTML = `<h4>${attribute}</h4>`;
+        unlockedSkillIds.forEach(skillId => {
+            const skillData = this.findSkillById(skillId);
+            if (skillData) {
+                const skillNode = this.createSkillDisplayNode(skillData);
+                container.appendChild(skillNode);
+            }
+        });
+    }
 
-            const treeRoot = document.createElement('div');
-            treeRoot.className = 'skill-tree-root';
-            attributeTree[attribute].forEach(skill => {
-                this._renderSkillNodeRecursive(skill, treeRoot, null);
-            });
-            attributeSubContainer.appendChild(treeRoot);
-            attributeContainer.appendChild(attributeSubContainer);
-        }
+    createSkillDisplayNode(skill) {
+        const skillNode = document.createElement('div');
+        skillNode.className = 'skill-node unlocked'; // Usa a classe de nó, já estilizada
+        skillNode.innerHTML = `
+            <h4 class="skill-name">${skill.name}</h4>
+            <p class="skill-description">${skill.description}</p>
+        `;
+        return skillNode;
     }
 
     _renderSkillNodeRecursive(skill, parentContainer, parentSkill) {
@@ -2322,10 +2612,44 @@ class CharacterSheet {
             this.saveCharacterChanges();
             this.renderSkillTree();
             this.renderSheet();
+        } else {
+            alert("Você não tem pontos de habilidade suficientes para desbloquear esta habilidade.");
         }
     }
 
+    recalculateDerivedStats() {
+        if (!this.character) return;
+
+        const attrs = this.character.attributes;
+
+        // Recalcula HP Máximo
+        const newHpMax = 10 + (attrs.vitalidade * 2);
+        if (this.character.status.hp_max !== newHpMax) {
+            const diff = newHpMax - this.character.status.hp_max;
+            this.character.status.hp_max = newHpMax;
+            this.character.status.hp_current += diff; // Aumenta o HP atual junto com o máximo
+            if (this.character.status.hp_current > newHpMax) this.character.status.hp_current = newHpMax;
+        }
+
+        // Recalcula Sanidade Máxima
+        this.character.status.sanity_max = 10 + (attrs.presenca * 2);
+
+        // Recalcula PA Máximo
+        this.character.status.pa_max = 5 + Math.floor(attrs.agilidade / 2);
+
+        // Recalcula Defesa
+        this.character.classStats.defense = 10 + attrs.agilidade;
+    }
+
     async saveCharacterChanges() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('mode') === 'local') {
+            let localCharacters = JSON.parse(localStorage.getItem('sombras-local-characters')) || [];
+            const charIndex = localCharacters.findIndex(c => c.id === this.character.id);
+            if (charIndex > -1) localCharacters[charIndex] = this.character;
+            localStorage.setItem('sombras-local-characters', JSON.stringify(localCharacters));
+            return;
+        }
         // Usando Axios para atualizar o personagem (PUT request)
         try {
             await api.put(`/characters/${this.character.id}`, this.character);
@@ -2819,44 +3143,38 @@ function updateActiveLinks() {
 
 // Função para verificar o status de login e atualizar o header
 async function checkAuthStatus() {
-    const header = document.querySelector('#header-placeholder .home-header');
-    if (!header) {
-        // O header não foi carregado ou não contém a tag nav, provavelmente devido a um erro.
-        // A mensagem de erro já foi exibida por loadHeader.
+    const nav = document.querySelector('#primary-navigation');
+    if (!nav) {
+        console.error("Elemento de navegação '#primary-navigation' não encontrado para inserir o status de autenticação.");
         return;
     }
 
-    // Remove qualquer container de autenticação anterior para evitar duplicatas
+    // Remove o container anterior para evitar duplicatas em recarregamentos
     const existingAuthContainer = header.querySelector('.auth-container');
     if (existingAuthContainer) {
         existingAuthContainer.remove();
     }
-
+    
     const authContainer = document.createElement('div');
     authContainer.className = 'auth-container';
 
+    // 1. Adiciona o botão de login imediatamente para uma resposta visual rápida
+    authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
+    nav.appendChild(authContainer);
+
     try {
-        // Usando Axios para verificar o status de autenticação
+        // 2. Tenta buscar o usuário logado em segundo plano
         const response = await authApi.get('/user');
         const user = response.data;
-        authContainer.innerHTML = `<span class="user-info">Olá, ${user.displayName}! <a href="${API_BASE_URL}/auth/logout" class="auth-link">[Sair]</a></span>`;
-    } catch (error) {
-        if (error.response && (error.response.status === 401 || error.response.status === 404)) {
-            // Erro 401 (Não Autorizado) é esperado se o usuário não estiver logado
-            authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
-        } else {
-            // Outros erros (como falha de rede) indicam que o backend pode estar offline
-            console.log('Servidor backend offline. Mostrando botão de login padrão.');
-            authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
+
+        // 3. Se encontrar, substitui o botão de login pelas informações do usuário
+        if (user) {
+            authContainer.innerHTML = `<span class="user-info">Olá, ${user.displayName}! <a href="${API_BASE_URL}/auth/logout" class="auth-link">[Sair]</a></span>`;
         }
-    }
-    
-    // Anexa o container de autenticação à navegação para funcionar bem no mobile
-    const nav = header.querySelector('#primary-navigation');
-    if (nav) {
-        nav.appendChild(authContainer);
-    } else {
-        header.appendChild(authContainer);
+    } catch (error) {
+        // Se houver um erro (ex: 401 não autorizado), o botão de login já está na tela,
+        // então não precisamos fazer nada, apenas registrar o erro no console.
+        console.log('Sessão de usuário não encontrada ou erro de autenticação. O botão de login será mantido.');
     }
 }
 
@@ -2869,6 +3187,7 @@ async function loadHeader() {
         // Usando Axios para carregar o HTML do cabeçalho
         const response = await axios.get('_header.html');
         const data = response.data;
+        header = headerPlaceholder; // Atribui o elemento à variável global
         headerPlaceholder.innerHTML = data;
     } catch (error) {
         console.error('Erro ao carregar o cabeçalho:', error);
@@ -2898,17 +3217,21 @@ function checkAndApplyDevMode() {
     }
 }
 
+let header; // Variável global para o header
 // Inicialização do Script quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', async () => {
     await loadHeader();
 
     checkAndApplyDevMode(); // Verifica o modo dev logo no início
     updateActiveLinks();
-    checkAuthStatus();
+    checkAuthStatus(); // Agora é mais rápido
 
     const path = window.location.pathname;
     if (path.includes('criar-agente.html')) {
-        new CharacterCreator();
+        // A classe CharacterCreator agora lida com a lógica de modo internamente
+        const creator = new CharacterCreator();
+        // A inicialização já é chamada dentro do construtor, então não precisa de `creator.initialize()`
+
     }
     if (path.includes('campanhas.html')) {
         displayCampaigns();

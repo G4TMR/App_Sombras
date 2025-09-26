@@ -662,10 +662,6 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     transition: transform 0.3s ease;
 }
 
-.modal-overlay.sticky-modal {
-    pointer-events: auto; /* Garante que o overlay capture cliques */
-}
-
 .modal-overlay.visible .specialization-modal-content {
     transform: scale(1);
 }
@@ -711,58 +707,7 @@ body[data-page="patente"] { --page-color: #6f42c1; }
 .specialization-card p {
     font-size: 1rem;
     color: var(--color-text-secondary);
-}
-
-/* --- MODAL DE CONFIRMAÇÃO DE ESPECIALIZAÇÃO --- */
-.spec-confirmation-content {
-    display: none; /* Oculto por padrão */
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 2rem;
-}
-
-.spec-confirmation-content h2 {
-    font-family: var(--font-display);
-    font-size: 2.5rem;
-    color: var(--page-color, var(--color-primary));
-    margin: 0 0 1rem 0;
-}
-
-.spec-confirmation-content p {
-    color: var(--color-text-secondary);
-    font-size: 1.1rem;
-    max-width: 500px;
-    margin-bottom: 2rem;
-}
-
-.spec-confirmation-content strong {
-    color: var(--color-text-primary);
-    font-weight: bold;
-}
-
-.spec-confirmation-actions {
-    display: flex;
-    gap: 1.5rem;
-    margin-top: 1rem;
-}
-
-.wizard-btn.confirm-btn {
-    background: var(--color-accent-rare);
-    box-shadow: 0 4px 15px rgba(50, 205, 50, 0.3);
-}
-
-.wizard-btn.confirm-btn:hover {
-    background: #45e045;
-    filter: brightness(1.1);
-}
-
-.wizard-btn.cancel-spec-btn {
-    background: var(--color-danger);
-}
-
-.wizard-btn.cancel-spec-btn:hover {
-    background: #e04453;
+    margin-bottom: 1.5rem;
 }
 
 /* --- DISTRIBUIÇÃO DE ATRIBUTOS --- */
@@ -1403,16 +1348,10 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     gap: 0.75rem;
 }
 
-.attr-value-controls-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem; /* Espaço entre o valor e o container do botão */
-}
-
 .attr-controls {
     position: relative; /* Alterado de absolute */
     /* Removido top, right e transform */
-    /* margin-left removido, o gap do wrapper agora controla o espaço */
+    margin-left: 0.5rem; /* Adiciona um espaço entre o número e o botão */
     flex-shrink: 0; /* Impede que o container do botão encolha */
     display: flex;
     gap: 4px;
@@ -1465,7 +1404,15 @@ body[data-page="patente"] { --page-color: #6f42c1; }
 .primary-attr-value {
     font-family: var(--font-display);
     font-size: 1.8rem; /* Reduzido de 2rem */
-    /* margin-left e padding-right removidos */
+    margin-left: auto;
+    padding-right: 0.5rem; /* Adiciona um espaço para não colar no botão */
+}
+
+.primary-attr-block {
+    /* Adiciona display flex para alinhar os itens filhos horizontalmente */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .progression-container {

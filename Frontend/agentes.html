@@ -13,16 +13,31 @@
     <main class="personagens-container">
         <div class="agentes-header">
             <div class="header-content">
-                <h2>Meus Agentes</h2>
-                <p class="header-subtitle">Gerencie seus investigadores das sombras</p>
+                <h2>Meus Agentes (Online)</h2>
+                <p class="header-subtitle">Agentes salvos na sua conta. Requer login.</p>
             </div>
             <a href="criar-agente.html" class="create-agent-btn">
                 <span class="btn-icon">+</span>
-                Criar Novo Agente
+                Criar Agente Online
             </a>
         </div>
-        <div class="agentes-content">
-            <p class="empty-message">Nenhum agente criado ainda. Crie sua primeira ficha para vê-la aqui!</p>
+        <div id="online-agents-content" class="agentes-content">
+            <!-- Agentes online serão carregados aqui -->
+        </div>
+
+        <!-- Nova Seção para Agentes Locais -->
+        <div class="agentes-header" style="margin-top: 4rem; border-top: 2px solid var(--color-surface-2); padding-top: 2rem;">
+            <div class="header-content">
+                <h2>Agentes de Teste (Locais)</h2>
+                <p class="header-subtitle">Agentes temporários salvos apenas neste navegador. Não requer login.</p>
+            </div>
+            <a href="criar-agente.html?mode=local" class="create-agent-btn" style="background: #555;">
+                <span class="btn-icon">🧪</span>
+                Criar Agente de Teste
+            </a>
+        </div>
+        <div id="local-agents-content" class="agentes-content">
+            <!-- Agentes locais serão carregados aqui -->
         </div>
     </main>
 
