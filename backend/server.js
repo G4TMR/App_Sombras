@@ -90,6 +90,19 @@ const CharacterSchema = new mongoose.Schema({
 
 const Character = mongoose.model('Character', CharacterSchema);
 
+// Novo Schema para Campanhas
+const CampaignSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    title: { type: String, required: true },
+    synopsis: String,
+    imageUrl: String,
+    inviteCode: { type: String, unique: true, sparse: true },
+    players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    createdAt: { type: Date, default: Date.now }
+}, { strict: false }); // strict: false para permitir outros campos que o frontend possa enviar
+const Campaign = mongoose.model('Campaign', CampaignSchema);
+
 // --- 5.5. Configuração do Passport (Estratégia Google) ---
 
 // Validação para garantir que as variáveis de ambiente do Google estão definidas
@@ -241,6 +254,105 @@ app.delete('/api/characters/:id', ensureAuthenticated, async (req, res) => {
     } catch (error) {
         console.error("Erro ao deletar personagem:", error);
         res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+});
+
+// --- Rotas de Campanhas ---
+
+// Criar uma nova campanha
+app.post('/api/campaigns', ensureAuthenticated, async (req, res) => {
+    try {
+        const campaignData = { ...req.body, ownerId: req.user._id };
+        const newCampaign = new Campaign(campaignData);
+        await newCampaign.save();
+        res.status(201).json(newCampaign);
+    } catch (error) {
+        console.error("Erro ao criar campanha:", error);
+        res.status(500).json({ message: 'Erro interno do servidor ao criar campanha.' });
+    }
+});
+
+// Obter todas as campanhas do usuário (criadas e participando)
+app.get('/api/campaigns', ensureAuthenticated, async (req, res) => {
+    try {
+        const campaigns = await Campaign.find({
+            $or: [{ ownerId: req.user._id }, { players: req.user._id }]
+        }).populate('ownerId', 'displayName').sort({ createdAt: -1 }); // Popula o nome do dono e ordena
+        res.status(200).json(campaigns);
+    } catch (error) {
+        console.error("Erro ao listar campanhas:", error);
+        res.status(500).json({ message: 'Erro interno do servidor ao listar campanhas.' });
+    }
+});
+
+// Obter uma campanha específica
+app.get('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
+    try {
+        const campaign = await Campaign.findOne({ id: req.params.id });
+        if (!campaign) return res.status(404).json({ message: 'Campanha não encontrada.' });
+
+        // Verifica se o usuário é o dono ou um jogador
+        const isPlayer = campaign.players.some(p => p.equals(req.user._id));
+        if (!campaign.ownerId.equals(req.user._id) && !isPlayer) {
+            return res.status(403).json({ message: 'Acesso negado.' });
+        }
+        res.status(200).json(campaign);
+    } catch (error) {
+        console.error("Erro ao buscar campanha:", error);
+        res.status(500).json({ message: 'Erro interno do servidor ao buscar campanha.' });
+    }
+});
+
+// Atualizar uma campanha
+app.put('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
+    try {
+        const updatedCampaign = await Campaign.findOneAndUpdate(
+            { id: req.params.id, ownerId: req.user._id }, // Só o dono pode atualizar
+            req.body,
+            { new: true }
+        );
+        if (!updatedCampaign) return res.status(404).json({ message: 'Campanha não encontrada ou você não é o dono.' });
+        res.status(200).json(updatedCampaign);
+    } catch (error) {
+        console.error("Erro ao atualizar campanha:", error);
+        res.status(500).json({ message: 'Erro interno do servidor ao atualizar campanha.' });
+    }
+});
+
+// Deletar uma campanha
+app.delete('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
+    try {
+        const result = await Campaign.findOneAndDelete({ id: req.params.id, ownerId: req.user._id }); // Só o dono pode deletar
+        if (!result) return res.status(404).json({ message: 'Campanha não encontrada ou você não é o dono.' });
+        res.status(200).json({ message: 'Campanha excluída com sucesso.' });
+    } catch (error) {
+        console.error("Erro ao deletar campanha:", error);
+        res.status(500).json({ message: 'Erro interno do servidor ao deletar campanha.' });
+    }
+});
+
+// Entrar em uma campanha com código
+app.post('/api/campaigns/join', ensureAuthenticated, async (req, res) => {
+    const { inviteCode } = req.body;
+    if (!inviteCode) {
+        return res.status(400).json({ message: 'Código de convite é obrigatório.' });
+    }
+
+    try {
+        const campaign = await Campaign.findOne({ inviteCode: inviteCode });
+        if (!campaign) {
+            return res.status(404).json({ message: 'Campanha não encontrada com este código.' });
+        }
+
+        // Adiciona o jogador se ele ainda não estiver na lista
+        if (!campaign.players.includes(req.user._id) && !campaign.ownerId.equals(req.user._id)) {
+            campaign.players.push(req.user._id);
+            await campaign.save();
+        }
+        res.status(200).json(campaign);
+    } catch (error) {
+        console.error("Erro ao entrar na campanha:", error);
+        res.status(500).json({ message: 'Erro interno do servidor ao entrar na campanha.' });
     }
 });
 

@@ -2832,39 +2832,33 @@ class ThreatListPage {
  * @param {string} campaignId - O ID da campanha a ser buscada.
  * @returns {object|null} O objeto da campanha ou nulo se não for encontrado.
  */
-function getCampaignById(campaignId) {
-    const campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-    return campaigns.find(c => c.id === campaignId);
+async function getCampaignById(campaignId) {
+    try {
+        const response = await api.get(`/campaigns/${campaignId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Erro ao buscar campanha por ID:", error);
+        return null;
+    }
 }
 
 /**
  * Atualiza uma campanha existente no localStorage.
  * @param {object} updatedCampaign - O objeto da campanha com os dados atualizados.
  */
-function updateCampaign(updatedCampaign, showIndicator = false) {
+async function updateCampaign(updatedCampaign, showIndicator = false) {
     try {
-        let campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-        const campaignIndex = campaigns.findIndex(c => c.id === updatedCampaign.id);
-        if (campaignIndex > -1) {
-            // Mantém dados existentes (como jogadores) e atualiza apenas os do formulário
-            campaigns[campaignIndex] = { ...campaigns[campaignIndex], ...updatedCampaign };
-            localStorage.setItem('sombras-campaigns', JSON.stringify(campaigns));
-            
-            // Fornece feedback visual de que foi salvo
-            if (showIndicator) {
-                const saveIndicator = document.getElementById('save-status-indicator');
-                if (saveIndicator) {
-                    saveIndicator.textContent = 'Salvo!';
-                    saveIndicator.classList.add('show');
-                    setTimeout(() => {
-                        saveIndicator.classList.remove('show');
-                    }, 2000); // O indicador some após 2 segundos
-                }
+        await api.put(`/campaigns/${updatedCampaign.id}`, updatedCampaign);
+        
+        if (showIndicator) {
+            const saveIndicator = document.getElementById('save-status-indicator');
+            if (saveIndicator) {
+                saveIndicator.textContent = 'Salvo!';
+                saveIndicator.classList.add('show');
+                setTimeout(() => {
+                    saveIndicator.classList.remove('show');
+                }, 2000);
             }
-
-            // window.location.href = 'campanhas.html'; // Removido para salvamento em tempo real
-        } else {
-            throw new Error("Campanha não encontrada para atualização.");
         }
     } catch (error) {
         console.error("Erro ao atualizar campanha:", error);
@@ -2876,15 +2870,14 @@ function updateCampaign(updatedCampaign, showIndicator = false) {
  * Exclui uma campanha do localStorage.
  * @param {string} campaignId - O ID da campanha a ser excluída.
  */
-function deleteCampaign(campaignId) {
+async function deleteCampaign(campaignId) {
     if (!confirm('Tem certeza que deseja excluir esta campanha? Esta ação não pode ser desfeita.')) {
         return;
     }
     try {
-        let campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-        const updatedCampaigns = campaigns.filter(c => c.id !== campaignId);
-        localStorage.setItem('sombras-campaigns', JSON.stringify(updatedCampaigns));
-        window.location.href = 'campanhas.html'; // Volta para a lista
+        await api.delete(`/campaigns/${campaignId}`);
+        alert('Campanha excluída com sucesso.');
+        window.location.href = 'campanhas.html';
     } catch (error) {
         console.error("Erro ao excluir campanha:", error);
         alert("Ocorreu um erro ao excluir a campanha.");
@@ -2899,13 +2892,12 @@ function deleteCampaign(campaignId) {
  * Salva uma nova campanha no localStorage e redireciona para a página de campanhas.
  * @param {object} campaignData - O objeto da campanha a ser salvo.
  */
-function saveCampaign(campaignData) {
-    // Adiciona o ownerId e inicializa players e inviteCode se não existirem
-    const newCampaignData = { ...campaignData, ownerId: currentUserId, players: [], inviteCode: generateUniqueInviteCode() };
+async function saveCampaign(campaignData) {
+    // O backend agora cuidará de adicionar ownerId, players e inviteCode.
+    const newCampaignData = { ...campaignData, inviteCode: generateUniqueInviteCode() };
     try {
-        const campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-        campaigns.unshift(newCampaignData); // Adiciona no início para a mais recente aparecer primeiro
-        localStorage.setItem('sombras-campaigns', JSON.stringify(campaigns)); // Salva a campanha com o ownerId
+        // A API agora espera o ID do usuário logado do cookie/sessão
+        await api.post('/campaigns', newCampaignData);
         window.location.href = 'campanhas.html';
     } catch (error) {
         console.error("Erro ao salvar campanha:", error);
@@ -2926,15 +2918,22 @@ async function displayCampaigns() {
     if (!myCampaignsGrid || !joinedCampaignsGrid || !joinedCampaignsSection) return;
 
     // Garante que currentUserId está definido (pode ser 'local_user_id' ou o ID do usuário logado)
-    await checkAuthStatus(); 
+    const user = await checkAuthStatus(); 
+    if (!user) {
+        // Se não há usuário, não há o que mostrar.
+        emptyMyCampaigns.style.display = 'flex';
+        joinedCampaignsSection.style.display = 'none';
+        return;
+    }
 
-    const campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
+    const campaigns = (await api.get('/campaigns')).data;
 
     myCampaignsGrid.innerHTML = '';
     joinedCampaignsGrid.innerHTML = '';
 
-    const ownedCampaigns = campaigns.filter(c => c.ownerId === currentUserId);
-    const joinedCampaigns = campaigns.filter(c => c.players && c.players.includes(currentUserId) && c.ownerId !== currentUserId);
+    // O backend já filtra, mas fazemos a separação no frontend
+    const ownedCampaigns = campaigns.filter(c => c.ownerId._id === user._id);
+    const joinedCampaigns = campaigns.filter(c => c.ownerId._id !== user._id);
 
     // Renderizar "Minhas Campanhas"
     if (ownedCampaigns.length > 0) {
@@ -2980,7 +2979,7 @@ function createCampaignCard(campaign, isOwned) {
         <p>${synopsisSnippet}</p>
         <div class="campaign-card-footer">
             <span class="campaign-date">Criada em: ${new Date(campaign.createdAt).toLocaleDateString('pt-BR')}</span>
-            <button class="wizard-btn" onclick="window.location.href='gerenciar-campanha.html?id=${campaign.id}'">${isOwned ? 'Gerenciar' : 'Acessar'}</button>
+            <button class="wizard-btn" onclick="window.location.href='gerenciar-campanha.html?id=${campaign.id}'">${isOwned ? 'Gerenciar' : 'JOGAR'}</button>
         </div>
     `;
     return card;
@@ -3008,24 +3007,24 @@ function generateUniqueInviteCode() {
  * Adiciona o usuário atual a uma campanha usando um código de convite.
  * @param {string} inviteCode - O código de convite.
  */
-async function joinCampaignByCode(inviteCode) {
-    await checkAuthStatus(); // Garante que currentUserId está definido
-    const campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-    const campaignIndex = campaigns.findIndex(c => c.inviteCode === inviteCode);
+async function joinCampaignByCode(inviteCode) {    
+    const user = await checkAuthStatus();
+    if (!user) {
+        alert('Você precisa estar logado para entrar em uma campanha.');
+        return;
+    }
 
-    if (campaignIndex > -1) {
-        const campaign = campaigns[campaignIndex];
-        if (!campaign.players.includes(currentUserId)) {
-            campaign.players.push(currentUserId);
-            localStorage.setItem('sombras-campaigns', JSON.stringify(campaigns));
-            alert(`Você entrou na campanha "${campaign.title}"!`);
-            window.location.href = `gerenciar-campanha.html?id=${campaign.id}`;
+    try {
+        const response = await api.post('/campaigns/join', { inviteCode });
+        alert(`Você entrou na campanha "${response.data.title}"!`);
+        window.location.href = `gerenciar-campanha.html?id=${response.data.id}`;
+    } catch (error) {
+        if (error.response && error.response.status === 404) {
+            alert('Código de convite inválido ou campanha não encontrada.');
         } else {
-            alert('Você já faz parte desta campanha.');
-            window.location.href = `gerenciar-campanha.html?id=${campaign.id}`;
+            console.error("Erro ao entrar na campanha:", error);
+            alert('Ocorreu um erro ao tentar entrar na campanha. Tente novamente.');
         }
-    } else {
-        alert('Código de convite inválido ou campanha não encontrada.');
     }
 }
 
@@ -3042,22 +3041,22 @@ async function initializeCampaignManagement() {
         return;
     }
 
-    const campaign = getCampaignById(campaignId);
+    // Garante que o ID do usuário atual está carregado
+    const user = await checkAuthStatus();
+
+    const campaign = await getCampaignById(campaignId);
     if (!campaign) {
         alert('Campanha não encontrada.');
         window.location.href = 'campanhas.html';
         return;
     }
 
-    // Garante que o ID do usuário atual está carregado
-    await checkAuthStatus();
-
     // Verifica se o usuário é o dono da campanha ou um jogador
-    if (campaign.ownerId === currentUserId) {
+    if (campaign.ownerId === user._id) {
         // O usuário é o mestre, mostra a visão de gerenciamento
         document.getElementById('campaign-management-container').style.display = 'block';
         initializeMasterView(campaign);
-    } else if (campaign.players && campaign.players.includes(currentUserId)) {
+    } else if (campaign.players && campaign.players.includes(user._id)) {
         // O usuário é um jogador, mostra a visão de jogador
         document.getElementById('player-view-container').style.display = 'block';
         initializePlayerView(campaign);
@@ -3312,6 +3311,9 @@ async function checkAuthStatus() {
         // 3. Se encontrar, substitui o botão de login pelas informações do usuário
         if (user) {
             authContainer.innerHTML = `<span class="user-info">Olá, ${user.displayName}! <a href="${API_BASE_URL}/auth/logout" class="auth-link">[Sair]</a></span>`;
+            currentUserId = user._id; // <-- CORREÇÃO CRÍTICA: Armazena o ID do usuário logado
+        } else {
+            currentUserId = 'local_user_id'; // Garante que, se não houver usuário, o ID seja o local
         }
     } catch (error) {
         // Se houver um erro (ex: 401 não autorizado), o botão de login já está na tela,
