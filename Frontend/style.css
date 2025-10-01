@@ -2700,6 +2700,58 @@ body.dev-mode #dev-mode-form { display: none; }
     text-align: center;
 }
 
+.invite-code-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    background-color: rgba(0,0,0,0.3);
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 0.8rem;
+}
+
+.invite-code-display span {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--color-text-primary);
+    letter-spacing: 2px;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.invite-code-display .wizard-btn.small-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    margin: 0;
+    background: var(--color-surface-2);
+    border: 1px solid #555;
+    box-shadow: none;
+}
+
+.join-campaign-form {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.join-campaign-form input {
+    flex-grow: 1;
+    padding: 0.8rem;
+    background-color: rgba(18, 18, 18, 0.8);
+    border: 2px solid #444;
+    border-radius: 8px;
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.join-campaign-form .wizard-btn {
+    padding: 0.8rem 1.5rem;
+}
+
 .recent-threats {
     display: flex;
     flex-direction: column;

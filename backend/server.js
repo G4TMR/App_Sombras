@@ -159,7 +159,7 @@ function ensureAuthenticated(req, res, next) {
 // --- 6. Rotas da API ---
 
 // Rotas de Autenticação
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'], prompt: 'select_account' }));
 
 app.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: `${FRONTEND_URL}/Home.html` }), // Redireciona para a Home em caso de falha

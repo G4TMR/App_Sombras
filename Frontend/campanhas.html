@@ -18,6 +18,18 @@
                     <p class="info-text">Gerencie suas campanhas de terror e investigação. Organize sessões, acompanhe o progresso dos jogadores e mantenha o controle narrativo de suas histórias.</p>
                     
                     <div class="campaigns-container">
+                        <div class="content-box" id="joined-campaigns-section" style="display: none; margin-bottom: 2rem;">
+                            <h2>Campanhas Incluídas</h2>
+                            <p class="info-text">Campanhas em que você está participando como jogador.</p>
+                            <div class="campaigns-grid" id="joined-campaigns-grid"></div>
+                            <div class="empty-state" id="empty-joined-campaigns" style="display: none;">
+                                <p class="empty-message">Você não está em nenhuma campanha ainda.</p>
+                                <p class="empty-submessage">Peça um código de convite ao seu Mestre!</p>
+                            </div>
+                        </div>
+
+                        <!-- As campanhas salvas aparecerão aqui -->
+                        <h2 style="margin-top: 2rem;">Minhas Campanhas</h2>
                         <div class="campaigns-grid"></div> <!-- As campanhas salvas aparecerão aqui -->
                         <div class="empty-state">
                             <p class="empty-message">Nenhuma campanha criada ainda.</p>
@@ -32,6 +44,14 @@
                 <div class="content-box">
                     <h2>Ferramentas do Mestre</h2>
                     <div class="tools-grid">
+                        <div class="tool-card">
+                            <h3>Entrar em uma Campanha</h3>
+                            <p>Possui um código de convite? Insira-o abaixo para se juntar a uma nova aventura.</p>
+                            <form id="join-campaign-form" class="join-campaign-form">
+                                <input type="text" id="join-code-input" placeholder="SDA-XXXX" required>
+                                <button type="submit" class="wizard-btn">Entrar</button>
+                            </form>
+                        </div>
                         <div class="tool-card">
                             <h3>Gerador de NPCs</h3>
                             <p>Crie personagens não-jogáveis únicos para suas campanhas.</p>

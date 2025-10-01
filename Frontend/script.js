@@ -12,6 +12,8 @@
 const API_BASE_URL = 'https://app-sombras.onrender.com'; // URL CORRIGIDA do seu serviço no Render
 
 const api = axios.create({
+    // Adiciona um interceptor para lidar com erros de autenticação globalmente
+    // Isso garante que, se a sessão expirar, o usuário seja redirecionado para o login.
     baseURL: `${API_BASE_URL}/api`,
     withCredentials: true, // Permite que cookies de autenticação sejam enviados
 });
@@ -20,6 +22,20 @@ const authApi = axios.create({
     baseURL: `${API_BASE_URL}/auth`,
     withCredentials: true,
 });
+
+api.interceptors.response.use(
+    response => response,
+    error => {
+        if (error.response && error.response.status === 401) {
+            // Se for um erro 401 (Não Autorizado), redireciona para a página de login
+            console.warn("Sessão expirada ou não autorizado. Redirecionando para login.");
+            window.location.href = `${API_BASE_URL}/auth/google`; // Ou sua página de login
+        }
+        return Promise.reject(error);
+    }
+);
+
+let currentUserId = 'local_user_id'; // ID padrão para modo local/não logado. Será atualizado por checkAuthStatus.
 
 const CLASS_BASE_ATTRIBUTES = {
     'Bélico': { forca: 3, agilidade: 2, presenca: 1, vitalidade: 3, inteligencia: 1 },
@@ -2884,10 +2900,12 @@ function deleteCampaign(campaignId) {
  * @param {object} campaignData - O objeto da campanha a ser salvo.
  */
 function saveCampaign(campaignData) {
+    // Adiciona o ownerId e inicializa players e inviteCode se não existirem
+    const newCampaignData = { ...campaignData, ownerId: currentUserId, players: [], inviteCode: generateUniqueInviteCode() };
     try {
         const campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-        campaigns.unshift(campaignData); // Adiciona no início para a mais recente aparecer primeiro
-        localStorage.setItem('sombras-campaigns', JSON.stringify(campaigns));
+        campaigns.unshift(newCampaignData); // Adiciona no início para a mais recente aparecer primeiro
+        localStorage.setItem('sombras-campaigns', JSON.stringify(campaigns)); // Salva a campanha com o ownerId
         window.location.href = 'campanhas.html';
     } catch (error) {
         console.error("Erro ao salvar campanha:", error);
@@ -2898,47 +2916,116 @@ function saveCampaign(campaignData) {
 /**
  * Exibe as campanhas salvas na página de campanhas.
  */
-function displayCampaigns() {
-    const campaignsContainer = document.querySelector('.campaigns-container');
-    if (!campaignsContainer) return;
+async function displayCampaigns() {
+    const myCampaignsGrid = document.querySelector('.campaigns-container .campaigns-grid');
+    const emptyMyCampaigns = document.querySelector('.campaigns-container .empty-state');
+    const joinedCampaignsSection = document.getElementById('joined-campaigns-section');
+    const joinedCampaignsGrid = document.getElementById('joined-campaigns-grid');
+    const emptyJoinedCampaigns = document.getElementById('empty-joined-campaigns');
+
+    if (!myCampaignsGrid || !joinedCampaignsGrid || !joinedCampaignsSection) return;
+
+    // Garante que currentUserId está definido (pode ser 'local_user_id' ou o ID do usuário logado)
+    await checkAuthStatus(); 
 
     const campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-    const emptyState = campaignsContainer.querySelector('.empty-state');
-    let grid = campaignsContainer.querySelector('.campaigns-grid');
 
-    if (campaigns.length > 0) {
-        if (emptyState) emptyState.style.display = 'none';
+    myCampaignsGrid.innerHTML = '';
+    joinedCampaignsGrid.innerHTML = '';
 
-        if (!grid) {
-            grid = document.createElement('div');
-            grid.className = 'campaigns-grid';
-            campaignsContainer.appendChild(grid);
-        }
-        grid.innerHTML = ''; // Limpa o grid para renderizar novamente
+    const ownedCampaigns = campaigns.filter(c => c.ownerId === currentUserId);
+    const joinedCampaigns = campaigns.filter(c => c.players && c.players.includes(currentUserId) && c.ownerId !== currentUserId);
 
-        campaigns.forEach(campaign => {
-            const card = document.createElement('div');
-            card.className = 'campaign-card';
-            const synopsisSnippet = campaign.synopsis ? campaign.synopsis.substring(0, 150) + (campaign.synopsis.length > 150 ? '...' : '') : 'Nenhuma sinopse fornecida.';
-            
-            const imageHtml = campaign.imageUrl
-                ? `<img src="${campaign.imageUrl}" alt="Capa da campanha ${campaign.title}" class="campaign-card-image">`
-                : '';
-
-            card.innerHTML = `
-                ${imageHtml}
-                <h3>${campaign.title}</h3>
-                <p>${synopsisSnippet}</p>
-                <div class="campaign-card-footer">
-                    <span class="campaign-date">Criada em: ${new Date(campaign.createdAt).toLocaleDateString('pt-BR')}</span>
-                    <button class="wizard-btn" onclick="window.location.href='gerenciar-campanha.html?id=${campaign.id}'">Gerenciar</button>
-                </div>
-            `;
-            grid.appendChild(card);
+    // Renderizar "Minhas Campanhas"
+    if (ownedCampaigns.length > 0) {
+        emptyMyCampaigns.style.display = 'none';
+        ownedCampaigns.forEach(campaign => {
+            myCampaignsGrid.appendChild(createCampaignCard(campaign, true)); // true indica que é uma campanha do mestre
         });
     } else {
-        if (emptyState) emptyState.style.display = 'flex';
-        if (grid) grid.innerHTML = ''; // Limpa o grid se não houver campanhas
+        emptyMyCampaigns.style.display = 'flex';
+    }
+
+    // Renderizar "Campanhas Incluídas"
+    if (joinedCampaigns.length > 0) {
+        joinedCampaignsSection.style.display = 'block';
+        emptyJoinedCampaigns.style.display = 'none';
+        joinedCampaigns.forEach(campaign => {
+            joinedCampaignsGrid.appendChild(createCampaignCard(campaign, false)); // false indica que é uma campanha de jogador
+        });
+    } else {
+        joinedCampaignsSection.style.display = 'block'; // Mostrar a seção mesmo que vazia
+        emptyJoinedCampaigns.style.display = 'flex';
+    }
+}
+
+/**
+ * Cria um card de campanha para exibição.
+ * @param {object} campaign - O objeto da campanha.
+ * @param {boolean} isOwned - True se o usuário é o mestre da campanha, false caso contrário.
+ * @returns {HTMLElement} O elemento do card da campanha.
+ */
+function createCampaignCard(campaign, isOwned) {
+    const card = document.createElement('div');
+    card.className = 'campaign-card';
+    const synopsisSnippet = campaign.synopsis ? campaign.synopsis.substring(0, 150) + (campaign.synopsis.length > 150 ? '...' : '') : 'Nenhuma sinopse fornecida.';
+    
+    const imageHtml = campaign.imageUrl
+        ? `<img src="${campaign.imageUrl}" alt="Capa da campanha ${campaign.title}" class="campaign-card-image">`
+        : '';
+
+    card.innerHTML = `
+        ${imageHtml}
+        <h3>${campaign.title}</h3>
+        <p>${synopsisSnippet}</p>
+        <div class="campaign-card-footer">
+            <span class="campaign-date">Criada em: ${new Date(campaign.createdAt).toLocaleDateString('pt-BR')}</span>
+            <button class="wizard-btn" onclick="window.location.href='gerenciar-campanha.html?id=${campaign.id}'">${isOwned ? 'Gerenciar' : 'Acessar'}</button>
+        </div>
+    `;
+    return card;
+}
+
+/**
+ * Gera um código de convite único para a campanha.
+ * @returns {string} O código de convite gerado.
+ */
+function generateUniqueInviteCode() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = 'SDA-';
+    for (let i = 0; i < 4; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    // Verifica se o código já existe (improvável para 4 caracteres, mas boa prática)
+    const campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
+    if (campaigns.some(c => c.inviteCode === result)) {
+        return generateUniqueInviteCode(); // Gera novamente se houver colisão
+    }
+    return result;
+}
+
+/**
+ * Adiciona o usuário atual a uma campanha usando um código de convite.
+ * @param {string} inviteCode - O código de convite.
+ */
+async function joinCampaignByCode(inviteCode) {
+    await checkAuthStatus(); // Garante que currentUserId está definido
+    const campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
+    const campaignIndex = campaigns.findIndex(c => c.inviteCode === inviteCode);
+
+    if (campaignIndex > -1) {
+        const campaign = campaigns[campaignIndex];
+        if (!campaign.players.includes(currentUserId)) {
+            campaign.players.push(currentUserId);
+            localStorage.setItem('sombras-campaigns', JSON.stringify(campaigns));
+            alert(`Você entrou na campanha "${campaign.title}"!`);
+            window.location.href = `gerenciar-campanha.html?id=${campaign.id}`;
+        } else {
+            alert('Você já faz parte desta campanha.');
+            window.location.href = `gerenciar-campanha.html?id=${campaign.id}`;
+        }
+    } else {
+        alert('Código de convite inválido ou campanha não encontrada.');
     }
 }
 
@@ -2953,6 +3040,10 @@ function initializeCampaignManagement() {
         window.location.href = 'campanhas.html';
         return;
     }
+
+    // Garante que a campanha tem os novos campos
+    campaign.players = campaign.players || [];
+    campaign.inviteCode = campaign.inviteCode || generateUniqueInviteCode();
 
     const campaign = getCampaignById(campaignId);
     if (!campaign) {
@@ -2971,6 +3062,8 @@ function initializeCampaignManagement() {
     const titleModalInput = document.getElementById('campaign-title-modal');
     const synopsisModalTextarea = document.getElementById('campaign-synopsis-modal');
     const imageModalInput = document.getElementById('campaign-image-modal');
+    const inviteCodeDisplay = document.getElementById('campaign-invite-code-display');
+    const generateCodeBtn = document.getElementById('generate-invite-code-btn');
     const imageModalPreview = document.getElementById('campaign-image-modal-preview');
 
     // Preenche os campos do formulário
@@ -2979,6 +3072,7 @@ function initializeCampaignManagement() {
     if (campaign.imageUrl) {
         coverImageDisplay.style.backgroundImage = `url('${campaign.imageUrl}')`;
     }
+    inviteCodeDisplay.textContent = campaign.inviteCode;
     
     // Lida com a mudança de imagem no modal
     const imageFileInput = document.getElementById('campaign-image-modal-input');
@@ -3032,6 +3126,13 @@ function initializeCampaignManagement() {
     // Configura o botão de exclusão
     const deleteBtn = document.getElementById('delete-campaign-btn');
     deleteBtn.addEventListener('click', () => deleteCampaign(campaignId));
+
+    // Configura o botão de gerar código de convite
+    generateCodeBtn.addEventListener('click', () => {
+        campaign.inviteCode = generateUniqueInviteCode();
+        updateCampaign(campaign, true);
+        inviteCodeDisplay.textContent = campaign.inviteCode;
+    });
 
     // Configura o gerador de mapa
     const generateMapBtn = document.getElementById('generate-map-btn');
@@ -3217,7 +3318,7 @@ function checkAndApplyDevMode() {
     }
 }
 
-let header; // Variável global para o header
+let header; // Variável global para o header element
 // Inicialização do Script quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', async () => {
     await loadHeader();
@@ -3225,7 +3326,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     checkAndApplyDevMode(); // Verifica o modo dev logo no início
     updateActiveLinks();
     checkAuthStatus(); // Agora é mais rápido
-
+    
     const path = window.location.pathname;
     if (path.includes('criar-agente.html')) {
         // A classe CharacterCreator agora lida com a lógica de modo internamente
@@ -3234,6 +3335,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     }
     if (path.includes('campanhas.html')) {
+        // Adiciona o listener para o formulário de entrar na campanha
+        const joinCampaignForm = document.getElementById('join-campaign-form');
+        if (joinCampaignForm) {
+            joinCampaignForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const inviteCode = document.getElementById('join-code-input').value.trim().toUpperCase();
+                joinCampaignByCode(inviteCode);
+            });
+        }
         displayCampaigns();
     }
     if (path.includes('gerenciar-campanha.html')) {
