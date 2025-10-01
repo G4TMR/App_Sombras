@@ -3032,18 +3032,15 @@ async function joinCampaignByCode(inviteCode) {
 /**
  * Inicializa a página de gerenciamento de campanha, carregando dados e configurando eventos.
  */
-function initializeCampaignManagement() {
+async function initializeCampaignManagement() {
     const params = new URLSearchParams(window.location.search);
     const campaignId = params.get('id');
+
     if (!campaignId) {
         alert('ID da campanha não encontrado.');
         window.location.href = 'campanhas.html';
         return;
     }
-
-    // Garante que a campanha tem os novos campos
-    campaign.players = campaign.players || [];
-    campaign.inviteCode = campaign.inviteCode || generateUniqueInviteCode();
 
     const campaign = getCampaignById(campaignId);
     if (!campaign) {
@@ -3052,6 +3049,30 @@ function initializeCampaignManagement() {
         return;
     }
 
+    // Garante que o ID do usuário atual está carregado
+    await checkAuthStatus();
+
+    // Verifica se o usuário é o dono da campanha ou um jogador
+    if (campaign.ownerId === currentUserId) {
+        // O usuário é o mestre, mostra a visão de gerenciamento
+        document.getElementById('campaign-management-container').style.display = 'block';
+        initializeMasterView(campaign);
+    } else if (campaign.players && campaign.players.includes(currentUserId)) {
+        // O usuário é um jogador, mostra a visão de jogador
+        document.getElementById('player-view-container').style.display = 'block';
+        initializePlayerView(campaign);
+    } else {
+        // O usuário não é nem o mestre nem um jogador
+        alert('Você não tem permissão para acessar esta campanha.');
+        window.location.href = 'campanhas.html';
+    }
+}
+
+/**
+ * Inicializa a visualização do Mestre para gerenciar a campanha.
+ * @param {object} campaign - O objeto da campanha.
+ */
+function initializeMasterView(campaign) {
     // Elementos de exibição
     const titleDisplay = document.getElementById('campaign-title-display');
     const synopsisDisplay = document.getElementById('campaign-synopsis-display');
@@ -3065,6 +3086,15 @@ function initializeCampaignManagement() {
     const inviteCodeDisplay = document.getElementById('campaign-invite-code-display');
     const generateCodeBtn = document.getElementById('generate-invite-code-btn');
     const imageModalPreview = document.getElementById('campaign-image-modal-preview');
+
+    // Migração de dados para campanhas antigas
+    let needsSave = false;
+    if (!campaign.players) { campaign.players = []; needsSave = true; }
+    if (!campaign.inviteCode) { campaign.inviteCode = generateUniqueInviteCode(); needsSave = true; }
+    if (needsSave) {
+        console.log("Migrando campanha antiga. Adicionando código de convite.");
+        updateCampaign(campaign); // Salva a campanha com os novos campos
+    }
 
     // Preenche os campos do formulário
     titleDisplay.textContent = campaign.title;
@@ -3185,6 +3215,17 @@ function initializeCampaignManagement() {
                 tabContents.forEach(c => c.id === tabId ? c.classList.add('active') : c.classList.remove('active'));
             });
         });
+    }
+}
+
+/**
+ * Inicializa a visualização do Jogador para a campanha.
+ * @param {object} campaign - O objeto da campanha.
+ */
+function initializePlayerView(campaign) {
+    const titleElement = document.getElementById('player-view-campaign-title');
+    if (titleElement) {
+        titleElement.textContent = `MENU DA CAMPANHA: ${campaign.title}`;
     }
 }
 
