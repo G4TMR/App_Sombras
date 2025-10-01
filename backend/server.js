@@ -288,7 +288,9 @@ app.get('/api/campaigns', ensureAuthenticated, async (req, res) => {
 // Obter uma campanha específica
 app.get('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
     try {
-        const campaign = await Campaign.findOne({ id: req.params.id });
+        // Adicionado .populate() para garantir que ownerId seja sempre um objeto
+        const campaign = await Campaign.findOne({ id: req.params.id })
+            .populate('ownerId', 'displayName');
         if (!campaign) return res.status(404).json({ message: 'Campanha não encontrada.' });
 
         // Verifica se o usuário é o dono ou um jogador

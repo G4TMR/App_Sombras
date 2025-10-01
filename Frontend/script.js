@@ -3052,11 +3052,11 @@ async function initializeCampaignManagement() {
     }
 
     // Verifica se o usuário é o dono da campanha ou um jogador
-    if (campaign.ownerId === user._id) {
+    if (campaign.ownerId && campaign.ownerId._id === user._id) {
         // O usuário é o mestre, mostra a visão de gerenciamento
         document.getElementById('campaign-management-container').style.display = 'block';
         initializeMasterView(campaign);
-    } else if (campaign.players && campaign.players.includes(user._id)) {
+    } else if (campaign.players && campaign.players.includes(user._id)) { // Esta verificação já está correta
         // O usuário é um jogador, mostra a visão de jogador
         document.getElementById('player-view-container').style.display = 'block';
         initializePlayerView(campaign);
