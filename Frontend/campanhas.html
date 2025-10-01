@@ -28,13 +28,15 @@
                             </div>
                         </div>
 
-                        <!-- As campanhas salvas aparecerão aqui -->
-                        <h2 style="margin-top: 2rem;">Minhas Campanhas</h2>
-                        <div class="campaigns-grid"></div> <!-- As campanhas salvas aparecerão aqui -->
-                        <div class="empty-state">
-                            <p class="empty-message">Nenhuma campanha criada ainda.</p>
-                            <p class="empty-submessage">Crie sua primeira campanha para começar a narrar!</p>
-                            <button class="create-campaign-btn" onclick="window.location.href='criar-campanha.html'"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-7-7h14"/></svg>Criar Nova Campanha</button>
+                        <div class="content-box" id="my-campaigns-section">
+                            <h2>Minhas Campanhas</h2>
+                            <p class="info-text">Campanhas criadas e gerenciadas por você.</p>
+                            <div class="campaigns-grid" id="my-campaigns-grid"></div>
+                            <div class="empty-state" id="empty-my-campaigns" style="display: none;">
+                                <p class="empty-message">Nenhuma campanha criada ainda.</p>
+                                <p class="empty-submessage">Crie sua primeira campanha para começar a narrar!</p>
+                                <button class="create-campaign-btn" onclick="window.location.href='criar-campanha.html'"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-7-7h14"/></svg>Criar Nova Campanha</button>
+                            </div>
                         </div>
                     </div>
                 </div>

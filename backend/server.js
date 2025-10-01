@@ -21,6 +21,9 @@ app.use(express.json());
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://127.0.0.1:5500';
 const BACKEND_URL = process.env.BACKEND_URL || `http://localhost:${PORT}`;
 
+// Habilita requisições pre-flight (OPTIONS) para todas as rotas
+app.options('*', cors());
+
 app.use(cors({
     origin: FRONTEND_URL,
     credentials: true
@@ -289,13 +292,19 @@ app.get('/api/campaigns', ensureAuthenticated, async (req, res) => {
 app.get('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
     try {
         // Adicionado .populate() para garantir que ownerId seja sempre um objeto
-        const campaign = await Campaign.findOne({ id: req.params.id })
-            .populate('ownerId', 'displayName');
+        // Modificado para buscar por _id (padrão do Mongo) ou pelo campo 'id' (gerado no frontend)
+        const campaign = await Campaign.findOne({
+            $or: [
+                { _id: mongoose.Types.ObjectId.isValid(req.params.id) ? req.params.id : null },
+                { id: req.params.id }
+            ]
+        }).populate('ownerId', 'displayName');
         if (!campaign) return res.status(404).json({ message: 'Campanha não encontrada.' });
 
         // Verifica se o usuário é o dono ou um jogador
+        const isOwner = campaign.ownerId.equals(req.user._id);
         const isPlayer = campaign.players.some(p => p.equals(req.user._id));
-        if (!campaign.ownerId.equals(req.user._id) && !isPlayer) {
+        if (!isOwner && !isPlayer) {
             return res.status(403).json({ message: 'Acesso negado.' });
         }
         res.status(200).json(campaign);
@@ -324,7 +333,14 @@ app.put('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
 // Deletar uma campanha
 app.delete('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
     try {
-        const result = await Campaign.findOneAndDelete({ id: req.params.id, ownerId: req.user._id }); // Só o dono pode deletar
+        // Modificado para buscar por _id ou id, mas garantindo que apenas o dono possa deletar.
+        const result = await Campaign.findOneAndDelete({
+            $or: [
+                { _id: mongoose.Types.ObjectId.isValid(req.params.id) ? req.params.id : null },
+                { id: req.params.id }
+            ],
+            ownerId: req.user._id // A verificação de dono é crucial e permanece.
+        });
         if (!result) return res.status(404).json({ message: 'Campanha não encontrada ou você não é o dono.' });
         res.status(200).json({ message: 'Campanha excluída com sucesso.' });
     } catch (error) {
