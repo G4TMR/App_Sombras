@@ -2951,8 +2951,8 @@ async function saveCampaign(campaignData) {
     // 2. Se estiver logado, salva no servidor
     try {
         if (user) {
-            // Envia para a API apenas o ID, como o backend espera.
-            await api.post('/campaigns', { ...newCampaignData, ownerId: user._id });
+            // Envia para a API apenas o ID, como o backend espera, com o prefixo correto.
+            await api.post('/api/campaigns', { ...newCampaignData, ownerId: user._id });
         }
         window.location.href = 'campanhas.html';
     } catch (error) {
