@@ -3105,7 +3105,7 @@ async function joinCampaignByCode(inviteCode, formElement) {
     try {
         const response = await api.post('/api/campaigns/join', { inviteCode });
         alert(`Você entrou na campanha "${response.data.title}"!`);
-        window.location.href = `gerenciar-campanha.html?id=${response.data.id}&view=player`;
+        window.location.href = `campanhas.html`; // Redireciona para a própria página para forçar o recarregamento
     } catch (error) {
         if (error.response && error.response.status === 404) {
             alert('Código de convite inválido ou campanha não encontrada.');
