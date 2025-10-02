@@ -2991,7 +2991,7 @@ async function displayCampaigns() {
 
     // 2. Se logado, carrega campanhas online e mescla
     if (user) {
-        const onlineCampaigns = (await api.get('/campaigns')).data;
+        const onlineCampaigns = (await api.get('/api/campaigns')).data;
         onlineCampaigns.forEach(campaign => {
             if (!campaignIds.has(campaign.id)) {
                 allCampaigns.push(campaign);
