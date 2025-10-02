@@ -3004,11 +3004,11 @@ async function displayCampaigns() {
     joinedCampaignsGrid.innerHTML = '';
 
     // 1. Filtro para "Minhas Campanhas": Campanhas onde o usuário é o dono.
-    const ownedCampaigns = allCampaigns.filter(c => c.ownerId && (c.ownerId._id || c.ownerId) === userId);
+    const ownedCampaigns = allCampaigns.filter(c => c.ownerId && (c.ownerId._id === userId || c.ownerId === userId));
     const ownedCampaignIds = new Set(ownedCampaigns.map(c => c.id));
 
     // 2. Filtro para "Campanhas Incluídas": Campanhas onde o usuário é um jogador E que NÃO estão na lista de campanhas que ele possui.
-    const joinedCampaigns = allCampaigns.filter(c => c.players?.some(p => (p._id || p) === userId) && !ownedCampaignIds.has(c.id));
+    const joinedCampaigns = allCampaigns.filter(c => c.players?.some(p => (p._id === userId || p === userId)) && !ownedCampaignIds.has(c.id));
 
     // Renderizar "Minhas Campanhas"
     if (ownedCampaigns.length > 0) {
@@ -3082,12 +3082,23 @@ function generateUniqueInviteCode() {
  * Adiciona o usuário atual a uma campanha usando um código de convite.
  * @param {string} inviteCode - O código de convite.
  */
-async function joinCampaignByCode(inviteCode) {    
+async function joinCampaignByCode(inviteCode, formElement) {    
     const user = await checkAuthStatus();
     if (!user) {
         alert('Você precisa estar logado para entrar em uma campanha.');
         return;
     }
+
+    const submitButton = formElement.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.innerHTML;
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="loader"></span>Entrando...'; // Adiciona um spinner (CSS necessário)
+
+    // Adicione este CSS ao seu style.css para o spinner
+    /*
+    .loader { width: 16px; height: 16px; border: 2px solid #FFF; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; margin-right: 8px; }
+    @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    */
 
     try {
         const response = await api.post('/campaigns/join', { inviteCode });
@@ -3100,6 +3111,9 @@ async function joinCampaignByCode(inviteCode) {
             console.error("Erro ao entrar na campanha:", error);
             alert('Ocorreu um erro ao tentar entrar na campanha. Tente novamente.');
         }
+    } finally {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonText;
     }
 }
 
@@ -3463,7 +3477,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             joinCampaignForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const inviteCode = document.getElementById('join-code-input').value.trim().toUpperCase();
-                joinCampaignByCode(inviteCode);
+                joinCampaignByCode(inviteCode, joinCampaignForm);
             });
         }
         displayCampaigns();

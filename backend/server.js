@@ -295,7 +295,7 @@ app.get('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
                 { _id: mongoose.Types.ObjectId.isValid(req.params.id) ? req.params.id : null },
                 { id: req.params.id }
             ]
-        }).populate('ownerId', 'displayName');
+        }).populate('ownerId', 'displayName').populate('players', 'displayName email');
         if (!campaign) return res.status(404).json({ message: 'Campanha não encontrada.' });
 
         // Verifica se o usuário é o dono ou um jogador
