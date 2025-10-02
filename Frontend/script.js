@@ -3004,11 +3004,11 @@ async function displayCampaigns() {
     joinedCampaignsGrid.innerHTML = '';
 
     // 1. Filtro para "Minhas Campanhas": Campanhas onde o usuário é o dono.
-    const ownedCampaigns = allCampaigns.filter(c => c.ownerId && (c.ownerId._id === userId || c.ownerId === userId));
+    const ownedCampaigns = allCampaigns.filter(c => c.ownerId && (c.ownerId._id === userId || c.ownerId === userId || (typeof c.ownerId === 'object' && c.ownerId.id === userId)));
     const ownedCampaignIds = new Set(ownedCampaigns.map(c => c.id));
 
     // 2. Filtro para "Campanhas Incluídas": Campanhas onde o usuário é um jogador E que NÃO estão na lista de campanhas que ele possui.
-    const joinedCampaigns = allCampaigns.filter(c => c.players?.some(p => (p._id === userId || p === userId)) && !ownedCampaignIds.has(c.id));
+    const joinedCampaigns = allCampaigns.filter(c => c.players?.some(p => (p._id === userId || p === userId || (typeof p === 'object' && p.id === userId))) && !ownedCampaignIds.has(c.id));
 
     // Renderizar "Minhas Campanhas"
     if (ownedCampaigns.length > 0) {
