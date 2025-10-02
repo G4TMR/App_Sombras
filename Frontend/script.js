@@ -2897,7 +2897,7 @@ async function deleteCampaign(campaignId) {
     // 1. Tenta deletar no servidor PRIMEIRO (se estiver online)
     if (user) {
         try {
-            await api.delete(`/campaigns/${campaignId}`); // A API já verifica se o usuário é o dono
+            await api.delete(`/api/campaigns/${campaignId}`); // A API já verifica se o usuário é o dono
         } catch (error) {
             console.error("Erro ao excluir campanha no servidor:", error);
             alert("Ocorreu um erro ao excluir a campanha. Verifique sua conexão e tente novamente.");
@@ -2964,24 +2964,14 @@ async function saveCampaign(campaignData) {
 /**
  * Exibe as campanhas salvas na página de campanhas.
  */
-async function displayCampaigns(user) {
+function displayCampaigns(allCampaigns, userId) {
     const myCampaignsGrid = document.getElementById('my-campaigns-grid');
     const joinedCampaignsSection = document.getElementById('joined-campaigns-section');
     const emptyMyCampaigns = document.getElementById('empty-my-campaigns');
     const joinedCampaignsGrid = document.getElementById('joined-campaigns-grid');
     const emptyJoinedCampaigns = document.getElementById('empty-joined-campaigns');
 
-    if (!myCampaignsGrid || !joinedCampaignsGrid || !joinedCampaignsSection) return; // Garante que os elementos existam
-
-    const userId = user ? user._id : 'local_user_id';
-    let allCampaigns = [];
-    // Lógica simplificada: Se o usuário está logado, a API é a única fonte da verdade.
-    // Caso contrário, usamos o localStorage.
-    if (user) {
-        allCampaigns = (await api.get('/api/campaigns')).data;
-    } else {
-        allCampaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-    }
+    if (!myCampaignsGrid || !joinedCampaignsGrid || !joinedCampaignsSection) return;
 
     myCampaignsGrid.innerHTML = '';
     joinedCampaignsGrid.innerHTML = '';
@@ -3470,8 +3460,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 joinCampaignByCode(inviteCode, joinCampaignForm);
             });
         }
-        // Agora chamamos displayCampaigns aqui, com o usuário já verificado
-        displayCampaigns(user);
+
+        // Lógica de exibição de campanhas refatorada para garantir a ordem
+        let campaignsData = [];
+        const userId = user ? user._id : 'local_user_id';
+
+        if (user) {
+            try {
+                // Adiciona um parâmetro de cache-busting para garantir dados novos
+                const response = await api.get(`/api/campaigns?t=${new Date().getTime()}`);
+                campaignsData = response.data;
+            } catch (error) {
+                console.error("Falha ao buscar campanhas da API:", error);
+            }
+        } else {
+            campaignsData = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
+        }
+        displayCampaigns(campaignsData, userId);
     }
     if (path.includes('gerenciar-campanha.html')) {
         initializeCampaignManagement();
