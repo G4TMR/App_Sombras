@@ -2964,7 +2964,7 @@ async function saveCampaign(campaignData) {
 /**
  * Exibe as campanhas salvas na página de campanhas.
  */
-async function displayCampaigns() {
+async function displayCampaigns(user) {
     const myCampaignsGrid = document.getElementById('my-campaigns-grid');
     const joinedCampaignsSection = document.getElementById('joined-campaigns-section');
     const emptyMyCampaigns = document.getElementById('empty-my-campaigns');
@@ -2973,8 +2973,6 @@ async function displayCampaigns() {
 
     if (!myCampaignsGrid || !joinedCampaignsGrid || !joinedCampaignsSection) return;
 
-    // Garante que currentUserId está definido (pode ser 'local_user_id' ou o ID do usuário logado)
-    const user = await checkAuthStatus();
     const userId = user ? user._id : 'local_user_id';
 
     let allCampaigns = [];
@@ -3420,9 +3418,11 @@ async function checkAuthStatus() {
         console.log('Sessão de usuário não encontrada ou erro de autenticação. O botão de login será mantido.');
         return null; // Retorna nulo se não houver usuário
     } finally {
-        // Garante que a exibição das campanhas seja chamada APÓS a verificação de auth terminar.
+        // Garante que a exibição das campanhas seja chamada APÓS a verificação de auth terminar,
+        // passando o usuário que acabamos de verificar.
         if (document.body.dataset.page === 'campanhas') {
-            displayCampaigns();
+            const user = await api.get('/auth/user').then(res => res.data).catch(() => null);
+            displayCampaigns(user);
         }
     }
 }
