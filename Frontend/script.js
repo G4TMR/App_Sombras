@@ -2842,7 +2842,7 @@ async function getCampaignById(campaignId) {
 
     // 2. Se não encontrou localmente, tenta buscar na API (para acesso online)
     try {
-        const response = await api.get(`/campaigns/${campaignId}`);
+        const response = await api.get(`/api/campaigns/${campaignId}`);
         return response.data;
     } catch (error) {
         console.error("Erro ao buscar campanha por ID:", error);
