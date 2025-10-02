@@ -2858,6 +2858,25 @@ body.dev-mode #dev-mode-form { display: none; }
     grid-column: 1 / -1; /* Ocupa todas as colunas */
 }
 
+/* --- BOTÃO VOLTAR (PÁGINA DE GERENCIAMENTO) --- */
+.back-to-list-btn {
+    display: inline-block;
+    margin: 0 0 2rem 2rem; /* Alinha com o padding do container */
+    padding: 0.5rem 1rem;
+    background-color: var(--color-surface-2);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.back-to-list-btn:hover {
+    background-color: var(--page-color, var(--color-primary));
+    color: var(--color-text-primary);
+    transform: translateX(-5px);
+}
+
 /* =================================================================
    REGRAS DE RESPONSIVIDADE PARA DISPOSITIVOS MÓVEIS
    Adicione este bloco ao FINAL do seu arquivo style.css

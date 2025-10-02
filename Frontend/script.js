@@ -3419,6 +3419,11 @@ async function checkAuthStatus() {
         // então não precisamos fazer nada, apenas registrar o erro no console.
         console.log('Sessão de usuário não encontrada ou erro de autenticação. O botão de login será mantido.');
         return null; // Retorna nulo se não houver usuário
+    } finally {
+        // Garante que a exibição das campanhas seja chamada APÓS a verificação de auth terminar.
+        if (document.body.dataset.page === 'campanhas') {
+            displayCampaigns();
+        }
     }
 }
 
@@ -3487,7 +3492,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 joinCampaignByCode(inviteCode, joinCampaignForm);
             });
         }
-        displayCampaigns();
+        // A chamada para displayCampaigns() foi movida para dentro de checkAuthStatus para garantir a ordem correta de execução.
     }
     if (path.includes('gerenciar-campanha.html')) {
         initializeCampaignManagement();
