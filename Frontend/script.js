@@ -2971,31 +2971,16 @@ async function displayCampaigns(user) {
     const joinedCampaignsGrid = document.getElementById('joined-campaigns-grid');
     const emptyJoinedCampaigns = document.getElementById('empty-joined-campaigns');
 
-    if (!myCampaignsGrid || !joinedCampaignsGrid || !joinedCampaignsSection) return;
+    if (!myCampaignsGrid || !joinedCampaignsGrid || !joinedCampaignsSection) return; // Garante que os elementos existam
 
     const userId = user ? user._id : 'local_user_id';
-
     let allCampaigns = [];
-    const campaignIds = new Set();
-
-    // 1. Carrega campanhas locais
-    const localCampaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-    localCampaigns.forEach(campaign => {
-        if (!campaignIds.has(campaign.id)) {
-            allCampaigns.push(campaign);
-            campaignIds.add(campaign.id);
-        }
-    });
-
-    // 2. Se logado, carrega campanhas online e mescla
+    // Lógica simplificada: Se o usuário está logado, a API é a única fonte da verdade.
+    // Caso contrário, usamos o localStorage.
     if (user) {
-        const onlineCampaigns = (await api.get('/api/campaigns')).data;
-        onlineCampaigns.forEach(campaign => {
-            if (!campaignIds.has(campaign.id)) {
-                allCampaigns.push(campaign);
-                campaignIds.add(campaign.id);
-            }
-        });
+        allCampaigns = (await api.get('/api/campaigns')).data;
+    } else {
+        allCampaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
     }
 
     myCampaignsGrid.innerHTML = '';
