@@ -3103,7 +3103,7 @@ async function joinCampaignByCode(inviteCode, formElement) {
     */
 
     try {
-        const response = await api.post('/campaigns/join', { inviteCode });
+        const response = await api.post('/api/campaigns/join', { inviteCode });
         alert(`Você entrou na campanha "${response.data.title}"!`);
         window.location.href = `gerenciar-campanha.html?id=${response.data.id}&view=player`;
     } catch (error) {
