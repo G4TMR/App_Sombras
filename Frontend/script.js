@@ -3,26 +3,20 @@
  * Contém a lógica para a criação de personagens e exibição de agentes.
  */
 
-// Configuração do Axios para comunicação com a API
-
 // --- MODO DE DESENVOLVIMENTO (para testar no seu PC) ---
 // const API_BASE_URL = 'http://localhost:3000';
 
 // --- MODO DE PRODUÇÃO (para o site online) ---
 const API_BASE_URL = 'https://app-sombras.onrender.com'; // URL CORRIGIDA do seu serviço no Render
 
+// Configuração do Axios para comunicação com a API
 const api = axios.create({
-    // Adiciona um interceptor para lidar com erros de autenticação globalmente
-    // Isso garante que, se a sessão expirar, o usuário seja redirecionado para o login.
-    baseURL: `${API_BASE_URL}/api`,
+    baseURL: API_BASE_URL,
     withCredentials: true, // Permite que cookies de autenticação sejam enviados
 });
 
-const authApi = axios.create({
-    baseURL: `${API_BASE_URL}/auth`,
-    withCredentials: true,
-});
-
+// Adiciona um interceptor para lidar com erros de autenticação globalmente
+// Isso garante que, se a sessão expirar, o usuário seja redirecionado para o login.
 api.interceptors.response.use(
     response => response,
     error => {
@@ -3387,7 +3381,7 @@ async function checkAuthStatus() {
 
     try {
         // 2. Tenta buscar o usuário logado em segundo plano
-        const response = await authApi.get('/user');
+        const response = await api.get('/auth/user');
         const user = response.data;
 
         // 3. Se encontrar, substitui o botão de login pelas informações do usuário
