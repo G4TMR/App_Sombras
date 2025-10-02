@@ -360,7 +360,8 @@ app.post('/api/campaigns/join', ensureAuthenticated, async (req, res) => {
         }
 
         // Adiciona o jogador se ele ainda não estiver na lista
-        if (!campaign.players.includes(req.user._id)) {
+        // CORREÇÃO: .includes() não funciona bem com ObjectIds. Usar .some() com .equals() é a forma correta.
+        if (!campaign.players.some(p => p.equals(req.user._id))) {
             campaign.players.push(req.user._id);
             await campaign.save();
         }

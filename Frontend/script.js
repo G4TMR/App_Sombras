@@ -3133,7 +3133,7 @@ async function initializeCampaignManagement() {
         // O usuário é um jogador e quer a visão de jogador
         document.getElementById('player-view-container').style.display = 'block';
         initializePlayerView(campaign);
-    } else if (campaign.ownerId && (campaign.ownerId._id || campaign.ownerId) === userId) {
+    } else if (getObjectIdAsString(campaign.ownerId) === userId) {
         // O usuário é o mestre, mostra a visão de gerenciamento
         document.getElementById('campaign-management-container').style.display = 'block';
         initializeMasterView(campaign);
