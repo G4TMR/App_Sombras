@@ -3362,7 +3362,7 @@ function updateActiveLinks() {
 async function checkAuthStatus() {
     const nav = document.querySelector('#primary-navigation');
     if (!nav) {
-        console.error("Elemento de navegação '#primary-navigation' não encontrado para inserir o status de autenticação.");
+        console.warn("Elemento de navegação '#primary-navigation' não encontrado. A verificação de status será pulada.");
         return;
     }
 
@@ -3388,8 +3388,10 @@ async function checkAuthStatus() {
         if (user && user._id) {
             authContainer.innerHTML = `<span class="user-info">Olá, ${user.displayName}! <a href="${API_BASE_URL}/auth/logout" class="auth-link">[Sair]</a></span>`;
             currentUserId = user._id; // <-- CORREÇÃO CRÍTICA: Armazena o ID do usuário logado
+            return user; // <-- CORREÇÃO: Retorna o objeto do usuário em caso de sucesso
         } else {
             currentUserId = 'local_user_id'; // Garante que, se não houver usuário, o ID seja o local
+            return null; // <-- CORREÇÃO: Retorna nulo se não houver usuário
         }
     } catch (error) {
         // Se houver um erro (ex: 401 não autorizado), o botão de login já está na tela,
