@@ -21,9 +21,6 @@ app.use(express.json());
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://127.0.0.1:5500';
 const BACKEND_URL = process.env.BACKEND_URL || `http://localhost:${PORT}`;
 
-// Habilita requisições pre-flight (OPTIONS) para todas as rotas
-app.options('*', cors());
-
 app.use(cors({
     origin: FRONTEND_URL,
     credentials: true
