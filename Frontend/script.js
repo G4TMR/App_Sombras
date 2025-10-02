@@ -2925,6 +2925,17 @@ async function deleteCampaign(campaignId) {
 // =================================================================================
 
 /**
+ * Extrai o ID de um objeto ou string, garantindo que seja sempre uma string para comparação.
+ * @param {string|object} idField - O campo que pode ser um ID string ou um objeto com _id.
+ * @returns {string|null} O ID como string ou null se não puder ser extraído.
+ */
+function getObjectIdAsString(idField) {
+    if (typeof idField === 'string') return idField;
+    if (typeof idField === 'object' && idField !== null && idField._id) return idField._id;
+    return null;
+}
+
+/**
  * Salva uma nova campanha no localStorage e redireciona para a página de campanhas.
  * @param {object} campaignData - O objeto da campanha a ser salvo.
  */
@@ -2977,11 +2988,11 @@ function displayCampaigns(allCampaigns, userId) {
     joinedCampaignsGrid.innerHTML = '';
 
     // 1. Filtro para "Minhas Campanhas": Campanhas onde o usuário é o dono.
-    const ownedCampaigns = allCampaigns.filter(c => c.ownerId && (c.ownerId._id === userId || c.ownerId === userId || (typeof c.ownerId === 'object' && c.ownerId.id === userId)));
+    const ownedCampaigns = allCampaigns.filter(c => getObjectIdAsString(c.ownerId) === userId);
     const ownedCampaignIds = new Set(ownedCampaigns.map(c => c.id));
 
     // 2. Filtro para "Campanhas Incluídas": Campanhas onde o usuário é um jogador E que NÃO estão na lista de campanhas que ele possui.
-    const joinedCampaigns = allCampaigns.filter(c => c.players?.some(p => (p._id === userId || p === userId || (typeof p === 'object' && p.id === userId))) && !ownedCampaignIds.has(c.id));
+    const joinedCampaigns = allCampaigns.filter(c => c.players?.some(p => getObjectIdAsString(p) === userId) && !ownedCampaignIds.has(c.id));
 
     // Renderizar "Minhas Campanhas"
     if (ownedCampaigns.length > 0) {
@@ -3118,7 +3129,7 @@ async function initializeCampaignManagement() {
     }
 
     // Verifica se o usuário é o dono da campanha ou um jogador
-    if (viewMode === 'player' && campaign.players && campaign.players.some(p => (p._id || p) === userId)) {
+    if (viewMode === 'player' && campaign.players && campaign.players.some(p => getObjectIdAsString(p) === userId)) {
         // O usuário é um jogador e quer a visão de jogador
         document.getElementById('player-view-container').style.display = 'block';
         initializePlayerView(campaign);
@@ -3126,7 +3137,7 @@ async function initializeCampaignManagement() {
         // O usuário é o mestre, mostra a visão de gerenciamento
         document.getElementById('campaign-management-container').style.display = 'block';
         initializeMasterView(campaign);
-    } else if (campaign.players && campaign.players.some(p => (p._id || p) === userId)) {
+    } else if (campaign.players && campaign.players.some(p => getObjectIdAsString(p) === userId)) {
         // O usuário é um jogador (caso geral), mostra a visão de jogador
         document.getElementById('player-view-container').style.display = 'block';
         initializePlayerView(campaign);
