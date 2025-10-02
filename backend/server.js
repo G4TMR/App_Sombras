@@ -372,6 +372,6 @@ app.post('/api/campaigns/join', ensureAuthenticated, async (req, res) => {
 });
 
 // --- 7. Iniciando o Servidor ---
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}.`);
 });
