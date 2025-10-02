@@ -3417,13 +3417,6 @@ async function checkAuthStatus() {
         // então não precisamos fazer nada, apenas registrar o erro no console.
         console.log('Sessão de usuário não encontrada ou erro de autenticação. O botão de login será mantido.');
         return null; // Retorna nulo se não houver usuário
-    } finally {
-        // Garante que a exibição das campanhas seja chamada APÓS a verificação de auth terminar,
-        // passando o usuário que acabamos de verificar.
-        if (document.body.dataset.page === 'campanhas') {
-            const user = await api.get('/auth/user').then(res => res.data).catch(() => null);
-            displayCampaigns(user);
-        }
     }
 }
 
@@ -3473,7 +3466,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     checkAndApplyDevMode(); // Verifica o modo dev logo no início
     updateActiveLinks();
-    checkAuthStatus(); // Agora é mais rápido
+    const user = await checkAuthStatus(); // Espera a verificação de auth e armazena o usuário
     
     const path = window.location.pathname;
     if (path.includes('criar-agente.html')) {
@@ -3492,7 +3485,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 joinCampaignByCode(inviteCode, joinCampaignForm);
             });
         }
-        // A chamada para displayCampaigns() foi movida para dentro de checkAuthStatus para garantir a ordem correta de execução.
+        // Agora chamamos displayCampaigns aqui, com o usuário já verificado
+        displayCampaigns(user);
     }
     if (path.includes('gerenciar-campanha.html')) {
         initializeCampaignManagement();
