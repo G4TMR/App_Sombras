@@ -3054,7 +3054,9 @@ function createCampaignCard(campaign, isOwned) {
         <p>${synopsisSnippet}</p>
         <div class="campaign-card-footer">
             <span class="campaign-date">Criada em: ${new Date(campaign.createdAt).toLocaleDateString('pt-BR')}</span>
-            <button class="wizard-btn" onclick="window.location.href='gerenciar-campanha.html?id=${campaign.id}'">${isOwned ? 'Gerenciar' : 'JOGAR'}</button>
+            <button class="wizard-btn" onclick="window.location.href='gerenciar-campanha.html?id=${campaign.id}${isOwned ? '' : '&view=player'}'">
+                ${isOwned ? 'Gerenciar' : 'JOGAR'}
+            </button>
         </div>
     `;
     return card;
@@ -3103,7 +3105,7 @@ async function joinCampaignByCode(inviteCode, formElement) {
     try {
         const response = await api.post('/campaigns/join', { inviteCode });
         alert(`Você entrou na campanha "${response.data.title}"!`);
-        window.location.href = `gerenciar-campanha.html?id=${response.data.id}`;
+        window.location.href = `gerenciar-campanha.html?id=${response.data.id}&view=player`;
     } catch (error) {
         if (error.response && error.response.status === 404) {
             alert('Código de convite inválido ou campanha não encontrada.');
@@ -3123,6 +3125,7 @@ async function joinCampaignByCode(inviteCode, formElement) {
 async function initializeCampaignManagement() {
     const params = new URLSearchParams(window.location.search);
     const campaignId = params.get('id');
+    const viewMode = params.get('view'); // Novo: Captura o modo de visualização
 
     if (!campaignId) {
         alert('ID da campanha não encontrado.');
@@ -3142,12 +3145,16 @@ async function initializeCampaignManagement() {
     }
 
     // Verifica se o usuário é o dono da campanha ou um jogador
-    if (campaign.ownerId && (campaign.ownerId._id || campaign.ownerId) === userId) {
+    if (viewMode === 'player' && campaign.players && campaign.players.some(p => (p._id || p) === userId)) {
+        // O usuário é um jogador e quer a visão de jogador
+        document.getElementById('player-view-container').style.display = 'block';
+        initializePlayerView(campaign);
+    } else if (campaign.ownerId && (campaign.ownerId._id || campaign.ownerId) === userId) {
         // O usuário é o mestre, mostra a visão de gerenciamento
         document.getElementById('campaign-management-container').style.display = 'block';
         initializeMasterView(campaign);
-    } else if (campaign.players && campaign.players.includes(user._id)) { // Esta verificação já está correta
-        // O usuário é um jogador, mostra a visão de jogador
+    } else if (campaign.players && campaign.players.some(p => (p._id || p) === userId)) {
+        // O usuário é um jogador (caso geral), mostra a visão de jogador
         document.getElementById('player-view-container').style.display = 'block';
         initializePlayerView(campaign);
     } else {

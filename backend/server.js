@@ -360,7 +360,7 @@ app.post('/api/campaigns/join', ensureAuthenticated, async (req, res) => {
         }
 
         // Adiciona o jogador se ele ainda não estiver na lista
-        if (!campaign.players.includes(req.user._id) && !campaign.ownerId.equals(req.user._id)) {
+        if (!campaign.players.includes(req.user._id)) {
             campaign.players.push(req.user._id);
             await campaign.save();
         }
