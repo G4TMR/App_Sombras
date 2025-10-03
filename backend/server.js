@@ -275,12 +275,9 @@ app.post('/api/campaigns', ensureAuthenticated, async (req, res) => {
 // Obter todas as campanhas do usuário (criadas e participando)
 app.get('/api/campaigns', ensureAuthenticated, async (req, res) => {
     try {
-git         const campaigns = await Campaign.find({
-            // CORREÇÃO: A forma correta de buscar em um array é usar o operador $in
-            // ou simplesmente passar o valor, que o Mongoose interpreta como "contém".
-            // A query anterior { players: req.user._id } falha se houver mais de um jogador.
-            $or: [{ ownerId: req.user._id }, { players: { $in: [req.user._id] } }]
-        }).populate('ownerId', 'displayName').sort({ createdAt: -1 }); // Popula o nome do dono e ordena
+        // A query correta para buscar campanhas onde o usuário é dono OU está na lista de jogadores.
+        const campaigns = await Campaign.find({ $or: [{ ownerId: req.user._id }, { players: req.user._id }] })
+            .populate('ownerId', 'displayName').sort({ createdAt: -1 });
         res.status(200).json(campaigns);
     } catch (error) {
         console.error("Erro ao listar campanhas:", error);
