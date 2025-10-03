@@ -3341,11 +3341,11 @@ function initializePlayerView(campaign) {
                     card.addEventListener('click', async () => {
                         // Adiciona o personagem à campanha
                         try {
-                            await api.put(`/api/campaigns/${campaign.id}/add-character`, { characterId: char._id });
+                            const response = await api.put(`/api/campaigns/${campaign.id}/add-character`, { characterId: char._id });
                             alert(`Agente "${char.personalization.name}" adicionado com sucesso!`);
                             modalOverlay.classList.remove('visible');
-                            // Recarrega a página para mostrar o novo agente na lista
-                            window.location.reload();
+                            // Atualiza a UI dinamicamente sem recarregar a página
+                            addAgentToCampaignUI(response.data.character);
                         } catch (error) {
                             const errorMessage = error.response?.data?.message || 'Erro ao adicionar agente.';
                             alert(errorMessage);
@@ -3385,6 +3385,21 @@ function initializePlayerView(campaign) {
     }
 }
 
+/**
+ * Adiciona dinamicamente o card de um novo agente à grade da campanha na UI.
+ * @param {object} character - O objeto do personagem recém-adicionado.
+ */
+function addAgentToCampaignUI(character) {
+    if (!character) return;
+
+    const agentsGrid = document.getElementById('campaign-agents-grid');
+    const noAgentsMessage = document.getElementById('no-agents-in-campaign');
+
+    // Esconde a mensagem de "nenhum agente" e adiciona o novo card
+    noAgentsMessage.style.display = 'none';
+    const agentCard = createAgentCardForCampaign(character);
+    agentsGrid.appendChild(agentCard);
+}
 /**
  * Cria um card de agente para ser exibido dentro da página da campanha.
  * É uma versão simplificada do card da página 'agentes.html'.
@@ -3498,28 +3513,39 @@ async function checkAuthStatus() {
     authContainer.className = 'auth-container';
 
     // 1. Adiciona o botão de login imediatamente para uma resposta visual rápida
-    authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
+    // Tenta carregar o usuário do sessionStorage para uma UI otimista
+    const cachedUser = JSON.parse(sessionStorage.getItem('sombras-user'));
+    if (cachedUser && cachedUser.displayName) {
+        authContainer.innerHTML = `<span class="user-info">Olá, <span class="user-display-name">${cachedUser.displayName}</span>! <a href="${API_BASE_URL}/auth/logout" class="auth-link">[Sair]</a></span>`;
+    } else {
+        authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
+    }
     nav.appendChild(authContainer);
 
     try {
         // 2. Tenta buscar o usuário logado em segundo plano
         const response = await api.get('/auth/user');
         const user = response.data;
-
-        // 3. Se encontrar, substitui o botão de login pelas informações do usuário
+        
+        // 3. Se encontrar, atualiza a UI e o cache
         if (user && user._id) {
-            authContainer.innerHTML = `<span class="user-info">Olá, ${user.displayName}! <a href="${API_BASE_URL}/auth/logout" class="auth-link">[Sair]</a></span>`;
-            currentUserId = user._id; // <-- CORREÇÃO CRÍTICA: Armazena o ID do usuário logado
-            return user; // <-- CORREÇÃO: Retorna o objeto do usuário em caso de sucesso
+            authContainer.innerHTML = `<span class="user-info">Olá, <span class="user-display-name">${user.displayName}</span>! <a href="${API_BASE_URL}/auth/logout" class="auth-link">[Sair]</a></span>`;
+            sessionStorage.setItem('sombras-user', JSON.stringify(user));
+            currentUserId = user._id;
+            return user;
         } else {
-            currentUserId = 'local_user_id'; // Garante que, se não houver usuário, o ID seja o local
-            return null; // <-- CORREÇÃO: Retorna nulo se não houver usuário
+            // Se a API não retornar usuário, limpa o cache e mostra o botão de login
+            sessionStorage.removeItem('sombras-user');
+            authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
+            currentUserId = 'local_user_id';
+            return null;
         }
     } catch (error) {
-        // Se houver um erro (ex: 401 não autorizado), o botão de login já está na tela,
-        // então não precisamos fazer nada, apenas registrar o erro no console.
+        // Se a API falhar (ex: 401), limpa o cache e garante que o botão de login seja exibido
+        sessionStorage.removeItem('sombras-user');
+        authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
         console.log('Sessão de usuário não encontrada ou erro de autenticação. O botão de login será mantido.');
-        return null; // Retorna nulo se não houver usuário
+        return null;
     }
 }
 
