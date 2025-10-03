@@ -3094,12 +3094,10 @@ async function joinCampaignByCode(inviteCode, formElement) {
         alert(`Você entrou na campanha "${response.data.title}"!`);
         window.location.href = `campanhas.html`; // Redireciona para a própria página para forçar o recarregamento
     } catch (error) {
-        if (error.response && error.response.status === 404) {
-            alert('Código de convite inválido ou campanha não encontrada.');
-        } else {
-            console.error("Erro ao entrar na campanha:", error);
-            alert('Ocorreu um erro ao tentar entrar na campanha. Tente novamente.');
-        }
+        // Exibe a mensagem de erro específica vinda do servidor, ou uma mensagem genérica se não houver.
+        const errorMessage = error.response?.data?.message || 'Ocorreu um erro ao tentar entrar na campanha. Tente novamente.';
+        alert(errorMessage);
+        console.error("Erro ao entrar na campanha:", error);
     } finally {
         submitButton.disabled = false;
         submitButton.innerHTML = originalButtonText;
