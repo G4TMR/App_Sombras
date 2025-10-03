@@ -382,6 +382,33 @@ app.post('/api/campaigns/join', ensureAuthenticated, async (req, res) => {
     }
 });
 
+// Adicionar um personagem a uma campanha
+app.put('/api/campaigns/:id/add-character', ensureAuthenticated, async (req, res) => {
+    const { characterId } = req.body;
+    const campaignId = req.params.id;
+
+    if (!characterId) {
+        return res.status(400).json({ message: 'O ID do personagem é obrigatório.' });
+    }
+
+    try {
+        const campaign = await Campaign.findById(campaignId);
+        if (!campaign) return res.status(404).json({ message: 'Campanha não encontrada.' });
+
+        // Verifica se o personagem já está na campanha
+        if (campaign.characters && campaign.characters.includes(characterId)) {
+            return res.status(400).json({ message: 'Este agente já está na campanha.' });
+        }
+
+        // Adiciona o personagem à campanha
+        await Campaign.updateOne({ _id: campaignId }, { $addToSet: { characters: characterId } });
+
+        res.status(200).json({ message: 'Agente adicionado com sucesso!' });
+    } catch (error) {
+        console.error("Erro ao adicionar personagem à campanha:", error);
+        res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+});
 // --- 7. Iniciando o Servidor ---
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}.`);

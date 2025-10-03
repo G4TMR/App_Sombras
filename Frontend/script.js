@@ -3304,10 +3304,74 @@ function initializeMasterView(campaign) {
  * @param {object} campaign - O objeto da campanha.
  */
 function initializePlayerView(campaign) {
-    const titleElement = document.getElementById('player-view-campaign-title');
-    if (titleElement) {
-        titleElement.textContent = `MENU DA CAMPANHA: ${campaign.title}`;
+    const titleDisplay = document.getElementById('player-view-campaign-title');
+    const synopsisDisplay = document.getElementById('player-view-campaign-synopsis');
+    const coverImageDisplay = document.getElementById('player-view-campaign-cover');
+    const addAgentBtn = document.getElementById('add-agent-to-campaign-btn');
+
+    // Preenche o cabeçalho da campanha
+    titleDisplay.textContent = campaign.title;
+    synopsisDisplay.textContent = campaign.synopsis || 'Nenhuma sinopse fornecida.';
+    if (campaign.imageUrl) {
+        coverImageDisplay.style.backgroundImage = `url('${campaign.imageUrl}')`;
     }
+
+    // Lógica para o modal de adicionar agente
+    const modalOverlay = document.getElementById('add-agent-modal-overlay');
+    const cancelBtn = document.getElementById('cancel-add-agent-btn');
+    const agentListContainer = document.getElementById('select-agent-list');
+
+    addAgentBtn.addEventListener('click', async () => {
+        // Busca os personagens do usuário
+        try {
+            const response = await api.get('/api/characters');
+            const userCharacters = response.data;
+            agentListContainer.innerHTML = ''; // Limpa a lista
+
+            if (userCharacters.length > 0) {
+                userCharacters.forEach(char => {
+                    const card = document.createElement('div');
+                    card.className = 'character-card simple-card'; // Um estilo mais simples para o modal
+                    card.innerHTML = `
+                        <h3>${char.personalization.name}</h3>
+                        <p>${char.class} | ${char.element}</p>
+                    `;
+                    card.addEventListener('click', async () => {
+                        // Adiciona o personagem à campanha
+                        try {
+                            await api.put(`/api/campaigns/${campaign.id}/add-character`, { characterId: char._id });
+                            alert(`Agente "${char.personalization.name}" adicionado com sucesso!`);
+                            modalOverlay.classList.remove('visible');
+                            // Recarrega a página para mostrar o novo agente na lista
+                            window.location.reload();
+                        } catch (error) {
+                            const errorMessage = error.response?.data?.message || 'Erro ao adicionar agente.';
+                            alert(errorMessage);
+                        }
+                    });
+                    agentListContainer.appendChild(card);
+                });
+            } else {
+                agentListContainer.innerHTML = '<p class="empty-message">Você não tem nenhum agente criado.</p>';
+            }
+
+            modalOverlay.classList.add('visible');
+        } catch (error) {
+            console.error("Erro ao buscar agentes do usuário:", error);
+            alert('Não foi possível carregar seus agentes. Tente novamente.');
+        }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        modalOverlay.classList.remove('visible');
+    });
+
+    // Renderiza os personagens que já estão na campanha
+    const agentsGrid = document.getElementById('campaign-agents-grid');
+    const noAgentsMessage = document.getElementById('no-agents-in-campaign');
+    // Esta parte será implementada no futuro, quando a API retornar os personagens da campanha.
+    agentsGrid.innerHTML = '';
+    noAgentsMessage.style.display = 'flex';
 }
 
 // =================================================================================

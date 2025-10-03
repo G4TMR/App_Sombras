@@ -92,10 +92,33 @@
     <!-- Novo Menu do Jogador -->
     <main class="main-content" id="player-view-container" style="display: none;">
         <a href="campanhas.html" class="back-to-list-btn">&larr; Voltar para Campanhas</a>
-        <div class="content-box" style="text-align: center; padding: 5rem 2rem;">
-            <h2 id="player-view-campaign-title">Carregando...</h2>
-            <p class="info-text">Você está conectado a esta campanha como jogador.</p>
-            <!-- O conteúdo da campanha para jogadores virá aqui no futuro -->
+        
+        <div class="content-box">
+            <!-- Cabeçalho da Campanha -->
+            <div class="campaign-display-header">
+                <div id="player-view-campaign-cover" class="campaign-cover-image"></div>
+                <div class="campaign-title-section">
+                    <h2 id="player-view-campaign-title">Carregando...</h2>
+                    <p id="player-view-campaign-synopsis" class="info-text"></p>
+                </div>
+            </div>
+    
+            <!-- Agentes na Campanha -->
+            <div class="form-section" style="margin-top: 2rem;">
+                <h3 class="section-title">Agentes na Campanha</h3>
+                <div id="campaign-agents-grid" class="characters-grid">
+                    <!-- Cards de personagens serão injetados aqui -->
+                </div>
+                <div id="no-agents-in-campaign" class="empty-state" style="display: none; padding: 2rem 0;">
+                    <p class="empty-message">Nenhum agente nesta campanha ainda.</p>
+                    <p class="empty-submessage">Adicione seu primeiro agente para começar a jogar.</p>
+                </div>
+            </div>
+    
+            <!-- Botão de Ação -->
+            <div style="text-align:center; margin-top:3rem;">
+                <button id="add-agent-to-campaign-btn" class="wizard-btn">Adicionar Agente</button>
+            </div>
         </div>
     </main>
 
@@ -126,6 +149,23 @@
             <div class="modal-actions" style="margin-top: 2rem;">
                 <button id="cancel-edit-btn" class="wizard-btn danger-btn">Cancelar</button>
                 <button id="save-edit-btn" class="wizard-btn">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar Agente à Campanha -->
+    <div id="add-agent-modal-overlay" class="modal-overlay">
+        <div class="specialization-modal-content">
+            <h1>Adicionar Agente à Campanha</h1>
+            <p class="info-text">Escolha um dos seus agentes existentes ou crie um novo para se juntar a esta campanha.</p>
+            
+            <div id="select-agent-list" class="characters-grid modal-character-list">
+                <!-- Lista de agentes do usuário para seleção -->
+            </div>
+    
+            <div class="modal-actions" style="margin-top: 2rem; border-top: 1px solid var(--color-surface-2); padding-top: 2rem;">
+                <button id="cancel-add-agent-btn" class="wizard-btn danger-btn">Cancelar</button>
+                <a href="criar-agente.html" class="wizard-btn">Criar Novo Agente</a>
             </div>
         </div>
     </div>
