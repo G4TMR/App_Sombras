@@ -2827,13 +2827,19 @@ class ThreatListPage {
  * @returns {object|null} O objeto da campanha ou nulo se não for encontrado.
  */
 async function getCampaignById(campaignId) {
-    // 1. Tenta encontrar no localStorage primeiro (para acesso offline/local-first)
+    // 1. Tenta buscar na API primeiro (para ter os dados mais recentes)
+    try {
+        const response = await api.get(`/api/campaigns/${campaignId}`);
+        return response.data;
+    } catch (error) {
+        console.warn("Falha ao buscar campanha da API, tentando localStorage...", error);
+    }
+
+    // 2. Se a API falhar (offline), tenta encontrar no localStorage
     try {
         const localCampaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-        const localCampaign = localCampaigns.find(c => c.id === campaignId);
+        const localCampaign = localCampaigns.find(c => c.id === campaignId || c._id === campaignId);
         if (localCampaign) {
-            // Se encontrou localmente, retorna imediatamente.
-            // Isso garante que o modo offline funcione.
             return localCampaign;
         }
     } catch (e) {
@@ -2891,24 +2897,19 @@ async function updateCampaign(updatedCampaign, showIndicator = false) {
  */
 async function deleteCampaign(campaignId) {
     if (!confirm('Tem certeza que deseja excluir esta campanha? Esta ação não pode ser desfeita.')) return;
-
-    const user = await checkAuthStatus();
-
-    // 1. Tenta deletar no servidor PRIMEIRO (se estiver online)
-    if (user) {
-        try {
-            await api.delete(`/api/campaigns/${campaignId}`); // A API já verifica se o usuário é o dono
-        } catch (error) {
-            console.error("Erro ao excluir campanha no servidor:", error);
-            alert("Ocorreu um erro ao excluir a campanha. Verifique sua conexão e tente novamente.");
-            return; // Interrompe a execução se a exclusão no servidor falhar
-        }
+    
+    // 1. Tenta deletar no servidor
+    try {
+        await api.delete(`/api/campaigns/${campaignId}`);
+    } catch (error) {
+        console.error("Erro ao excluir campanha no servidor:", error);
+        // Não interrompe, permite que a exclusão local ocorra mesmo assim
     }
 
-    // 2. Se a exclusão no servidor foi bem-sucedida (ou se estiver offline), deleta localmente
+    // 2. Deleta localmente, independentemente do sucesso do servidor (para modo offline)
     try {
         let campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-        const updatedCampaigns = campaigns.filter(c => c.id !== campaignId);
+        const updatedCampaigns = campaigns.filter(c => c.id !== campaignId && c._id !== campaignId);
         localStorage.setItem('sombras-campaigns', JSON.stringify(updatedCampaigns));
     } catch (error) {
         console.error("Erro ao excluir campanha localmente:", error);
@@ -2916,7 +2917,7 @@ async function deleteCampaign(campaignId) {
         // Apenas informa o usuário e redireciona.
     }
     
-    alert('Campanha excluída com sucesso.');
+    alert('Campanha excluída.');
     window.location.href = 'campanhas.html';
 }
 

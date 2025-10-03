@@ -275,7 +275,7 @@ app.post('/api/campaigns', ensureAuthenticated, async (req, res) => {
 // Obter todas as campanhas do usuário (criadas e participando)
 app.get('/api/campaigns', ensureAuthenticated, async (req, res) => {
     try {
-        const campaigns = await Campaign.find({
+git         const campaigns = await Campaign.find({
             // CORREÇÃO: A forma correta de buscar em um array é usar o operador $in
             // ou simplesmente passar o valor, que o Mongoose interpreta como "contém".
             // A query anterior { players: req.user._id } falha se houver mais de um jogador.
