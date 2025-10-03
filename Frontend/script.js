@@ -2828,7 +2828,9 @@ class ThreatListPage {
  */
 async function getCampaignById(campaignId) {
     // 1. Tenta buscar na API primeiro (para ter os dados mais recentes)
+    // A rota da API agora popula os personagens, então sempre buscamos online primeiro.
     try {
+        // A rota da API agora popula os personagens, então sempre buscamos online primeiro.
         const response = await api.get(`/api/campaigns/${campaignId}`);
         return response.data;
     } catch (error) {
@@ -2838,7 +2840,7 @@ async function getCampaignById(campaignId) {
     // 2. Se a API falhar (offline), tenta encontrar no localStorage
     try {
         const localCampaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-        const localCampaign = localCampaigns.find(c => c.id === campaignId || c._id === campaignId);
+        const localCampaign = localCampaigns.find(c => c.id === campaignId);
         if (localCampaign) {
             return localCampaign;
         }
@@ -3369,9 +3371,59 @@ function initializePlayerView(campaign) {
     // Renderiza os personagens que já estão na campanha
     const agentsGrid = document.getElementById('campaign-agents-grid');
     const noAgentsMessage = document.getElementById('no-agents-in-campaign');
-    // Esta parte será implementada no futuro, quando a API retornar os personagens da campanha.
-    agentsGrid.innerHTML = '';
-    noAgentsMessage.style.display = 'flex';
+    
+    agentsGrid.innerHTML = ''; // Limpa a grade
+
+    if (campaign.characters && campaign.characters.length > 0) {
+        noAgentsMessage.style.display = 'none';
+        campaign.characters.forEach(character => {
+            const agentCard = createAgentCardForCampaign(character);
+            agentsGrid.appendChild(agentCard);
+        });
+    } else {
+        noAgentsMessage.style.display = 'flex';
+    }
+}
+
+/**
+ * Cria um card de agente para ser exibido dentro da página da campanha.
+ * É uma versão simplificada do card da página 'agentes.html'.
+ * @param {object} character - O objeto do personagem.
+ * @returns {HTMLElement} O elemento do card do agente.
+ */
+function createAgentCardForCampaign(character) {
+    const card = document.createElement('div');
+    card.className = 'character-card';
+    if (character.element) {
+        card.classList.add(character.element.toLowerCase());
+    }
+
+    const p = character.personalization || {};
+    const imageHtml = p.imageUrl
+        ? `<img src="${p.imageUrl}" alt="Retrato de ${p.name}" class="character-card-image">`
+        : '';
+
+    card.innerHTML = `
+        ${imageHtml}
+        <div class="character-header">
+            <h3>${p.name || 'Agente Sem Nome'}</h3>
+            <span class="character-class">${character.class || 'Classe'}</span>
+        </div>
+        <div class="character-info">
+            <p><strong>Jogador:</strong> ${p.player || 'N/A'}</p>
+        </div>
+        <div class="character-footer campaign-view">
+            <button class="view-btn">Ver Ficha</button>
+        </div>
+    `;
+
+    card.querySelector('.view-btn').addEventListener('click', () => {
+        // O ID pode ser `_id` vindo do populate da API
+        const charId = character.id || character._id;
+        window.location.href = `ficha-agente.html?id=${charId}`;
+    });
+
+    return card;
 }
 
 // =================================================================================

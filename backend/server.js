@@ -99,6 +99,7 @@ const CampaignSchema = new mongoose.Schema({
     imageUrl: String,
     inviteCode: { type: String, unique: true, sparse: true },
     players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    characters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Character' }],
     createdAt: { type: Date, default: Date.now }
 }, { strict: false }); // strict: false para permitir outros campos que o frontend possa enviar
 const Campaign = mongoose.model('Campaign', CampaignSchema);
@@ -295,7 +296,10 @@ app.get('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
                 { _id: mongoose.Types.ObjectId.isValid(req.params.id) ? req.params.id : null },
                 { id: req.params.id }
             ]
-        }).populate('ownerId', 'displayName').populate('players', 'displayName email');
+        }).populate('ownerId', 'displayName')
+          .populate('players', 'displayName email')
+          .populate('characters'); // Popula os dados completos dos personagens
+
         if (!campaign) return res.status(404).json({ message: 'Campanha não encontrada.' });
 
         // Verifica se o usuário é o dono ou um jogador
@@ -392,7 +396,13 @@ app.put('/api/campaigns/:id/add-character', ensureAuthenticated, async (req, res
     }
 
     try {
-        const campaign = await Campaign.findById(campaignId);
+        // CORREÇÃO: Buscar por 'id' ou '_id' para compatibilidade
+        const campaign = await Campaign.findOne({
+            $or: [
+                { _id: mongoose.Types.ObjectId.isValid(campaignId) ? campaignId : null },
+                { id: campaignId }
+            ]
+        });
         if (!campaign) return res.status(404).json({ message: 'Campanha não encontrada.' });
 
         // Verifica se o personagem já está na campanha
