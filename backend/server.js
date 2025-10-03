@@ -359,9 +359,19 @@ app.post('/api/campaigns/join', ensureAuthenticated, async (req, res) => {
             return res.status(404).json({ message: 'Campanha não encontrada com este código.' });
         }
 
-        // Adiciona o jogador se ele ainda não estiver na lista
-        // CORREÇÃO: .includes() não funciona bem com ObjectIds. Usar .some() com .equals() é a forma correta.
-        if (!campaign.players.some(p => p.equals(req.user._id))) {
+        // Verifica se o usuário já é o dono ou um jogador
+        const isOwner = campaign.ownerId.equals(req.user._id);
+        const isAlreadyPlayer = campaign.players.some(p => p.equals(req.user._id));
+
+        if (isOwner) {
+            return res.status(400).json({ message: 'Você já é o mestre desta campanha.' });
+        }
+        if (isAlreadyPlayer) {
+            return res.status(400).json({ message: 'Você já está participando desta campanha.' });
+        }
+
+        // Se não for dono nem jogador, adiciona à lista
+        if (!isOwner && !isAlreadyPlayer) {
             campaign.players.push(req.user._id);
             await campaign.save();
         }
