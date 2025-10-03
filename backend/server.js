@@ -358,7 +358,7 @@ app.post('/api/campaigns/join', ensureAuthenticated, async (req, res) => {
     }
 
     try {
-        const campaign = await Campaign.findOne({ inviteCode: inviteCode });
+        const campaign = await Campaign.findlOne({ inviteCode: inviteCode });
         if (!campaign) {
             return res.status(404).json({ message: 'Campanha não encontrada com este código.' });
         }
@@ -411,7 +411,7 @@ app.put('/api/campaigns/:id/add-character', ensureAuthenticated, async (req, res
         }
 
         // Adiciona o personagem à campanha
-        await Campaign.updateOne({ _id: campaignId }, { $addToSet: { characters: characterId } });
+        await Campaign.updateOne({ _id: campaign._id }, { $addToSet: { characters: characterId } });
 
         res.status(200).json({ message: 'Agente adicionado com sucesso!' });
     } catch (error) {
