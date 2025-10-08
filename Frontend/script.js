@@ -3260,6 +3260,64 @@ function initializeCampaignLogListener(campaignId) {
 }
 
 /**
+ * Remove um jogador de uma campanha. Apenas para o mestre.
+ * @param {string} campaignId - O ID da campanha.
+ * @param {string} playerId - O ID do jogador a ser removido.
+ * @param {HTMLElement} cardElement - O elemento do card do jogador a ser removido da UI.
+ */
+async function removePlayerFromCampaign(campaignId, playerId, cardElement) {
+    if (!confirm('Tem certeza que deseja remover este jogador da campanha? Seus agentes permanecerão na campanha e precisarão ser removidos manualmente.')) return;
+
+    try {
+        await api.delete(`/api/campaigns/${campaignId}/players/${playerId}`);
+        alert('Jogador removido com sucesso.');
+        cardElement.remove(); // Remove o card do jogador da tela
+
+        const playersGrid = document.getElementById('campaign-players-list');
+        if (playersGrid && playersGrid.children.length === 0) {
+            document.getElementById('no-players-in-campaign').style.display = 'block';
+        }
+    } catch (error) {
+        const errorMessage = error.response?.data?.message || 'Ocorreu um erro ao remover o jogador.';
+        alert(errorMessage);
+    }
+}
+
+/**
+ * Renderiza a lista de jogadores na visão do Mestre.
+ * @param {object} campaign - O objeto da campanha com os jogadores populados.
+ */
+function renderCampaignPlayers(campaign) {
+    const playersListContainer = document.getElementById('campaign-players-list');
+    const noPlayersMessage = document.getElementById('no-players-in-campaign');
+
+    if (!playersListContainer) return;
+
+    playersListContainer.innerHTML = ''; // Limpa a lista existente
+
+    if (campaign.players && campaign.players.length > 0) {
+        noPlayersMessage.style.display = 'none';
+        campaign.players.forEach(player => {
+            const playerCard = document.createElement('div');
+            playerCard.className = 'player-card'; // Novo estilo para o card do jogador
+            playerCard.innerHTML = `
+                <div class="player-info-content">
+                    <h4>${player.displayName}</h4>
+                    <p>${player.email}</p>
+                </div>
+                <button class="delete-btn small-btn" title="Remover Jogador">&times;</button>
+            `;
+            playersListContainer.appendChild(playerCard);
+
+            const removeBtn = playerCard.querySelector('.delete-btn');
+            removeBtn.addEventListener('click', () => removePlayerFromCampaign(campaign._id, player._id, playerCard));
+        });
+    } else {
+        noPlayersMessage.style.display = 'block';
+    }
+}
+
+/**
  * Inicializa a visualização do Mestre para gerenciar a campanha.
  * @param {object} campaign - O objeto da campanha.
  */
@@ -3285,6 +3343,24 @@ function initializeMasterView(campaign) {
     if (needsSave) {
         console.log("Migrando campanha antiga. Adicionando código de convite.");
         updateCampaign(campaign); // Salva a campanha com os novos campos
+    }
+
+    // Renderiza a lista de jogadores
+    renderCampaignPlayers(campaign);
+
+    // Renderiza a lista de agentes para o mestre
+    const masterAgentsGrid = document.getElementById('master-agents-grid');
+    const noAgentsMessage = document.getElementById('no-agents-for-master');
+    if (masterAgentsGrid) {
+        masterAgentsGrid.innerHTML = '';
+        if (campaign.characters && campaign.characters.length > 0) {
+            noAgentsMessage.style.display = 'none';
+            campaign.characters.forEach(character => {
+                masterAgentsGrid.appendChild(createAgentCardForCampaign(character, campaign.id, true)); // Passa true para isMasterView
+            });
+        } else {
+            noAgentsMessage.style.display = 'block';
+        }
     }
 
     // Preenche os campos do formulário
@@ -3531,6 +3607,7 @@ function addAgentToCampaignUI(character) {
  * @returns {HTMLElement} O elemento do card do agente.
  */
 function createAgentCardForCampaign(character, campaignId) {
+function createAgentCardForCampaign(character, campaignId, isMasterView = false) {
     const card = document.createElement('div');
     card.className = 'character-card simple-card'; // Usa a classe para diminuir o tamanho
     if (character.element) {
@@ -3543,8 +3620,11 @@ function createAgentCardForCampaign(character, campaignId) {
         : '';
 
     // Verifica se o personagem pertence ao usuário logado (currentUserId é uma variável global)
+    // Se for a visão do mestre, o botão de deletar aparece em todos.
+    // Se for a visão do jogador, o botão só aparece se ele for o dono do personagem.
     const isOwner = character.owner === currentUserId;
     const deleteButtonHtml = isOwner
+    const deleteButtonHtml = (isMasterView || isOwner)
         ? `<button class="delete-btn small-btn" title="Remover da Campanha">&times;</button>`
         : '';
 
@@ -3759,6 +3839,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (user) {
             try {
                 // Adiciona um parâmetro de cache-busting para garantir dados novos
+             const response = await api.get(`/api/campaigns?t=${new Date().getTime()}`);
                 const response = await api.get(`/api/campaigns?t=${new Date().getTime()}`);
                 campaignsData = response.data;
             } catch (error) {

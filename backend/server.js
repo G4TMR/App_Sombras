@@ -256,12 +256,30 @@ app.get('/api/characters/:id', ensureAuthenticated, async (req, res) => {
 
 app.put('/api/characters/:id', ensureAuthenticated, async (req, res) => {
     try {
-        const updatedCharacter = await Character.findOneAndUpdate(
-            { id: req.params.id, owner: req.user._id },
-            req.body,
-            { new: true }
-        );
-        if (!updatedCharacter) return res.status(404).json({ message: 'Personagem não encontrado.' });
+        // Primeiro, encontra o personagem pelo ID (pode ser _id ou id customizado)
+        const character = await Character.findOne({
+            $or: [
+                { _id: mongoose.Types.ObjectId.isValid(req.params.id) ? req.params.id : null },
+                { id: req.params.id }
+            ]
+        });
+        if (!character) return res.status(404).json({ message: 'Personagem não encontrado.' });
+
+        // Verifica se o usuário logado é o dono do personagem
+        const isOwner = character.owner.equals(req.user._id);
+
+        // Se não for o dono, verifica se o usuário é o mestre de alguma campanha que contém este personagem
+        let isCampaignMaster = false;
+        if (!isOwner) {
+            const campaign = await Campaign.findOne({ characters: character._id, ownerId: req.user._id });
+            isCampaignMaster = !!campaign;
+        }
+
+        if (!isOwner && !isCampaignMaster) {
+            return res.status(403).json({ message: 'Você não tem permissão para editar esta ficha.' });
+        }
+
+        const updatedCharacter = await Character.findByIdAndUpdate(character._id, req.body, { new: true });
         res.status(200).json(updatedCharacter);
     } catch (error) {
         console.error("Erro ao atualizar personagem:", error);
@@ -319,7 +337,8 @@ app.get('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
                 { id: req.params.id }
             ]
         }).populate('ownerId', 'displayName')
-          .populate('players', 'displayName email')
+          // CORREÇÃO: Garante que a lista de jogadores sempre venha populada
+          .populate('players', 'displayName email') 
           .populate('characters'); // Popula os dados completos dos personagens
 
         if (!campaign) return res.status(404).json({ message: 'Campanha não encontrada.' });
@@ -480,6 +499,34 @@ app.delete('/api/campaigns/:campaignId/characters/:characterId', ensureAuthentic
         res.status(200).json({ message: 'Agente removido da campanha com sucesso.' });
     } catch (error) {
         console.error("Erro ao remover personagem da campanha:", error);
+        res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+});
+
+// Remover um jogador de uma campanha (apenas para o mestre)
+app.delete('/api/campaigns/:campaignId/players/:playerId', ensureAuthenticated, async (req, res) => {
+    const { campaignId, playerId } = req.params;
+
+    try {
+        const campaign = await Campaign.findById(campaignId);
+        if (!campaign) {
+            return res.status(404).json({ message: 'Campanha não encontrada.' });
+        }
+
+        // Apenas o mestre da campanha pode remover jogadores.
+        if (!campaign.ownerId.equals(req.user._id)) {
+            return res.status(403).json({ message: 'Você não tem permissão para remover jogadores desta campanha.' });
+        }
+
+        // Remove o ID do jogador do array 'players' da campanha
+        await Campaign.updateOne(
+            { _id: campaignId },
+            { $pull: { players: playerId } }
+        );
+
+        res.status(200).json({ message: 'Jogador removido da campanha com sucesso.' });
+    } catch (error) {
+        console.error("Erro ao remover jogador da campanha:", error);
         res.status(500).json({ message: 'Erro interno do servidor.' });
     }
 });

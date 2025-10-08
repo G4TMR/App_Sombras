@@ -34,18 +34,38 @@
                     <!-- Conteúdo das Abas -->
                     <div class="tab-content active" id="escudo-mestre">
                         <h4>Recursos do Mestre</h4>
-                        <p>Aqui você verá as fichas dos jogadores e monstros. As notificações e rolagens de dados aparecerão na barra lateral.</p>
-                        <div class="master-tools-grid">
-                            <div class="tool-placeholder">Lista de Jogadores</div>
-                            <div class="tool-card">
-                                <h3>Código de Convite</h3>
-                                <p>Compartilhe este código com seus jogadores para que eles possam se juntar à sua campanha.</p>
-                                <div class="invite-code-display">
-                                    <span id="campaign-invite-code-display">SDA-XXXX</span>
-                                    <button id="generate-invite-code-btn" class="wizard-btn small-btn">Gerar Novo</button>
-                                </div>
+                        <p>Aqui você verá as fichas dos agentes e a lista de jogadores. As notificações e rolagens de dados aparecerão na barra lateral.</p>
+
+                        <!-- Seção para as fichas dos agentes -->
+                        <div class="content-box" style="margin-top: 2rem; margin-bottom: 2rem;">
+                            <h3 class="section-title">Agentes na Campanha</h3>
+                            <div id="master-agents-grid" class="characters-grid">
+                                <!-- Cards dos agentes da campanha serão injetados aqui -->
                             </div>
+                            <p class="empty-message" id="no-agents-for-master" style="display: none;">Nenhum agente nesta campanha ainda.</p>
+                        </div>
+
+                        <!-- Nova seção para a lista de jogadores -->
+                        <div class="content-box" style="margin-bottom: 2rem;">
+                            <h3 class="section-title">Jogadores na Campanha</h3>
+                            <div id="campaign-players-list" class="players-grid">
+                                <!-- Cards de jogadores serão injetados aqui -->
+                                <p class="empty-message" id="no-players-in-campaign" style="display: none;">Nenhum jogador nesta campanha ainda.</p>
+                            </div>
+                        </div>
+
+                        <div class="master-tools-grid">
                             <div class="tool-placeholder">Fichas de Monstros</div>
+                        </div>
+
+                        <!-- Código de Convite movido para baixo e em um content-box separado -->
+                        <div class="content-box" style="margin-top: 2rem;">
+                            <h3 class="section-title">Código de Convite</h3>
+                            <p>Compartilhe este código com seus jogadores para que eles possam se juntar à sua campanha.</p>
+                            <div class="invite-code-display">
+                                <span id="campaign-invite-code-display">SDA-XXXX</span>
+                                <button id="generate-invite-code-btn" class="wizard-btn small-btn">Gerar Novo</button>
+                            </div>
                         </div>
                     </div>
         
