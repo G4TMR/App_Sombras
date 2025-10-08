@@ -1191,6 +1191,21 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     border-top: 1px solid #333;
 }
 
+.character-footer.campaign-view {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.character-footer.campaign-view .view-btn {
+    flex-grow: 1; /* Faz o botão de ver ficha ocupar o espaço */
+    margin-right: 1rem;
+}
+
+.character-card.simple-card {
+    max-width: 320px;
+}
+
 .created-date {
     font-size: 0.85rem;
     color: #888;

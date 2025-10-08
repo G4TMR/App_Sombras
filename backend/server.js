@@ -419,6 +419,38 @@ app.put('/api/campaigns/:id/add-character', ensureAuthenticated, async (req, res
         res.status(500).json({ message: 'Erro interno do servidor.' });
     }
 });
+
+// Remover um personagem de uma campanha
+app.delete('/api/campaigns/:campaignId/characters/:characterId', ensureAuthenticated, async (req, res) => {
+    const { campaignId, characterId } = req.params;
+
+    try {
+        const campaign = await Campaign.findById(campaignId);
+        if (!campaign) return res.status(404).json({ message: 'Campanha não encontrada.' });
+
+        const character = await Character.findById(characterId);
+        if (!character) return res.status(404).json({ message: 'Personagem não encontrado.' });
+
+        // Verifica a permissão: Apenas o dono do personagem ou o mestre da campanha podem remover.
+        const isCharacterOwner = character.owner.equals(req.user._id);
+        const isCampaignOwner = campaign.ownerId.equals(req.user._id);
+
+        if (!isCharacterOwner && !isCampaignOwner) {
+            return res.status(403).json({ message: 'Você não tem permissão para remover este agente.' });
+        }
+
+        // Remove o ID do personagem do array 'characters' da campanha
+        await Campaign.updateOne(
+            { _id: campaignId },
+            { $pull: { characters: characterId } }
+        );
+
+        res.status(200).json({ message: 'Agente removido da campanha com sucesso.' });
+    } catch (error) {
+        console.error("Erro ao remover personagem da campanha:", error);
+        res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+});
 // --- 7. Iniciando o Servidor ---
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}.`);

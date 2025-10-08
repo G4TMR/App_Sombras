@@ -2923,6 +2923,31 @@ async function deleteCampaign(campaignId) {
     window.location.href = 'campanhas.html';
 }
 
+/**
+ * Remove um personagem de uma campanha.
+ * @param {string} campaignId - O ID da campanha.
+ * @param {string} characterId - O ID do personagem a ser removido.
+ * @param {HTMLElement} cardElement - O elemento do card a ser removido da UI.
+ */
+async function removeAgentFromCampaign(campaignId, characterId, cardElement) {
+    if (!confirm('Tem certeza que deseja remover este agente da campanha?')) return;
+
+    try {
+        await api.delete(`/api/campaigns/${campaignId}/characters/${characterId}`);
+        alert('Agente removido da campanha com sucesso.');
+        cardElement.remove(); // Remove o card da tela
+
+        // Verifica se a grade de agentes ficou vazia
+        const agentsGrid = document.getElementById('campaign-agents-grid');
+        if (agentsGrid && agentsGrid.children.length === 0) {
+            document.getElementById('no-agents-in-campaign').style.display = 'flex';
+        }
+    } catch (error) {
+        const errorMessage = error.response?.data?.message || 'Ocorreu um erro ao remover o agente.';
+        alert(errorMessage);
+        console.error("Erro ao remover agente da campanha:", error);
+    }
+}
 // =================================================================================
 // FUNÇÕES DE CAMPANHA
 // =================================================================================
@@ -3332,8 +3357,8 @@ function initializePlayerView(campaign) {
 
             if (userCharacters.length > 0) {
                 userCharacters.forEach(char => {
-                    const card = document.createElement('div');
-                    card.className = 'character-card simple-card'; // Um estilo mais simples para o modal
+                    const card = document.createElement('div'); // Um estilo mais simples para o modal
+                    card.className = 'character-card simple-card'; 
                     card.innerHTML = `
                         <h3>${char.personalization.name}</h3>
                         <p>${char.class} | ${char.element}</p>
@@ -3342,8 +3367,10 @@ function initializePlayerView(campaign) {
                         // Adiciona o personagem à campanha
                         try {
                             const response = await api.put(`/api/campaigns/${campaign.id}/add-character`, { characterId: char._id });
-                            alert(`Agente "${char.personalization.name}" adicionado com sucesso!`);
+                            alert(`Agente "${char.personalization.name}" adicionado com sucesso!`);                           
                             modalOverlay.classList.remove('visible');
+                            // A API agora retorna o personagem populado, então podemos usá-lo diretamente.
+                            // Se a API não retornar o personagem, teríamos que recarregar a página.
                             // Atualiza a UI dinamicamente sem recarregar a página
                             addAgentToCampaignUI(response.data.character);
                         } catch (error) {
@@ -3377,7 +3404,7 @@ function initializePlayerView(campaign) {
     if (campaign.characters && campaign.characters.length > 0) {
         noAgentsMessage.style.display = 'none';
         campaign.characters.forEach(character => {
-            const agentCard = createAgentCardForCampaign(character);
+            const agentCard = createAgentCardForCampaign(character, campaign.id);
             agentsGrid.appendChild(agentCard);
         });
     } else {
@@ -3397,7 +3424,7 @@ function addAgentToCampaignUI(character) {
 
     // Esconde a mensagem de "nenhum agente" e adiciona o novo card
     noAgentsMessage.style.display = 'none';
-    const agentCard = createAgentCardForCampaign(character);
+    const agentCard = createAgentCardForCampaign(character, character.campaignId); // Supondo que o ID da campanha esteja disponível
     agentsGrid.appendChild(agentCard);
 }
 /**
@@ -3406,9 +3433,9 @@ function addAgentToCampaignUI(character) {
  * @param {object} character - O objeto do personagem.
  * @returns {HTMLElement} O elemento do card do agente.
  */
-function createAgentCardForCampaign(character) {
+function createAgentCardForCampaign(character, campaignId) {
     const card = document.createElement('div');
-    card.className = 'character-card';
+    card.className = 'character-card simple-card'; // Usa a classe para diminuir o tamanho
     if (character.element) {
         card.classList.add(character.element.toLowerCase());
     }
@@ -3416,6 +3443,12 @@ function createAgentCardForCampaign(character) {
     const p = character.personalization || {};
     const imageHtml = p.imageUrl
         ? `<img src="${p.imageUrl}" alt="Retrato de ${p.name}" class="character-card-image">`
+        : '';
+
+    // Verifica se o personagem pertence ao usuário logado (currentUserId é uma variável global)
+    const isOwner = character.owner === currentUserId;
+    const deleteButtonHtml = isOwner
+        ? `<button class="delete-btn small-btn" title="Remover da Campanha">&times;</button>`
         : '';
 
     card.innerHTML = `
@@ -3429,6 +3462,7 @@ function createAgentCardForCampaign(character) {
         </div>
         <div class="character-footer campaign-view">
             <button class="view-btn">Ver Ficha</button>
+            ${deleteButtonHtml}
         </div>
     `;
 
@@ -3437,6 +3471,12 @@ function createAgentCardForCampaign(character) {
         const charId = character.id || character._id;
         window.location.href = `ficha-agente.html?id=${charId}`;
     });
+
+    // Adiciona o evento de clique para o botão de deletar, se ele existir
+    const deleteBtn = card.querySelector('.delete-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => removeAgentFromCampaign(campaignId, character._id, card));
+    }
 
     return card;
 }
