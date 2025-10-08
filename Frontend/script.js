@@ -1924,8 +1924,7 @@ class CharacterSheet {
 
     async loadCharacter() {
         const params = new URLSearchParams(window.location.search);
-        // Prioriza o ID passado no construtor (para o modal), senão pega da URL
-        const charId = this.characterId || params.get('id');
+        const charId = params.get('id');
         const mode = params.get('mode');
 
         try {
@@ -1946,11 +1945,7 @@ class CharacterSheet {
             this.character = null; // Garante que o personagem é nulo em caso de erro
             if (error.response && (error.response.status === 401 || error.response.status === 404)) {
                 alert('Sua sessão expirou ou você não tem permissão para ver esta ficha. Por favor, faça login novamente.');
-                // Não redireciona se estiver em um modal, apenas mostra o erro.
-                const modalContainer = document.getElementById('sheet-modal-container');
-                if (!modalContainer) { // Só redireciona se não estiver no modal da campanha
-                    window.location.href = 'agentes.html';
-                }
+                window.location.href = 'agentes.html';
             }
         } finally {
             // Este bloco agora executa para AMBOS os modos (local e online)
@@ -2023,8 +2018,8 @@ class CharacterSheet {
             personalization = {}, status, pericias = {}, inventario = []
         } = this.character;
 
-        const sheetContainer = this.container.querySelector('#sheet-container');
-        const header = document.querySelector('.sheet-header');
+        const sheetContainer = document.getElementById('sheet-container');
+        const header = sheetContainer.querySelector('.sheet-header');
         const charImage = document.getElementById('sheet-char-image');
         // Limpa classes de elementos anteriores e adiciona a classe base e a do elemento atual
         sheetContainer.className = 'sheet-container'; // Reseta para a classe base
@@ -2086,7 +2081,7 @@ class CharacterSheet {
     }
 
     renderProficiencies() {
-        const container = this.container.querySelector('#proficiencies-list');
+        const container = document.getElementById('proficiencies-list');
         if (!container) return;
 
         container.innerHTML = '';
@@ -2164,7 +2159,7 @@ class CharacterSheet {
     }
 
     renderActionsPanel() {
-        const inventoryList = this.container.querySelector('#sheet-inventory-list');
+        const inventoryList = document.getElementById('sheet-inventory-list');
         inventoryList.innerHTML = '';
         if (this.character.inventario && this.character.inventario.length > 0) {
             this.character.inventario.forEach((item, index) => {
@@ -2175,15 +2170,15 @@ class CharacterSheet {
         }
 
         const p = this.character.personalization || {};
-        this.container.querySelector('#sheet-appearance').value = p.appearance || '';
-        this.container.querySelector('#sheet-history').value = p.history || '';
-        this.container.querySelector('#sheet-motivation').value = p.motivation || '';
+        document.getElementById('sheet-appearance').value = p.appearance || '';
+        document.getElementById('sheet-history').value = p.history || '';
+        document.getElementById('sheet-motivation').value = p.motivation || '';
     }
 
     updateBar(type, current, max) {
-        const fill = this.container.querySelector(`#${type}-bar-fill`);
-        const currentDisplay = this.container.querySelector(`#${type}-current`);
-        const maxInput = this.container.querySelector(`#${type}-max`);
+        const fill = document.getElementById(`${type}-bar-fill`);
+        const currentDisplay = document.getElementById(`${type}-current`);
+        const maxInput = document.getElementById(`${type}-max`);
 
         if (!fill || !currentDisplay || !maxInput) return;
 
@@ -2206,7 +2201,7 @@ class CharacterSheet {
     }
 
     setupEventListeners() {
-        this.container.querySelector('.actions-accordion').addEventListener('click', (e) => {
+        document.querySelector('.actions-accordion').addEventListener('click', (e) => {
             if (e.target.classList.contains('accordion-header')) {
                 const currentPanel = e.target.closest('.accordion-panel');
                 
@@ -2219,7 +2214,7 @@ class CharacterSheet {
             }
         });
 
-        this.container.querySelector('.status-bars-container').addEventListener('click', (e) => {
+        document.querySelector('.status-bars-container').addEventListener('click', (e) => {
             if (e.target.classList.contains('status-btn')) {
                 const stat = e.target.dataset.stat;
                 const amount = parseInt(e.target.dataset.amount, 10);
@@ -2243,7 +2238,7 @@ class CharacterSheet {
             }
         });
 
-        this.container.querySelector('.primary-attributes-display').addEventListener('click', (e) => {
+        document.querySelector('.primary-attributes-display').addEventListener('click', (e) => {
             if (e.target.classList.contains('attr-btn')) {
                 const block = e.target.closest('.primary-attr-block');
                 const attrName = block.dataset.attr;
@@ -2266,7 +2261,7 @@ class CharacterSheet {
         });
 
         // Adiciona listener para o novo botão de especialização
-        const specBlock = this.container.querySelector('#class-specialization-block');
+        const specBlock = document.getElementById('class-specialization-block');
         if (specBlock) {
             specBlock.addEventListener('click', (e) => {
                 if (e.target.closest('[data-action="specialize"]')) {
@@ -2275,7 +2270,7 @@ class CharacterSheet {
             });
         }
 
-        this.container.querySelector('#nf-control').addEventListener('click', (e) => {
+        document.getElementById('nf-control').addEventListener('click', (e) => {
             if (e.target.classList.contains('progression-btn')) {
                 const amount = parseInt(e.target.dataset.amount, 10);
                 if (!isNaN(amount)) {
@@ -2315,15 +2310,15 @@ class CharacterSheet {
         });
 
 
-        this.container.querySelector('#hp-max').addEventListener('change', (e) => this.updateStatus('hp_max', e.target.value));
-        this.container.querySelector('#sanity-max').addEventListener('change', (e) => this.updateStatus('sanity_max', e.target.value));
-        this.container.querySelector('#pa-max').addEventListener('change', (e) => this.updateStatus('pa_max', e.target.value));
+        document.getElementById('hp-max').addEventListener('change', (e) => this.updateStatus('hp_max', e.target.value));
+        document.getElementById('sanity-max').addEventListener('change', (e) => this.updateStatus('sanity_max', e.target.value));
+        document.getElementById('pa-max').addEventListener('change', (e) => this.updateStatus('pa_max', e.target.value));
 
-        this.container.querySelector('#sheet-appearance').addEventListener('blur', (e) => this.updatePersonalization('appearance', e.target.value));
-        this.container.querySelector('#sheet-history').addEventListener('blur', (e) => this.updatePersonalization('history', e.target.value));
-        this.container.querySelector('#sheet-motivation').addEventListener('blur', (e) => this.updatePersonalization('motivation', e.target.value));
+        document.getElementById('sheet-appearance').addEventListener('blur', (e) => this.updatePersonalization('appearance', e.target.value));
+        document.getElementById('sheet-history').addEventListener('blur', (e) => this.updatePersonalization('history', e.target.value));
+        document.getElementById('sheet-motivation').addEventListener('blur', (e) => this.updatePersonalization('motivation', e.target.value));
 
-        this.container.querySelector('#dice-roller-form').addEventListener('submit', (e) => {
+        document.getElementById('dice-roller-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const count = parseInt(document.getElementById('dice-count').value, 10);
             const type = parseInt(document.getElementById('dice-type').value, 10);
@@ -2331,14 +2326,14 @@ class CharacterSheet {
             this.rollDice(type, count, bonus, "Rolagem Manual");
         });
 
-        const notesTextarea = this.container.querySelector('#sheet-notes');
+        const notesTextarea = document.getElementById('sheet-notes');
         if (notesTextarea) notesTextarea.addEventListener('blur', (e) => {
             this.character.notes = e.target.value;
             this.saveCharacterChanges();
         });
 
-        const inventoryList = this.container.querySelector('#sheet-inventory-list');
-        this.container.querySelector('#add-item-form').addEventListener('submit', (e) => {
+        const inventoryList = document.getElementById('sheet-inventory-list');
+        document.getElementById('add-item-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const input = document.getElementById('add-item-input');
             const newItem = input.value.trim();
@@ -2368,14 +2363,14 @@ class CharacterSheet {
             }
         }, true);
 
-        this.container.querySelector('#add-xp-btn').addEventListener('click', () => {
+        document.getElementById('add-xp-btn').addEventListener('click', () => {
             const amount = parseInt(prompt('Quantidade de XP a adicionar:'));
             if (!isNaN(amount) && amount > 0) {
                 this.addXp(amount);
             }
         });
 
-        this.container.querySelector('#level-up-btn').addEventListener('click', () => {
+        document.getElementById('level-up-btn').addEventListener('click', () => {
             this.levelUp();
         });
     }
@@ -2390,7 +2385,7 @@ class CharacterSheet {
     checkLevelUp() {
         const xpToNextLevel = this.character.level * 100;
         if (this.character.xp >= xpToNextLevel) {
-            this.container.querySelector('#level-up-btn').style.display = 'block';
+            document.getElementById('level-up-btn').style.display = 'block';
         }
     }
 
@@ -2401,7 +2396,7 @@ class CharacterSheet {
             this.character.xp -= xpToNextLevel; // Deduz o XP usado para upar
             this.character.attributePoints += 2;
             this.character.skillPoints += 1;
-            this.container.querySelector('#level-up-btn').style.display = 'none';
+            document.getElementById('level-up-btn').style.display = 'none';
 
             this.saveCharacterChanges();
             this.renderSheet();
@@ -2419,8 +2414,8 @@ class CharacterSheet {
     }
 
     showSpecializationChoice() {
-        const modalOverlay = this.container.querySelector('#specialization-choice-overlay');
-        const optionsContainer = this.container.querySelector('#specialization-options-container');
+        const modalOverlay = document.getElementById('specialization-choice-overlay');
+        const optionsContainer = document.getElementById('specialization-options-container');
         const confirmationContainer = document.getElementById('spec-confirmation-content');
         if (!modalOverlay || !optionsContainer || !confirmationContainer) return;
 
@@ -2445,8 +2440,8 @@ class CharacterSheet {
     }
 
     showSpecializationConfirmation(spec) {
-        const optionsContainer = this.container.querySelector('#specialization-options-container');
-        const confirmationContainer = this.container.querySelector('#spec-confirmation-content');
+        const optionsContainer = document.getElementById('specialization-options-container');
+        const confirmationContainer = document.getElementById('spec-confirmation-content');
         
         // Preenche os dados da confirmação
         confirmationContainer.querySelector('h2').textContent = `Confirmar: ${spec.name}`;
@@ -2457,8 +2452,8 @@ class CharacterSheet {
         confirmationContainer.style.display = 'flex';
 
         // Limpa listeners antigos e adiciona novos para os botões de confirmação
-        const confirmBtn = this.container.querySelector('#confirm-spec-btn');
-        const cancelBtn = this.container.querySelector('#cancel-spec-btn');
+        const confirmBtn = document.getElementById('confirm-spec-btn');
+        const cancelBtn = document.getElementById('cancel-spec-btn');
 
         const confirmHandler = () => {
             this.finalizeSpecialization(spec.name);
@@ -2482,7 +2477,7 @@ class CharacterSheet {
     finalizeSpecialization(specName) {
         this.character.skillPoints--;
         this.character.specialization = specName;
-        this.container.querySelector('#specialization-choice-overlay').classList.remove('visible', 'sticky-modal');
+        document.getElementById('specialization-choice-overlay').classList.remove('visible', 'sticky-modal');
         this.saveCharacterChanges();
         this.renderSheet();
         this.renderSkillTree();
@@ -2507,7 +2502,7 @@ class CharacterSheet {
         }
         total += bonus;
 
-        const log = this.container.querySelector('#roll-log');
+        const log = document.getElementById('roll-log');
         const logPlaceholder = log.querySelector('.log-placeholder');
         if (logPlaceholder) logPlaceholder.remove();
 
@@ -2555,7 +2550,7 @@ class CharacterSheet {
     }
 
     renderSkillTree() {
-        const container = this.container.querySelector('#unlocked-skills-container');
+        const container = document.getElementById('unlocked-skills-container');
         if (!container) return;
 
         container.innerHTML = ''; // Limpa o container
@@ -2954,51 +2949,6 @@ async function deleteCampaign(campaignId) {
     
     alert('Campanha excluída.');
     window.location.href = 'campanhas.html';
-}
-
-/**
- * Exibe a ficha de um agente dentro de um modal na página da campanha.
- * @param {string} characterId - O ID do personagem a ser exibido.
- */
-async function showAgentSheetInCampaign(characterId) {
-    const modalOverlay = document.getElementById('sheet-modal-overlay');
-    const modalContainer = document.getElementById('sheet-modal-container');
-    const closeModalBtn = document.getElementById('close-sheet-modal-btn');
-
-    if (!modalOverlay || !modalContainer || !closeModalBtn) return;
-
-    // Mostra o modal com a mensagem de carregamento
-    modalContainer.innerHTML = '<p class="loading-message" style="padding: 4rem; text-align: center;">Carregando ficha do agente...</p>';
-    modalOverlay.classList.add('visible');
-
-    // Função para fechar o modal
-    const closeModal = () => modalOverlay.classList.remove('visible');
-    closeModalBtn.onclick = closeModal; // Usando onclick para garantir que só haja um listener
-
-    try {
-        // 1. Busca o HTML da página da ficha
-        const response = await axios.get('ficha-agente.html');
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(response.data, 'text/html');
-        const sheetContent = doc.getElementById('sheet-container');
-
-        if (!sheetContent) {
-            throw new Error("Container da ficha não encontrado no arquivo 'ficha-agente.html'.");
-        }
-
-        // 2. Injeta o HTML no modal
-        modalContainer.innerHTML = ''; // Limpa a mensagem de carregamento
-        modalContainer.appendChild(sheetContent);
-
-        // 3. Inicializa a classe CharacterSheet para preencher os dados
-        // Passamos o ID do personagem e o container do modal para a classe
-        const sheet = new CharacterSheet(characterId, modalContainer);
-        await sheet.initialize();
-
-    } catch (error) {
-        console.error("Erro ao carregar a ficha do agente no modal:", error);
-        modalContainer.innerHTML = '<p class="loading-message" style="color: var(--color-danger);">Falha ao carregar a ficha. Tente novamente.</p>';
-    }
 }
 
 /**
@@ -3557,7 +3507,8 @@ function createAgentCardForCampaign(character, campaignId) {
 
     card.querySelector('.view-btn').addEventListener('click', () => {
         // O ID pode ser `_id` vindo do populate da API
-        showAgentSheetInCampaign(character._id);
+        const charId = character._id; // Use _id directly
+        window.location.href = `ficha-agente.html?id=${charId}`;
     });
 
     // Adiciona o evento de clique para o botão de deletar, se ele existir
