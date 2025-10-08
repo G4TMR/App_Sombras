@@ -3721,7 +3721,7 @@ async function checkAuthStatus() {
     }
 
     // Remove o container anterior para evitar duplicatas em recarregamentos
-    const existingAuthContainer = header.querySelector('.auth-container');
+    const existingAuthContainer = nav.querySelector('.auth-container');
     if (existingAuthContainer) {
         existingAuthContainer.remove();
     }

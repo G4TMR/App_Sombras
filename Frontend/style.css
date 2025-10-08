@@ -3133,6 +3133,11 @@ body.dev-mode #dev-mode-form { display: none; }
         grid-template-columns: 1fr;
     }
 
+    .sheet-main-desktop {
+        gap: 1.5rem; /* Diminui o espaço entre as colunas empilhadas */
+        padding: 0.5rem;
+    }
+
     .status-bars-container {
         gap: 1.5rem; /* Aumenta o espaço entre as barras de status */
     }
@@ -3166,6 +3171,21 @@ body.dev-mode #dev-mode-form { display: none; }
         width: 20px;
         height: 20px;
     }
+
+    .primary-attributes-display {
+        grid-template-columns: 1fr; /* Uma coluna para os atributos */
+    }
+
+    .progression-grid {
+        grid-template-columns: repeat(2, 1fr); /* Duas colunas para a progressão */
+    }
+
+    .sheet-header-main-info {
+        flex-direction: column; /* Empilha a imagem e o texto no cabeçalho */
+        text-align: center;
+        gap: 1rem;
+    }
+
 
     /* --- CARD DE AGENTE --- */
     .character-card .character-actions {
