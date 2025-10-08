@@ -3404,7 +3404,7 @@ function initializePlayerView(campaign) {
     if (campaign.characters && campaign.characters.length > 0) {
         noAgentsMessage.style.display = 'none';
         campaign.characters.forEach(character => {
-            const agentCard = createAgentCardForCampaign(character, campaign.id);
+            const agentCard = createAgentCardForCampaign(character, campaign._id || campaign.id);
             agentsGrid.appendChild(agentCard);
         });
     } else {
@@ -3424,7 +3424,7 @@ function addAgentToCampaignUI(character) {
 
     // Esconde a mensagem de "nenhum agente" e adiciona o novo card
     noAgentsMessage.style.display = 'none';
-    const agentCard = createAgentCardForCampaign(character, character.campaignId); // Supondo que o ID da campanha esteja disponível
+    const agentCard = createAgentCardForCampaign(character, new URLSearchParams(window.location.search).get('id'));
     agentsGrid.appendChild(agentCard);
 }
 /**
