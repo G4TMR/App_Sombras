@@ -3318,6 +3318,258 @@ function renderCampaignPlayers(campaign) {
 }
 
 /**
+ * Renderiza as áreas de "Fog of War" no mapa.
+ * @param {object} campaign - O objeto da campanha.
+ * @param {HTMLElement} mapBoard - O elemento do tabuleiro do mapa.
+ * @param {boolean} isMasterView - Se a visão é a do mestre.
+ */
+function renderFogOfWar(campaign, mapBoard, isMasterView) {
+    // Limpa a névoa antiga
+    mapBoard.querySelectorAll('.fog-of-war').forEach(fog => fog.remove());
+
+    if (campaign.mapData?.fog) {
+        campaign.mapData.fog.forEach(fogData => {
+            const fogElement = document.createElement('div');
+            fogElement.className = 'fog-of-war';
+            fogElement.id = fogData.id;
+            fogElement.style.left = `${fogData.x}%`;
+            fogElement.style.top = `${fogData.y}%`;
+            fogElement.style.width = `${fogData.width}%`;
+            fogElement.style.height = `${fogData.height}%`;
+            mapBoard.appendChild(fogElement);
+
+            if (isMasterView) {
+                // Permite ao mestre remover a névoa
+                fogElement.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showMapContextMenu(e.clientX, e.clientY, fogData.id);
+                });
+            }
+        });
+    }
+}
+
+/**
+ * Exibe o menu de contexto customizado no mapa.
+ * @param {number} x - Posição X do mouse.
+ * @param {number} y - Posição Y do mouse.
+ * @param {string|null} fogId - O ID da área de névoa clicada, se houver.
+ */
+function showMapContextMenu(x, y, fogId = null) {
+    const menu = document.getElementById('map-context-menu');
+    menu.style.display = 'block';
+    menu.style.left = `${x}px`;
+    menu.style.top = `${y}px`;
+
+    const removeFogOption = document.getElementById('remove-fog-area');
+    removeFogOption.style.display = fogId ? 'block' : 'none';
+    removeFogOption.dataset.fogId = fogId;
+}
+
+/**
+ * Esconde o menu de contexto do mapa.
+ */
+function hideMapContextMenu() {
+    const menu = document.getElementById('map-context-menu');
+    if (menu) menu.style.display = 'none';
+}
+
+
+/**
+ * Inicializa a funcionalidade do mapa interativo para o mestre.
+ * @param {object} campaign - O objeto da campanha.
+ */
+function initializeMasterMap(campaign) {
+    const mapBoard = document.getElementById('map-board');
+    mapBoard.classList.add('master-view'); // Adiciona classe para estilização
+    const uploadInput = document.getElementById('map-upload-input');
+    const tokenList = document.getElementById('map-character-tokens');
+    const resetMapBtn = document.getElementById('reset-map-btn');
+    const contextMenu = document.getElementById('map-context-menu');
+    const toggleDrawModeBtn = document.getElementById('toggle-draw-mode');
+    const removeFogBtn = document.getElementById('remove-fog-area');
+
+    let isDrawingMode = false;
+    let isDrawing = false;
+    let startX, startY;
+    let selectionRect = null;
+
+    // Garante que a estrutura de dados exista
+    if (!campaign.mapData) campaign.mapData = {};
+    if (!campaign.mapData.fog) campaign.mapData.fog = [];
+
+    // Carrega o mapa e os tokens salvos
+    if (campaign.mapData?.imageUrl) {
+        mapBoard.style.backgroundImage = `url('${campaign.mapData.imageUrl}')`;
+        document.getElementById('map-upload-placeholder').style.display = 'none';
+    }
+    if (campaign.mapData?.tokens) {
+        campaign.mapData.tokens.forEach(tokenData => {
+            createTokenOnBoard(tokenData, mapBoard, campaign);
+        });
+    }
+
+    // Renderiza a névoa de guerra
+    renderFogOfWar(campaign, mapBoard, true);
+
+    // Lógica de upload do mapa
+    uploadInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const imageUrl = await readFileAsDataURL(file);
+            mapBoard.style.backgroundImage = `url('${imageUrl}')`;
+            document.getElementById('map-upload-placeholder').style.display = 'none';
+            
+            if (!campaign.mapData) campaign.mapData = {};
+            campaign.mapData.imageUrl = imageUrl;
+            updateCampaign(campaign);
+        }
+    });
+
+    // Popula a lista de tokens arrastáveis
+    tokenList.innerHTML = '';
+    campaign.characters.forEach(char => {
+        const tokenListItem = document.createElement('div');
+        tokenListItem.className = 'token-list-item';
+        tokenListItem.draggable = true;
+        tokenListItem.dataset.characterId = char._id;
+        tokenListItem.innerHTML = `
+            <img src="${char.personalization.imageUrl || 'https://via.placeholder.com/30'}" alt="${char.personalization.name}">
+            <span>${char.personalization.name}</span>
+        `;
+        tokenList.appendChild(tokenListItem);
+
+        tokenListItem.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', char._id);
+        });
+    });
+
+    // Lógica para soltar tokens no mapa
+    mapBoard.addEventListener('dragover', (e) => e.preventDefault());
+    mapBoard.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const charId = e.dataTransfer.getData('text/plain');
+        const character = campaign.characters.find(c => c._id === charId);
+
+        if (character) {
+            const rect = mapBoard.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const tokenData = {
+                id: `token_${charId}`,
+                characterId: charId,
+                imageUrl: character.personalization.imageUrl || 'https://via.placeholder.com/50',
+                x: (x / rect.width) * 100, // Salva como porcentagem
+                y: (y / rect.height) * 100,
+            };
+
+            if (!campaign.mapData) campaign.mapData = { tokens: [] };
+            if (!campaign.mapData.tokens) campaign.mapData.tokens = [];
+
+            // Remove token antigo se já existir
+            campaign.mapData.tokens = campaign.mapData.tokens.filter(t => t.characterId !== charId);
+            campaign.mapData.tokens.push(tokenData);
+            
+            updateCampaign(campaign);
+            // Limpa e recria todos os tokens para evitar duplicatas
+            mapBoard.querySelectorAll('.map-token').forEach(t => t.remove());
+            campaign.mapData.tokens.forEach(td => createTokenOnBoard(td, mapBoard, campaign));
+        }
+    });
+
+    // Lógica do Menu de Contexto e Desenho
+    mapBoard.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        showMapContextMenu(e.clientX, e.clientY);
+    });
+
+    document.addEventListener('click', hideMapContextMenu);
+
+    toggleDrawModeBtn.addEventListener('click', () => {
+        isDrawingMode = !isDrawingMode;
+        toggleDrawModeBtn.textContent = isDrawingMode ? 'Desativar Modo Desenho' : 'Ativar Modo Desenho';
+        mapBoard.style.cursor = isDrawingMode ? 'crosshair' : 'default';
+        hideMapContextMenu();
+    });
+
+    removeFogBtn.addEventListener('click', (e) => {
+        const fogIdToRemove = e.target.dataset.fogId;
+        if (fogIdToRemove) {
+            campaign.mapData.fog = campaign.mapData.fog.filter(f => f.id !== fogIdToRemove);
+            updateCampaign(campaign);
+            renderFogOfWar(campaign, mapBoard, true);
+        }
+        hideMapContextMenu();
+    });
+
+    // Eventos de desenho no mapa
+    mapBoard.addEventListener('mousedown', (e) => {
+        if (!isDrawingMode || e.button !== 0) return; // Apenas botão esquerdo
+        isDrawing = true;
+        const rect = mapBoard.getBoundingClientRect();
+        startX = e.clientX - rect.left;
+        startY = e.clientY - rect.top;
+
+        selectionRect = document.createElement('div');
+        selectionRect.className = 'draw-selection-rect';
+        mapBoard.appendChild(selectionRect);
+        selectionRect.style.left = `${startX}px`;
+        selectionRect.style.top = `${startY}px`;
+    });
+
+    mapBoard.addEventListener('mousemove', (e) => {
+        if (!isDrawing) return;
+        const rect = mapBoard.getBoundingClientRect();
+        const currentX = e.clientX - rect.left;
+        const currentY = e.clientY - rect.top;
+
+        const width = Math.abs(currentX - startX);
+        const height = Math.abs(currentY - startY);
+        const left = Math.min(currentX, startX);
+        const top = Math.min(currentY, startY);
+
+        selectionRect.style.width = `${width}px`;
+        selectionRect.style.height = `${height}px`;
+        selectionRect.style.left = `${left}px`;
+        selectionRect.style.top = `${top}px`;
+    });
+
+    mapBoard.addEventListener('mouseup', (e) => {
+        if (!isDrawing) return;
+        isDrawing = false;
+        mapBoard.removeChild(selectionRect);
+        selectionRect = null;
+
+        const rect = mapBoard.getBoundingClientRect();
+        const fogData = {
+            id: `fog_${Date.now()}`,
+            x: (parseFloat(e.target.style.left || startX) / rect.width) * 100,
+            y: (parseFloat(e.target.style.top || startY) / rect.height) * 100,
+            width: (Math.abs((e.clientX - rect.left) - startX) / rect.width) * 100,
+            height: (Math.abs((e.clientY - rect.top) - startY) / rect.height) * 100,
+        };
+
+        // Adiciona a nova área de névoa e salva
+        campaign.mapData.fog.push(fogData);
+        updateCampaign(campaign);
+        renderFogOfWar(campaign, mapBoard, true); // Re-renderiza a névoa
+    });
+
+    // Resetar o mapa
+    resetMapBtn.addEventListener('click', () => {
+        if (confirm('Tem certeza que deseja limpar o mapa e remover todos os tokens?')) {
+            campaign.mapData = { imageUrl: null, tokens: [] };
+            updateCampaign(campaign);
+            mapBoard.style.backgroundImage = 'none';
+            document.getElementById('map-upload-placeholder').style.display = 'flex';
+            mapBoard.querySelectorAll('.map-token').forEach(t => t.remove());
+        }
+    });
+}
+
+/**
  * Inicializa a visualização do Mestre para gerenciar a campanha.
  * @param {object} campaign - O objeto da campanha.
  */
@@ -3347,6 +3599,9 @@ function initializeMasterView(campaign) {
 
     // Renderiza a lista de jogadores
     renderCampaignPlayers(campaign);
+
+    // Inicializa o mapa do mestre
+    initializeMasterMap(campaign);
 
     // Renderiza a lista de agentes para o mestre
     const masterAgentsGrid = document.getElementById('master-agents-grid');
@@ -3431,45 +3686,6 @@ function initializeMasterView(campaign) {
         inviteCodeDisplay.textContent = campaign.inviteCode;
     });
 
-    // Configura o gerador de mapa
-    const generateMapBtn = document.getElementById('generate-map-btn');
-    if (generateMapBtn) {
-        generateMapBtn.addEventListener('click', () => {
-            const synopsis = document.getElementById('map-synopsis').value.trim();
-            if (!synopsis) {
-                alert('Por favor, escreva uma sinopse para o mapa.');
-                return;
-            }
-
-            const loader = document.getElementById('map-loader');
-            const display = document.getElementById('map-display');
-
-            display.innerHTML = '';
-            loader.style.display = 'flex';
-
-            // Simula o tempo de geração da IA
-            setTimeout(() => {
-                loader.style.display = 'none';
-                
-                // Lista de mapas pré-selecionados para simular a geração
-                const mapPool = [
-                    'https://i.imgur.com/V14R5O1.jpeg', // Mansão/Castelo
-                    'https://i.imgur.com/pOFG6O3.jpeg', // Dungeon
-                    'https://i.imgur.com/y5Yg3yF.jpeg', // Floresta
-                    'https://i.imgur.com/SgYfBfA.jpeg'  // Vilarejo
-                ];
-
-                // Escolhe um mapa aleatório da lista
-                const randomMapSrc = mapPool[Math.floor(Math.random() * mapPool.length)];
-
-                const mapImage = document.createElement('img');
-                mapImage.src = randomMapSrc;
-                mapImage.alt = 'Mapa gerado pela IA';
-                display.appendChild(mapImage);
-            }, 3500); // 3.5 segundos de "geração"
-        });
-    }
-
     // Configura a lógica das abas (tabs)
     const tabLinks = document.querySelectorAll('.tab-link');
     const tabContents = documentquerySelectorAll('.tab-content');
@@ -3486,6 +3702,32 @@ function initializeMasterView(campaign) {
         // Inicia o listener para o log de rolagens
         initializeCampaignLogListener(campaign.id);
     }
+}
+
+/**
+ * Inicializa a visualização do mapa para o jogador.
+ * @param {object} campaign - O objeto da campanha.
+ */
+function initializePlayerMap(campaign) {
+    const mapBoard = document.getElementById('player-map-board');
+    mapBoard.classList.add('player-view'); // Adiciona classe para estilização
+    mapBoard.innerHTML = ''; // Limpa o mapa
+
+    if (campaign.mapData?.imageUrl) {
+        mapBoard.style.backgroundImage = `url('${campaign.mapData.imageUrl}')`;
+    } else {
+        mapBoard.innerHTML = '<div class="map-upload-placeholder"><p>O mestre ainda não carregou um mapa.</p></div>';
+    }
+
+    if (campaign.mapData?.tokens) {
+        campaign.mapData.tokens.forEach(tokenData => {
+            // Cria o token, mas sem a funcionalidade de arrastar
+            const tokenElement = createTokenOnBoard(tokenData, mapBoard, campaign, false);
+        });
+    }
+
+    // Renderiza a névoa de guerra para o jogador
+    renderFogOfWar(campaign, mapBoard, false);
 }
 
 /**
@@ -3583,6 +3825,21 @@ async function initializePlayerView(campaign) {
     } else {
         noAgentsMessage.style.display = 'flex';
     }
+
+    // Inicializa o mapa do jogador
+    initializePlayerMap(campaign);
+
+    // Configura as abas do jogador
+    const playerTabLinks = document.querySelectorAll('#player-view-container .tab-link');
+    const playerTabContents = document.querySelectorAll('#player-view-container .tab-content');
+    playerTabLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            const tabId = link.dataset.tab;
+            playerTabLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            playerTabContents.forEach(c => c.id === tabId ? c.classList.add('active') : c.classList.remove('active'));
+        });
+    });
 }
 
 /**
@@ -3599,6 +3856,55 @@ function addAgentToCampaignUI(character) {
     noAgentsMessage.style.display = 'none';
     const agentCard = createAgentCardForCampaign(character, new URLSearchParams(window.location.search).get('id'));
     agentsGrid.appendChild(agentCard);
+}
+
+/**
+ * Cria e posiciona um token no mapa.
+ * @param {object} tokenData - Dados do token {id, characterId, imageUrl, x, y}.
+ * @param {HTMLElement} mapBoard - O elemento do tabuleiro do mapa.
+ * @param {object} campaign - O objeto da campanha.
+ * @param {boolean} isDraggable - Se o token pode ser arrastado (visão do mestre).
+ */
+function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true) {
+    let tokenElement = document.getElementById(tokenData.id);
+    if (!tokenElement) {
+        tokenElement = document.createElement('div');
+        tokenElement.id = tokenData.id;
+        tokenElement.className = 'map-token';
+        mapBoard.appendChild(tokenElement);
+    }
+
+    tokenElement.style.backgroundImage = `url('${tokenData.imageUrl}')`;
+    tokenElement.style.left = `${tokenData.x}%`;
+    tokenElement.style.top = `${tokenData.y}%`;
+
+    if (isDraggable) {
+        tokenElement.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const rect = mapBoard.getBoundingClientRect();
+            let offsetX = e.clientX - tokenElement.getBoundingClientRect().left;
+            let offsetY = e.clientY - tokenElement.getBoundingClientRect().top;
+
+            function onMouseMove(moveEvent) {
+                let newX = moveEvent.clientX - rect.left - offsetX;
+                let newY = moveEvent.clientY - rect.top - offsetY;
+                
+                tokenElement.style.left = `${newX}px`;
+                tokenElement.style.top = `${newY}px`;
+            }
+
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                tokenData.x = (parseFloat(tokenElement.style.left) / rect.width) * 100;
+                tokenData.y = (parseFloat(tokenElement.style.top) / rect.height) * 100;
+                updateCampaign(campaign);
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+    }
 }
 /**
  * Cria um card de agente para ser exibido dentro da página da campanha.

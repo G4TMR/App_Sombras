@@ -70,22 +70,21 @@
                     </div>
         
                     <div class="tab-content" id="mapa">
-                        <div class="premium-lock">
-                            <span class="lock-icon">🔒</span>
-                            <h3>Recurso Premium</h3>
-                            <p>A funcionalidade de Mapa Interativo está disponível apenas para apoiadores. Considere se tornar um Patrono para desbloquear este e outros recursos incríveis!</p>
-                            <a href="patente.html" class="wizard-btn">Ver Planos de Apoio</a>
-                        </div>
-                        <div class="map-content-unlocked">
-                            <h3>Gerador de Mapa com IA</h3>
-                            <p>Descreva o local em detalhes: a atmosfera, pontos de interesse, perigos e a estética geral. A IA usará sua sinopse para criar um mapa sombrio e detalhado.</p>
-                            <div class="map-generator-container">
-                                <textarea id="map-synopsis" placeholder="Ex: Uma mansão vitoriana abandonada em uma colina, cercada por uma floresta morta. A névoa é constante. Há um cemitério nos fundos e a entrada principal está arrombada..."></textarea>
-                                <button id="generate-map-btn" class="wizard-btn">Gerar Mapa</button>
-                                <div id="map-loader" class="map-loader" style="display: none;">
-                                    <div class="spinner"></div>
+                        <div class="map-container">
+                            <div id="map-board" class="map-board">
+                                <div id="map-upload-placeholder" class="map-upload-placeholder">
+                                    <p>Nenhum mapa carregado.</p>
+                                    <input type="file" id="map-upload-input" accept="image/*" style="display: none;">
+                                    <button class="wizard-btn" onclick="document.getElementById('map-upload-input').click()">Carregar Mapa</button>
                                 </div>
-                                <div id="map-display" class="map-display"></div>
+                                <!-- Tokens serão adicionados aqui -->
+                            </div>
+                            <div class="map-controls">
+                                <h4>Agentes Disponíveis</h4>
+                                <div id="map-character-tokens" class="map-character-tokens">
+                                    <!-- Lista de personagens para arrastar -->
+                                </div>
+                                <button id="reset-map-btn" class="wizard-btn danger-btn" style="width: 100%; margin-top: 1rem;">Resetar Mapa</button>
                             </div>
                         </div>
                     </div>
@@ -122,9 +121,15 @@
                     <p id="player-view-campaign-synopsis" class="info-text"></p>
                 </div>
             </div>
+
+            <!-- Abas do Jogador -->
+            <div class="master-tabs">
+                <button class="tab-link active" data-tab="player-agents">Agentes</button>
+                <button class="tab-link" data-tab="player-map">Mapa</button>
+            </div>
     
             <!-- Agentes na Campanha -->
-            <div class="form-section" style="margin-top: 2rem;">
+            <div class="tab-content active" id="player-agents">
                 <h3 class="section-title">Agentes na Campanha</h3>
                 <div id="campaign-agents-grid" class="characters-grid">
                     <!-- Cards de personagens serão injetados aqui -->
@@ -133,11 +138,18 @@
                     <p class="empty-message">Nenhum agente nesta campanha ainda.</p>
                     <p class="empty-submessage">Adicione seu primeiro agente para começar a jogar.</p>
                 </div>
+                <!-- Botão de Ação -->
+                <div style="text-align:center; margin-top:3rem;">
+                    <button id="add-agent-to-campaign-btn" class="wizard-btn">Adicionar Agente</button>
+                </div>
             </div>
-    
-            <!-- Botão de Ação -->
-            <div style="text-align:center; margin-top:3rem;">
-                <button id="add-agent-to-campaign-btn" class="wizard-btn">Adicionar Agente</button>
+
+            <!-- Mapa do Jogador -->
+            <div class="tab-content" id="player-map">
+                <div class="map-container player-view">
+                    <div id="player-map-board" class="map-board">
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -188,6 +200,15 @@
                 <a href="criar-agente.html" id="create-and-add-agent-btn" class="wizard-btn">Criar Novo Agente</a>
             </div>
         </div>
+    </div>
+
+    <!-- Menu de Contexto Customizado para o Mapa -->
+    <div id="map-context-menu" class="context-menu">
+        <ul>
+            <li id="toggle-draw-mode">Ativar Modo Desenho</li>
+            <li id="remove-fog-area" style="display: none;">Remover Névoa</li>
+            <!-- Outras opções podem ser adicionadas aqui -->
+        </ul>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>

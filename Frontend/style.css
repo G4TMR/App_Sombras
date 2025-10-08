@@ -2416,22 +2416,6 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     color: var(--page-color, var(--color-primary));
 }
 
-.ai-tools-section { margin-top: 3rem; }
-.ai-tools { display: flex; justify-content: center; gap: 1rem; }
-
-/* --- PÁGINA DE GERENCIAMENTO DE CAMPANHA (LAYOUT COM SIDEBAR) --- */
-.campaign-layout {
-    display: grid;
-    grid-template-columns: 1fr; /* Padrão para mobile */
-    gap: 2rem;
-}
-
-@media (min-width: 1024px) {
-    .campaign-layout {
-        grid-template-columns: 1fr 320px; /* Conteúdo principal e barra lateral */
-    }
-}
-
 .campaign-main-content {
     display: flex;
     justify-content: center;
