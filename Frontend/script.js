@@ -3726,7 +3726,6 @@ async function checkAuthStatus() {
     // Define o botão de login como padrão inicial
     authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
     nav.appendChild(authContainer); // Adiciona ao menu
-    console.log("Auth container appended to nav. Nav's current innerHTML:", nav.innerHTML); // Debugging line
 
     try {
         const response = await api.get('/auth/user');
