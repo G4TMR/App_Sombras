@@ -3606,8 +3606,7 @@ function addAgentToCampaignUI(character) {
  * @param {object} character - O objeto do personagem.
  * @returns {HTMLElement} O elemento do card do agente.
  */
-function createAgentCardForCampaign(character, campaignId) {
-function createAgentCardForCampaign(character, campaignId, isMasterView = false) {
+function createAgentCardForCampaign(character, campaignId, isMasterView = false) { // Linha duplicada removida
     const card = document.createElement('div');
     card.className = 'character-card simple-card'; // Usa a classe para diminuir o tamanho
     if (character.element) {
@@ -3623,8 +3622,7 @@ function createAgentCardForCampaign(character, campaignId, isMasterView = false)
     // Se for a visão do mestre, o botão de deletar aparece em todos.
     // Se for a visão do jogador, o botão só aparece se ele for o dono do personagem.
     const isOwner = character.owner === currentUserId;
-    const deleteButtonHtml = isOwner
-    const deleteButtonHtml = (isMasterView || isOwner)
+    const deleteButtonHtml = (isMasterView || isOwner) // Linha duplicada removida
         ? `<button class="delete-btn small-btn" title="Remover da Campanha">&times;</button>`
         : '';
 
@@ -3839,8 +3837,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (user) {
             try {
                 // Adiciona um parâmetro de cache-busting para garantir dados novos
-             const response = await api.get(`/api/campaigns?t=${new Date().getTime()}`);
-                const response = await api.get(`/api/campaigns?t=${new Date().getTime()}`);
+                const response = await api.get(`/api/campaigns?t=${new Date().getTime()}`); // Linha duplicada removida
                 campaignsData = response.data;
             } catch (error) {
                 console.error("Falha ao buscar campanhas da API:", error);
