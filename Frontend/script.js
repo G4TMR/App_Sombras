@@ -2948,6 +2948,51 @@ async function deleteCampaign(campaignId) {
 }
 
 /**
+ * Exibe a ficha de um agente dentro de um modal na página da campanha.
+ * @param {string} characterId - O ID do personagem a ser exibido.
+ */
+async function showAgentSheetInCampaign(characterId) {
+    const modalOverlay = document.getElementById('sheet-modal-overlay');
+    const modalContainer = document.getElementById('sheet-modal-container');
+    const closeModalBtn = document.getElementById('close-sheet-modal-btn');
+
+    if (!modalOverlay || !modalContainer || !closeModalBtn) return;
+
+    // Mostra o modal com a mensagem de carregamento
+    modalContainer.innerHTML = '<p class="loading-message" style="padding: 4rem; text-align: center;">Carregando ficha do agente...</p>';
+    modalOverlay.classList.add('visible');
+
+    // Função para fechar o modal
+    const closeModal = () => modalOverlay.classList.remove('visible');
+    closeModalBtn.onclick = closeModal; // Usando onclick para garantir que só haja um listener
+
+    try {
+        // 1. Busca o HTML da página da ficha
+        const response = await axios.get('ficha-agente.html');
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(response.data, 'text/html');
+        const sheetContent = doc.getElementById('sheet-container');
+
+        if (!sheetContent) {
+            throw new Error("Container da ficha não encontrado no arquivo 'ficha-agente.html'.");
+        }
+
+        // 2. Injeta o HTML no modal
+        modalContainer.innerHTML = ''; // Limpa a mensagem de carregamento
+        modalContainer.appendChild(sheetContent);
+
+        // 3. Inicializa a classe CharacterSheet para preencher os dados
+        // Passamos o ID do personagem e o container do modal para a classe
+        const sheet = new CharacterSheet(characterId, modalContainer);
+        await sheet.initialize();
+
+    } catch (error) {
+        console.error("Erro ao carregar a ficha do agente no modal:", error);
+        modalContainer.innerHTML = '<p class="loading-message" style="color: var(--color-danger);">Falha ao carregar a ficha. Tente novamente.</p>';
+    }
+}
+
+/**
  * Remove um personagem de uma campanha.
  * @param {string} campaignId - O ID da campanha.
  * @param {string} characterId - O ID do personagem a ser removido.
@@ -3503,8 +3548,7 @@ function createAgentCardForCampaign(character, campaignId) {
 
     card.querySelector('.view-btn').addEventListener('click', () => {
         // O ID pode ser `_id` vindo do populate da API
-        const charId = character.id || character._id;
-        window.location.href = `ficha-agente.html?id=${charId}`;
+        showAgentSheetInCampaign(character._id);
     });
 
     // Adiciona o evento de clique para o botão de deletar, se ele existir

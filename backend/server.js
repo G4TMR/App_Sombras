@@ -223,8 +223,25 @@ app.get('/api/characters', ensureAuthenticated, async (req, res) => {
 
 app.get('/api/characters/:id', ensureAuthenticated, async (req, res) => {
     try {
-        const character = await Character.findOne({ id: req.params.id, owner: req.user._id });
+        // Busca o personagem pelo ID customizado ou pelo _id do MongoDB
+        const character = await Character.findOne({ 
+            $or: [
+                { _id: mongoose.Types.ObjectId.isValid(req.params.id) ? req.params.id : null },
+                { id: req.params.id }
+            ]
+        });
         if (!character) return res.status(404).json({ message: 'Personagem não encontrado.' });
+
+        // Verifica se o usuário é o dono do personagem
+        const isOwner = character.owner.equals(req.user._id);
+        
+        // Se não for o dono, verifica se o usuário e o personagem estão na mesma campanha
+        const campaignsWithCharacter = await Campaign.find({ characters: character._id, $or: [{ ownerId: req.user._id }, { players: req.user._id }] });
+
+        if (!isOwner && campaignsWithCharacter.length === 0) {
+            return res.status(403).json({ message: 'Você não tem permissão para visualizar esta ficha.' });
+        }
+
         res.status(200).json(character);
     } catch (error) {
         console.error("Erro ao buscar personagem:", error);
