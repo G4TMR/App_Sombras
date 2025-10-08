@@ -3559,14 +3559,17 @@ function initializeMasterMap(campaign) {
 
     // Resetar o mapa
     resetMapBtn.addEventListener('click', () => {
-        if (confirm('Tem certeza que deseja limpar o mapa e remover todos os tokens?')) {
-            campaign.mapData = { imageUrl: null, tokens: [] };
-            updateCampaign(campaign);
-            mapBoard.style.backgroundImage = 'none';
-            document.getElementById('map-upload-placeholder').style.display = 'flex';
-            mapBoard.querySelectorAll('.map-token').forEach(t => t.remove());
+        if (confirm('Tem certeza que deseja limpar o mapa (remover imagem de fundo, tokens e névoa)?')) {
+            campaign.mapData = { imageUrl: null, tokens: [], fog: [] };
+            updateCampaign(campaign, true);
+            renderMapState();
         }
     });
+
+    // Inicialização
+    renderMapState();
+    populateTokenList();
+    setupDragAndDrop();
 }
 
 /**

@@ -16,7 +16,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- 3. Middlewares ---
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Aumenta o limite para 10MB para aceitar imagens em base64
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://127.0.0.1:5500';
 const BACKEND_URL = process.env.BACKEND_URL || `http://localhost:${PORT}`;
