@@ -1935,7 +1935,7 @@ class CharacterSheet {
                 this.character = localCharacters.find(char => char.id === charId) || null;
             } else if (charId) {
                 // Carrega da API para modo online
-                const response = await api.get(`/characters/${charId}`);
+                const response = await api.get(`/api/characters/${charId}`);
                 this.character = response.data;
             } else {
                 // Nenhum ID e não é modo local, então não há o que carregar.
