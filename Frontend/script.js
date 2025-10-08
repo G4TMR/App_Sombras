@@ -1913,6 +1913,16 @@ class CharacterSheet {
         if (!this.character) return; // Para a execução se o personagem não for carregado
 
         this.renderSheet();
+
+        // Lógica para o botão "Voltar para a Campanha"
+        const params = new URLSearchParams(window.location.search);
+        const campaignId = params.get('campaignId');
+        const backBtn = document.getElementById('back-to-campaign-btn');
+        if (campaignId && backBtn) {
+            backBtn.href = `gerenciar-campanha.html?id=${campaignId}`;
+            backBtn.style.display = 'inline-block';
+        }
+
         if (this.character) {
             this.setupEventListeners();
             this.renderSkillTree();
@@ -2509,6 +2519,19 @@ class CharacterSheet {
         const newLogEntry = document.createElement('p');
         newLogEntry.innerHTML = `<strong>${label}:</strong> ${total} <span>([${rolls.join(', ')}] + ${bonus})</span>`;
         log.prepend(newLogEntry);
+
+        // Envia a rolagem para o log da campanha via localStorage
+        const campaignId = new URLSearchParams(window.location.search).get('campaignId');
+        if (campaignId) {
+            const rollData = {
+                id: `roll_${Date.now()}`,
+                characterName: this.character.personalization.name || 'Agente',
+                label: label,
+                result: total,
+                details: `([${rolls.join(', ')}] + ${bonus})`
+            };
+            localStorage.setItem('lastCampaignRoll', JSON.stringify({ campaignId, rollData }));
+        }
     }
 
     updatePersonalization(key, value) {
@@ -3205,6 +3228,38 @@ async function initializeCampaignManagement() {
 }
 
 /**
+ * Adiciona uma entrada de log ao painel de atividades da campanha.
+ * @param {object} rollData - Os dados da rolagem de dados.
+ */
+function addRollToCampaignLog(rollData) {
+    const logContainer = document.getElementById('real-time-log');
+    if (!logContainer) return;
+
+    const placeholder = logContainer.querySelector('.log-placeholder');
+    if (placeholder) {
+        placeholder.remove();
+    }
+
+    const newLogEntry = document.createElement('p');
+    newLogEntry.innerHTML = `<strong>${rollData.characterName}</strong> rolou <strong>${rollData.label}</strong>: <span class="roll-result">${rollData.result}</span> <span class="roll-details">${rollData.details}</span>`;
+    logContainer.prepend(newLogEntry);
+}
+
+/**
+ * Inicia o listener para o log de atividades da campanha.
+ */
+function initializeCampaignLogListener(campaignId) {
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'lastCampaignRoll' && event.newValue) {
+            const { campaignId: eventCampaignId, rollData } = JSON.parse(event.newValue);
+            if (eventCampaignId === campaignId) {
+                addRollToCampaignLog(rollData);
+            }
+        }
+    });
+}
+
+/**
  * Inicializa a visualização do Mestre para gerenciar a campanha.
  * @param {object} campaign - O objeto da campanha.
  */
@@ -3351,6 +3406,9 @@ function initializeMasterView(campaign) {
                 tabContents.forEach(c => c.id === tabId ? c.classList.add('active') : c.classList.remove('active'));
             });
         });
+
+        // Inicia o listener para o log de rolagens
+        initializeCampaignLogListener(campaign.id);
     }
 }
 
@@ -3508,7 +3566,7 @@ function createAgentCardForCampaign(character, campaignId) {
     card.querySelector('.view-btn').addEventListener('click', () => {
         // O ID pode ser `_id` vindo do populate da API
         const charId = character._id; // Use _id directly
-        window.location.href = `ficha-agente.html?id=${charId}`;
+        window.location.href = `ficha-agente.html?id=${charId}&campaignId=${campaignId}`;
     });
 
     // Adiciona o evento de clique para o botão de deletar, se ele existir

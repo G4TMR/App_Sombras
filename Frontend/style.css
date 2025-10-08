@@ -2456,6 +2456,19 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     overflow-y: auto;
     padding-right: 10px;
 }
+.notification-sidebar .roll-log p {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--color-surface-2);
+}
+.notification-sidebar .roll-log .roll-result {
+    font-weight: bold;
+    color: var(--page-color, var(--color-primary));
+    font-size: 1.1em;
+}
+.notification-sidebar .roll-log .roll-details {
+    font-size: 0.9em;
+    color: #888;
+}
 
 /* --- DESBLOQUEIO DE FUNCIONALIDADE PREMIUM COM DEV MODE --- */
 .map-content-unlocked { display: none; }
