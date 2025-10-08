@@ -1901,13 +1901,17 @@ class CharacterDisplay {
 // CLASSE: CharacterSheet - Gerencia a exibição da ficha completa do agente
 // =================================================================================
 class CharacterSheet {
-    constructor() {
+    constructor(characterId = null, container = document) {
         document.body.classList.add('sheet-page-body');
         this.character = null;
+        this.characterId = characterId; // Armazena o ID passado
+        this.container = container; // Onde a ficha será renderizada (página ou modal)
     }
 
     async initialize() {
         await this.loadCharacter();
+        if (!this.character) return; // Para a execução se o personagem não for carregado
+
         this.renderSheet();
         if (this.character) {
             this.setupEventListeners();
@@ -1920,7 +1924,8 @@ class CharacterSheet {
 
     async loadCharacter() {
         const params = new URLSearchParams(window.location.search);
-        const charId = params.get('id');
+        // Prioriza o ID passado no construtor (para o modal), senão pega da URL
+        const charId = this.characterId || params.get('id');
         const mode = params.get('mode');
 
         try {
@@ -1941,7 +1946,11 @@ class CharacterSheet {
             this.character = null; // Garante que o personagem é nulo em caso de erro
             if (error.response && (error.response.status === 401 || error.response.status === 404)) {
                 alert('Sua sessão expirou ou você não tem permissão para ver esta ficha. Por favor, faça login novamente.');
-                window.location.href = 'agentes.html';
+                // Não redireciona se estiver em um modal, apenas mostra o erro.
+                const modalContainer = document.getElementById('sheet-modal-container');
+                if (!modalContainer) { // Só redireciona se não estiver no modal da campanha
+                    window.location.href = 'agentes.html';
+                }
             }
         } finally {
             // Este bloco agora executa para AMBOS os modos (local e online)
@@ -2014,7 +2023,7 @@ class CharacterSheet {
             personalization = {}, status, pericias = {}, inventario = []
         } = this.character;
 
-        const sheetContainer = document.getElementById('sheet-container');
+        const sheetContainer = this.container.querySelector('#sheet-container');
         const header = document.querySelector('.sheet-header');
         const charImage = document.getElementById('sheet-char-image');
         // Limpa classes de elementos anteriores e adiciona a classe base e a do elemento atual
@@ -2077,7 +2086,7 @@ class CharacterSheet {
     }
 
     renderProficiencies() {
-        const container = document.getElementById('proficiencies-list');
+        const container = this.container.querySelector('#proficiencies-list');
         if (!container) return;
 
         container.innerHTML = '';
@@ -2155,7 +2164,7 @@ class CharacterSheet {
     }
 
     renderActionsPanel() {
-        const inventoryList = document.getElementById('sheet-inventory-list');
+        const inventoryList = this.container.querySelector('#sheet-inventory-list');
         inventoryList.innerHTML = '';
         if (this.character.inventario && this.character.inventario.length > 0) {
             this.character.inventario.forEach((item, index) => {
@@ -2166,15 +2175,15 @@ class CharacterSheet {
         }
 
         const p = this.character.personalization || {};
-        document.getElementById('sheet-appearance').value = p.appearance || '';
-        document.getElementById('sheet-history').value = p.history || '';
-        document.getElementById('sheet-motivation').value = p.motivation || '';
+        this.container.querySelector('#sheet-appearance').value = p.appearance || '';
+        this.container.querySelector('#sheet-history').value = p.history || '';
+        this.container.querySelector('#sheet-motivation').value = p.motivation || '';
     }
 
     updateBar(type, current, max) {
-        const fill = document.getElementById(`${type}-bar-fill`);
-        const currentDisplay = document.getElementById(`${type}-current`);
-        const maxInput = document.getElementById(`${type}-max`);
+        const fill = this.container.querySelector(`#${type}-bar-fill`);
+        const currentDisplay = this.container.querySelector(`#${type}-current`);
+        const maxInput = this.container.querySelector(`#${type}-max`);
 
         if (!fill || !currentDisplay || !maxInput) return;
 
@@ -2197,7 +2206,7 @@ class CharacterSheet {
     }
 
     setupEventListeners() {
-        document.querySelector('.actions-accordion').addEventListener('click', (e) => {
+        this.container.querySelector('.actions-accordion').addEventListener('click', (e) => {
             if (e.target.classList.contains('accordion-header')) {
                 const currentPanel = e.target.closest('.accordion-panel');
                 
@@ -2210,7 +2219,7 @@ class CharacterSheet {
             }
         });
 
-        document.querySelector('.status-bars-container').addEventListener('click', (e) => {
+        this.container.querySelector('.status-bars-container').addEventListener('click', (e) => {
             if (e.target.classList.contains('status-btn')) {
                 const stat = e.target.dataset.stat;
                 const amount = parseInt(e.target.dataset.amount, 10);
@@ -2234,7 +2243,7 @@ class CharacterSheet {
             }
         });
 
-        document.querySelector('.primary-attributes-display').addEventListener('click', (e) => {
+        this.container.querySelector('.primary-attributes-display').addEventListener('click', (e) => {
             if (e.target.classList.contains('attr-btn')) {
                 const block = e.target.closest('.primary-attr-block');
                 const attrName = block.dataset.attr;
@@ -2257,7 +2266,7 @@ class CharacterSheet {
         });
 
         // Adiciona listener para o novo botão de especialização
-        const specBlock = document.getElementById('class-specialization-block');
+        const specBlock = this.container.querySelector('#class-specialization-block');
         if (specBlock) {
             specBlock.addEventListener('click', (e) => {
                 if (e.target.closest('[data-action="specialize"]')) {
@@ -2266,7 +2275,7 @@ class CharacterSheet {
             });
         }
 
-        document.getElementById('nf-control').addEventListener('click', (e) => {
+        this.container.querySelector('#nf-control').addEventListener('click', (e) => {
             if (e.target.classList.contains('progression-btn')) {
                 const amount = parseInt(e.target.dataset.amount, 10);
                 if (!isNaN(amount)) {
@@ -2306,15 +2315,15 @@ class CharacterSheet {
         });
 
 
-        document.getElementById('hp-max').addEventListener('change', (e) => this.updateStatus('hp_max', e.target.value));
-        document.getElementById('sanity-max').addEventListener('change', (e) => this.updateStatus('sanity_max', e.target.value));
-        document.getElementById('pa-max').addEventListener('change', (e) => this.updateStatus('pa_max', e.target.value));
+        this.container.querySelector('#hp-max').addEventListener('change', (e) => this.updateStatus('hp_max', e.target.value));
+        this.container.querySelector('#sanity-max').addEventListener('change', (e) => this.updateStatus('sanity_max', e.target.value));
+        this.container.querySelector('#pa-max').addEventListener('change', (e) => this.updateStatus('pa_max', e.target.value));
 
-        document.getElementById('sheet-appearance').addEventListener('blur', (e) => this.updatePersonalization('appearance', e.target.value));
-        document.getElementById('sheet-history').addEventListener('blur', (e) => this.updatePersonalization('history', e.target.value));
-        document.getElementById('sheet-motivation').addEventListener('blur', (e) => this.updatePersonalization('motivation', e.target.value));
+        this.container.querySelector('#sheet-appearance').addEventListener('blur', (e) => this.updatePersonalization('appearance', e.target.value));
+        this.container.querySelector('#sheet-history').addEventListener('blur', (e) => this.updatePersonalization('history', e.target.value));
+        this.container.querySelector('#sheet-motivation').addEventListener('blur', (e) => this.updatePersonalization('motivation', e.target.value));
 
-        document.getElementById('dice-roller-form').addEventListener('submit', (e) => {
+        this.container.querySelector('#dice-roller-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const count = parseInt(document.getElementById('dice-count').value, 10);
             const type = parseInt(document.getElementById('dice-type').value, 10);
@@ -2322,14 +2331,14 @@ class CharacterSheet {
             this.rollDice(type, count, bonus, "Rolagem Manual");
         });
 
-        const notesTextarea = document.getElementById('sheet-notes');
+        const notesTextarea = this.container.querySelector('#sheet-notes');
         if (notesTextarea) notesTextarea.addEventListener('blur', (e) => {
             this.character.notes = e.target.value;
             this.saveCharacterChanges();
         });
 
-        const inventoryList = document.getElementById('sheet-inventory-list');
-        document.getElementById('add-item-form').addEventListener('submit', (e) => {
+        const inventoryList = this.container.querySelector('#sheet-inventory-list');
+        this.container.querySelector('#add-item-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const input = document.getElementById('add-item-input');
             const newItem = input.value.trim();
@@ -2359,14 +2368,14 @@ class CharacterSheet {
             }
         }, true);
 
-        document.getElementById('add-xp-btn').addEventListener('click', () => {
+        this.container.querySelector('#add-xp-btn').addEventListener('click', () => {
             const amount = parseInt(prompt('Quantidade de XP a adicionar:'));
             if (!isNaN(amount) && amount > 0) {
                 this.addXp(amount);
             }
         });
 
-        document.getElementById('level-up-btn').addEventListener('click', () => {
+        this.container.querySelector('#level-up-btn').addEventListener('click', () => {
             this.levelUp();
         });
     }
@@ -2381,7 +2390,7 @@ class CharacterSheet {
     checkLevelUp() {
         const xpToNextLevel = this.character.level * 100;
         if (this.character.xp >= xpToNextLevel) {
-            document.getElementById('level-up-btn').style.display = 'block';
+            this.container.querySelector('#level-up-btn').style.display = 'block';
         }
     }
 
@@ -2392,7 +2401,7 @@ class CharacterSheet {
             this.character.xp -= xpToNextLevel; // Deduz o XP usado para upar
             this.character.attributePoints += 2;
             this.character.skillPoints += 1;
-            document.getElementById('level-up-btn').style.display = 'none';
+            this.container.querySelector('#level-up-btn').style.display = 'none';
 
             this.saveCharacterChanges();
             this.renderSheet();
@@ -2410,8 +2419,8 @@ class CharacterSheet {
     }
 
     showSpecializationChoice() {
-        const modalOverlay = document.getElementById('specialization-choice-overlay');
-        const optionsContainer = document.getElementById('specialization-options-container');
+        const modalOverlay = this.container.querySelector('#specialization-choice-overlay');
+        const optionsContainer = this.container.querySelector('#specialization-options-container');
         const confirmationContainer = document.getElementById('spec-confirmation-content');
         if (!modalOverlay || !optionsContainer || !confirmationContainer) return;
 
@@ -2436,8 +2445,8 @@ class CharacterSheet {
     }
 
     showSpecializationConfirmation(spec) {
-        const optionsContainer = document.getElementById('specialization-options-container');
-        const confirmationContainer = document.getElementById('spec-confirmation-content');
+        const optionsContainer = this.container.querySelector('#specialization-options-container');
+        const confirmationContainer = this.container.querySelector('#spec-confirmation-content');
         
         // Preenche os dados da confirmação
         confirmationContainer.querySelector('h2').textContent = `Confirmar: ${spec.name}`;
@@ -2448,8 +2457,8 @@ class CharacterSheet {
         confirmationContainer.style.display = 'flex';
 
         // Limpa listeners antigos e adiciona novos para os botões de confirmação
-        const confirmBtn = document.getElementById('confirm-spec-btn');
-        const cancelBtn = document.getElementById('cancel-spec-btn');
+        const confirmBtn = this.container.querySelector('#confirm-spec-btn');
+        const cancelBtn = this.container.querySelector('#cancel-spec-btn');
 
         const confirmHandler = () => {
             this.finalizeSpecialization(spec.name);
@@ -2473,7 +2482,7 @@ class CharacterSheet {
     finalizeSpecialization(specName) {
         this.character.skillPoints--;
         this.character.specialization = specName;
-        document.getElementById('specialization-choice-overlay').classList.remove('visible', 'sticky-modal');
+        this.container.querySelector('#specialization-choice-overlay').classList.remove('visible', 'sticky-modal');
         this.saveCharacterChanges();
         this.renderSheet();
         this.renderSkillTree();
@@ -2498,7 +2507,7 @@ class CharacterSheet {
         }
         total += bonus;
 
-        const log = document.getElementById('roll-log');
+        const log = this.container.querySelector('#roll-log');
         const logPlaceholder = log.querySelector('.log-placeholder');
         if (logPlaceholder) logPlaceholder.remove();
 
@@ -2546,7 +2555,7 @@ class CharacterSheet {
     }
 
     renderSkillTree() {
-        const container = document.getElementById('unlocked-skills-container');
+        const container = this.container.querySelector('#unlocked-skills-container');
         if (!container) return;
 
         container.innerHTML = ''; // Limpa o container
