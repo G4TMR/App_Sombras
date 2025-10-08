@@ -358,7 +358,7 @@ app.post('/api/campaigns/join', ensureAuthenticated, async (req, res) => {
     }
 
     try {
-        const campaign = await Campaign.findlOne({ inviteCode: inviteCode });
+        const campaign = await Campaign.findOne({ inviteCode: inviteCode });
         if (!campaign) {
             return res.status(404).json({ message: 'Campanha não encontrada com este código.' });
         }
@@ -391,12 +391,16 @@ app.put('/api/campaigns/:id/add-character', ensureAuthenticated, async (req, res
     const { characterId } = req.body;
     const campaignId = req.params.id;
 
-    if (!characterId) {
-        return res.status(400).json({ message: 'O ID do personagem é obrigatório.' });
-    }
+    if (!characterId) return res.status(400).json({ message: 'O ID do personagem é obrigatório.' });
+    if (!campaignId) return res.status(400).json({ message: 'O ID da campanha é obrigatório.' });
 
     try {
-        // CORREÇÃO: Buscar por 'id' ou '_id' para compatibilidade
+        // Busca o personagem para garantir que ele pertence ao usuário logado
+        const characterToAdd = await Character.findOne({ _id: characterId, owner: req.user._id });
+        if (!characterToAdd) {
+            return res.status(404).json({ message: 'Personagem não encontrado ou não pertence a você.' });
+        }
+
         const campaign = await Campaign.findOne({
             $or: [
                 { _id: mongoose.Types.ObjectId.isValid(campaignId) ? campaignId : null },
@@ -413,7 +417,13 @@ app.put('/api/campaigns/:id/add-character', ensureAuthenticated, async (req, res
         // Adiciona o personagem à campanha
         await Campaign.updateOne({ _id: campaign._id }, { $addToSet: { characters: characterId } });
 
-        res.status(200).json({ message: 'Agente adicionado com sucesso!' });
+        // Popula os dados do personagem recém-adicionado para retornar ao frontend
+        const populatedCharacter = await Character.findById(characterId).populate('owner', 'displayName');
+
+        res.status(200).json({ 
+            message: 'Agente adicionado com sucesso!',
+            character: populatedCharacter // Retorna o personagem completo
+        });
     } catch (error) {
         console.error("Erro ao adicionar personagem à campanha:", error);
         res.status(500).json({ message: 'Erro interno do servidor.' });

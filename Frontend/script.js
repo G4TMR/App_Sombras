@@ -1530,6 +1530,16 @@ class CharacterCreator {
         const form = this.elements.personalizationForm;
         if (!form) return;
 
+        // Se estiver criando para uma campanha, passa o ID para o formulário
+        const campaignId = new URLSearchParams(window.location.search).get('campaignId');
+        if (campaignId) {
+            const campaignIdInput = document.createElement('input');
+            campaignIdInput.type = 'hidden';
+            campaignIdInput.name = 'campaignId';
+            campaignIdInput.value = campaignId;
+            form.appendChild(campaignIdInput);
+        }
+
         // Lida com campos de texto
         form.addEventListener('input', debounce((e) => {
             if (e.target.type === 'file') return; // Ignora o input de arquivo aqui
@@ -1647,6 +1657,7 @@ class CharacterCreator {
 
     async saveCharacter() {
         const { name, player } = this.currentCharacter.personalization;
+        const campaignId = new URLSearchParams(window.location.search).get('campaignId');
         if (!name || !player) {
             alert('Por favor, preencha os campos obrigatórios (Nome do Agente e Nome do Jogador) para finalizar.');
             return;
@@ -1681,10 +1692,23 @@ class CharacterCreator {
 
         try {
             // Usando Axios para enviar o personagem para o backend
-            await api.post('/characters', this.currentCharacter);
+            const response = await api.post('/api/characters', this.currentCharacter); // Salva o personagem na conta do usuário
+            const newCharacter = response.data;
+
+            // Se foi criado a partir de uma campanha, adiciona o personagem a ela
+            if (campaignId && newCharacter) {
+                await api.put(`/api/campaigns/${campaignId}/add-character`, { characterId: newCharacter._id });
+                alert('Agente criado e adicionado à campanha com sucesso!');
+                // Redireciona de volta para a página da campanha
+                window.location.href = `gerenciar-campanha.html?id=${campaignId}`;
+                return;
+            }
+
+            // Fluxo normal: redireciona para a lista de agentes
             this.clearFormData();
             window.location.href = 'agentes.html';
         } catch (error) {
+            console.error("Erro detalhado ao salvar personagem:", error.response || error);
             if (error.response) {
                 // O servidor respondeu com um status de erro (4xx, 5xx)
                 const errorData = error.response.data;
@@ -3330,7 +3354,13 @@ function initializeMasterView(campaign) {
  * Inicializa a visualização do Jogador para a campanha.
  * @param {object} campaign - O objeto da campanha.
  */
-function initializePlayerView(campaign) {
+async function initializePlayerView(campaign) {
+    // Garante que o ID do usuário está carregado
+    const user = await checkAuthStatus();
+    if (!user) {
+        console.warn("Usuário não logado, algumas funcionalidades podem ser limitadas.");
+    }
+
     const titleDisplay = document.getElementById('player-view-campaign-title');
     const synopsisDisplay = document.getElementById('player-view-campaign-synopsis');
     const coverImageDisplay = document.getElementById('player-view-campaign-cover');
@@ -3347,6 +3377,12 @@ function initializePlayerView(campaign) {
     const modalOverlay = document.getElementById('add-agent-modal-overlay');
     const cancelBtn = document.getElementById('cancel-add-agent-btn');
     const agentListContainer = document.getElementById('select-agent-list');
+    const createAndAddBtn = document.getElementById('create-and-add-agent-btn');
+
+    // Modifica o link do botão "Criar Novo Agente" para incluir o ID da campanha
+    if (createAndAddBtn) {
+        createAndAddBtn.href = `criar-agente.html?campaignId=${campaign.id}`;
+    }
 
     addAgentBtn.addEventListener('click', async () => {
         // Busca os personagens do usuário
@@ -3365,12 +3401,11 @@ function initializePlayerView(campaign) {
                     `;
                     card.addEventListener('click', async () => {
                         // Adiciona o personagem à campanha
+                        const campaignIdToAdd = campaign._id || campaign.id;
                         try {
-                            const response = await api.put(`/api/campaigns/${campaign.id}/add-character`, { characterId: char._id });
+                            const response = await api.put(`/api/campaigns/${campaignIdToAdd}/add-character`, { characterId: char._id });
                             alert(`Agente "${char.personalization.name}" adicionado com sucesso!`);                           
                             modalOverlay.classList.remove('visible');
-                            // A API agora retorna o personagem populado, então podemos usá-lo diretamente.
-                            // Se a API não retornar o personagem, teríamos que recarregar a página.
                             // Atualiza a UI dinamicamente sem recarregar a página
                             addAgentToCampaignUI(response.data.character);
                         } catch (error) {
