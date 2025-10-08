@@ -3714,9 +3714,9 @@ function updateActiveLinks() {
 
 // Função para verificar o status de login e atualizar o header
 async function checkAuthStatus() {
-    const nav = document.querySelector('#primary-navigation');
+    const nav = document.querySelector('#primary-nav');
     if (!nav) {
-        console.warn("Elemento de navegação '#primary-navigation' não encontrado. A verificação de status será pulada.");
+        console.warn("Elemento de navegação '#primary-nav' não encontrado. A verificação de status será pulada.");
         return;
     }
 
