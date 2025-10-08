@@ -3687,8 +3687,8 @@ function initializeMasterView(campaign) {
     });
 
     // Configura a lógica das abas (tabs)
-    const tabLinks = document.querySelectorAll('.tab-link');
-    const tabContents = documentquerySelectorAll('.tab-content');
+    const tabLinks = document.querySelectorAll('#campaign-management-container .tab-link');
+    const tabContents = document.querySelectorAll('#campaign-management-container .tab-content');
     if (tabLinks.length > 0 && tabContents.length > 0) {
         tabLinks.forEach(link => {
             link.addEventListener('click', () => {
