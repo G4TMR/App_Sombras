@@ -101,6 +101,15 @@
                                 <button id="reset-map-btn" class="wizard-btn danger-btn">Resetar Mapa</button>
                             </div>
                         </div>
+
+                        <!-- Menu de Contexto Customizado para o Mapa (movido para dentro da aba) -->
+                        <div id="map-context-menu" class="context-menu">
+                            <ul>
+                                <li id="toggle-draw-mode">Ativar Modo Desenho</li>
+                                <li id="remove-fog-area" style="display: none;">Remover Névoa</li>
+                                <!-- Outras opções podem ser adicionadas aqui -->
+                            </ul>
+                        </div>
                     </div>
         
                     <div class="campaign-actions-footer">
@@ -214,15 +223,6 @@
                 <a href="criar-agente.html" id="create-and-add-agent-btn" class="wizard-btn">Criar Novo Agente</a>
             </div>
         </div>
-    </div>
-
-    <!-- Menu de Contexto Customizado para o Mapa -->
-    <div id="map-context-menu" class="context-menu">
-        <ul>
-            <li id="toggle-draw-mode">Ativar Modo Desenho</li>
-            <li id="remove-fog-area" style="display: none;">Remover Névoa</li>
-            <!-- Outras opções podem ser adicionadas aqui -->
-        </ul>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>

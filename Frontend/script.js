@@ -2878,17 +2878,15 @@ class ThreatListPage {
  * @returns {object|null} O objeto da campanha ou nulo se não for encontrado.
  */
 async function getCampaignById(campaignId) {
-    // 1. Tenta buscar na API primeiro (para ter os dados mais recentes)
-    // A rota da API agora popula os personagens, então sempre buscamos online primeiro.
+    // 1. Tenta buscar na API. Essa é a fonte principal da verdade.
     try {
-        // A rota da API agora popula os personagens, então sempre buscamos online primeiro.
         const response = await api.get(`/api/campaigns/${campaignId}`);
         return response.data;
     } catch (error) {
-        console.warn("Falha ao buscar campanha da API, tentando localStorage...", error);
+        console.warn("Falha ao buscar campanha da API, tentando localStorage como fallback...", error);
     }
 
-    // 2. Se a API falhar (offline), tenta encontrar no localStorage
+    // 2. Se a API falhar (por estar offline, por exemplo), tenta encontrar no localStorage
     try {
         const localCampaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
         const localCampaign = localCampaigns.find(c => c.id === campaignId);
@@ -2899,14 +2897,9 @@ async function getCampaignById(campaignId) {
         console.error("Erro ao ler campanhas do localStorage:", e);
     }
 
-    // 2. Se não encontrou localmente, tenta buscar na API (para acesso online)
-    try {
-        const response = await api.get(`/api/campaigns/${campaignId}`); // A rota correta já estava aqui, o erro estava em outro lugar.
-        return response.data;
-    } catch (error) {
-        console.error("Erro ao buscar campanha por ID:", error);
-        return null;
-    }
+    // Se falhar em ambos, retorna nulo.
+    console.error("Não foi possível carregar a campanha da API ou do localStorage.");
+    return null;
 }
 
 /**
