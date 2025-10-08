@@ -3712,54 +3712,35 @@ function updateActiveLinks() {
 
 // Função para verificar o status de login e atualizar o header
 async function checkAuthStatus() {
-    const nav = document.querySelector('#primary-nav');
+    const nav = document.querySelector('#primary-nav'); // O seletor correto
     if (!nav) {
         console.warn("Elemento de navegação '#primary-nav' não encontrado. A verificação de status será pulada.");
-        return;
+        return null; // Retorna nulo se o nav não for encontrado
     }
 
-    // Remove o container anterior para evitar duplicatas em recarregamentos
     const existingAuthContainer = nav.querySelector('.auth-container');
-    if (existingAuthContainer) {
-        existingAuthContainer.remove();
-    }
-    
-    const authContainer = document.createElement('div');
-    authContainer.className = 'auth-container';
+    if (existingAuthContainer) existingAuthContainer.remove(); // Limpa o container antigo
 
-    // 1. Adiciona o botão de login imediatamente para uma resposta visual rápida
-    // Tenta carregar o usuário do sessionStorage para uma UI otimista
-    const cachedUser = JSON.parse(sessionStorage.getItem('sombras-user'));
-    if (cachedUser && cachedUser.displayName) {
-        authContainer.innerHTML = `<span class="user-info">Olá, <span class="user-display-name">${cachedUser.displayName}</span>! <a href="${API_BASE_URL}/auth/logout" class="auth-link">[Sair]</a></span>`;
-    } else {
-        authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
-    }
-    nav.appendChild(authContainer);
+    const authContainer = document.createElement('div'); // Cria um novo
+    authContainer.className = 'auth-container';
+    // Define o botão de login como padrão inicial
+    authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
+    nav.appendChild(authContainer); // Adiciona ao menu
 
     try {
-        // 2. Tenta buscar o usuário logado em segundo plano
         const response = await api.get('/auth/user');
         const user = response.data;
-        
-        // 3. Se encontrar, atualiza a UI e o cache
+
         if (user && user._id) {
+            // Se encontrar um usuário logado, atualiza o container
             authContainer.innerHTML = `<span class="user-info">Olá, <span class="user-display-name">${user.displayName}</span>! <a href="${API_BASE_URL}/auth/logout" class="auth-link">[Sair]</a></span>`;
-            sessionStorage.setItem('sombras-user', JSON.stringify(user));
             currentUserId = user._id;
             return user;
-        } else {
-            // Se a API não retornar usuário, limpa o cache e mostra o botão de login
-            sessionStorage.removeItem('sombras-user');
-            authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
-            currentUserId = 'local_user_id';
-            return null;
         }
+        return null; // Retorna nulo se não houver usuário
     } catch (error) {
-        // Se a API falhar (ex: 401), limpa o cache e garante que o botão de login seja exibido
-        sessionStorage.removeItem('sombras-user');
-        authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
-        console.log('Sessão de usuário não encontrada ou erro de autenticação. O botão de login será mantido.');
+        // Se a API falhar (ex: 401, erro de rede), o botão de login já está na tela.
+        console.log('Nenhuma sessão de usuário ativa encontrada. O botão de login será exibido.');
         return null;
     }
 }
