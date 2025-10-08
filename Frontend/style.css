@@ -153,6 +153,10 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     font-size: 0.9rem;
     display: flex;
     align-items: center;
+    /* For debugging visibility */
+    background-color: rgba(255, 0, 0, 0.7) !important; /* Make it red and force it */
+    border: 2px solid yellow !important; /* Yellow border and force it */
+    z-index: 9999 !important; /* Bring to front and force it */
 }
 
 .user-info {

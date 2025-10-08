@@ -3712,9 +3712,9 @@ function updateActiveLinks() {
 
 // Função para verificar o status de login e atualizar o header
 async function checkAuthStatus() {
-    const nav = document.querySelector('#primary-nav'); // O seletor correto
+    const nav = document.querySelector('.home-header nav'); // CORREÇÃO: Busca o elemento nav dentro do cabeçalho
     if (!nav) {
-        console.warn("Elemento de navegação '#primary-nav' não encontrado. A verificação de status será pulada.");
+        console.warn("Elemento de navegação '.home-header nav' não encontrado. A verificação de status será pulada.");
         return null; // Retorna nulo se o nav não for encontrado
     }
 
@@ -3726,6 +3726,7 @@ async function checkAuthStatus() {
     // Define o botão de login como padrão inicial
     authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
     nav.appendChild(authContainer); // Adiciona ao menu
+    console.log("Auth container appended to nav. Nav's current innerHTML:", nav.innerHTML); // Debugging line
 
     try {
         const response = await api.get('/auth/user');
