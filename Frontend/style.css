@@ -2466,7 +2466,8 @@ body.map-fullscreen-active {
 /* Esconde o header principal quando o mapa está em tela cheia */
 body.map-fullscreen-active #header-placeholder,
 body.map-fullscreen-active .back-to-list-btn,
-body.map-fullscreen-active .master-tabs {
+body.map-fullscreen-active .master-tabs,
+body.map-fullscreen-active .notification-sidebar {
     display: none;
 }
 
