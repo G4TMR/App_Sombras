@@ -2489,15 +2489,15 @@ body.map-fullscreen-active {
 
 .master-map-layout.fullscreen-mode {
     /* Altera o posicionamento para o wrapper */
-    position: static;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 2000;
-    background-color: var(--color-background);
-    padding: 1rem;
-    box-sizing: border-box;
+    /* position: static; */
+    /* top: 0; */
+    /* left: 0; */
+    /* width: 100vw; */
+    /* height: 100vh; */
+    /* z-index: 2000; */
+    /* background-color: var(--color-background); */
+    /* padding: 1rem; */
+    /* box-sizing: border-box; */
     display: grid;
     grid-template-columns: 1fr 320px; /* Mapa à esquerda, painel de controle à direita */
     grid-template-rows: minmax(0, 1fr); /* Garante que as linhas do grid não ultrapassem a altura do contêiner */
@@ -2511,6 +2511,7 @@ body.map-fullscreen-active {
     width: 100vw;
     height: 100vh;
     z-index: 2000;
+    box-sizing: border-box;
     padding: 1rem;
 }
 
@@ -3413,6 +3414,7 @@ body.dev-mode #dev-mode-form { display: none; }
     height: 24px;
 }
 
-.map-fullscreen-button svg path {
+.map-fullscreen-button #fullscreen-enter-icon path,
+.map-fullscreen-button #fullscreen-exit-icon path {
     fill: var(--color-text-primary);
 }
