@@ -2406,6 +2406,70 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     border-radius: 8px;
 }
 
+/* --- ESTILOS DO MAPA INTERATIVO --- */
+.master-map-layout {
+    position: relative; /* Necessário para posicionar o botão de tela cheia */
+    display: grid;
+    grid-template-columns: 1fr; /* Por padrão, só o mapa é visível */
+    gap: 1rem;
+    width: 100%;
+    height: 100%;
+}
+
+.map-board {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: #111;
+    border: 1px solid var(--color-surface-2);
+    border-radius: 8px;
+    overflow: hidden;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.map-controls-panel {
+    display: none; /* Oculto por padrão */
+    background-color: rgba(24, 24, 24, 0.8);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-surface-2);
+    backdrop-filter: blur(5px);
+    overflow-y: auto;
+}
+
+/* --- MODO TELA CHEIA DO MAPA --- */
+body.map-fullscreen-active {
+    overflow: hidden; /* Impede a rolagem da página de fundo */
+}
+
+.master-map-layout.fullscreen-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2000;
+    background-color: var(--color-background);
+    padding: 1rem;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 1fr 320px; /* Mapa à esquerda, painel de controle à direita */
+    gap: 1rem;
+}
+
+.master-map-layout.fullscreen-mode .map-controls-panel {
+    display: block; /* Mostra o painel de controle em tela cheia */
+}
+
+/* Esconde o header principal quando o mapa está em tela cheia */
+body.map-fullscreen-active #header-placeholder,
+body.map-fullscreen-active .back-to-list-btn,
+body.map-fullscreen-active .master-tabs {
+    display: none;
+}
+
 .premium-lock {
     text-align: center;
     padding: 3rem 1rem;
@@ -2414,6 +2478,56 @@ body[data-page="patente"] { --page-color: #6f42c1; }
 .premium-lock .lock-icon {
     font-size: 3rem;
     color: var(--page-color, var(--color-primary));
+}
+
+/* --- ELEMENTOS DO MAPA (TOKENS, NÉVOA, ETC) --- */
+.map-upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    color: var(--color-text-secondary);
+    text-align: center;
+}
+
+.map-token {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-size: cover;
+    border-radius: 50%;
+    border: 2px solid var(--color-primary);
+    box-shadow: 0 0 10px rgba(0,0,0,0.7);
+    transform: translate(-50%, -50%); /* Centraliza o token na posição do cursor */
+}
+
+.fog-of-war {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.9);
+    pointer-events: none; /* Permite cliques através da névoa na visão do mestre */
+}
+
+.map-board.master-view .fog-of-war {
+    pointer-events: all; /* Permite que o mestre clique com o botão direito na névoa */
+    cursor: context-menu;
+}
+
+.draw-selection-rect {
+    position: absolute;
+    border: 2px dashed var(--color-primary);
+    background-color: rgba(168, 85, 247, 0.2);
+    pointer-events: none;
+}
+
+.context-menu {
+    position: fixed;
+    display: none;
+    background-color: var(--color-surface-1);
+    border: 1px solid var(--color-surface-2);
+    border-radius: 4px;
+    z-index: 3000;
 }
 
 .campaign-main-content {
@@ -3212,4 +3326,33 @@ body.dev-mode #dev-mode-form { display: none; }
         padding: 0.8rem 1.5rem; /* Reduz o padding dos botões principais */
         font-size: 1rem; /* Diminui a fonte dos botões */
     }
+}
+
+/* --- BOTÃO DE TELA CHEIA DO MAPA --- */
+.map-fullscreen-button {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(30, 30, 30, 0.8);
+    border: 1px solid var(--color-surface-2);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    transition: background-color 0.3s;
+    z-index: 100; /* Garante que fique sobre o mapa */
+}
+
+.map-fullscreen-button:hover {
+    background-color: var(--color-primary);
+}
+
+.map-fullscreen-button svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--color-text-primary);
 }
