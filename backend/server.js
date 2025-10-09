@@ -359,8 +359,11 @@ app.get('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
 // Atualizar uma campanha
 app.put('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
     try {
+        // CORREÇÃO: A busca deve ser feita pelo _id do MongoDB para garantir a atualização correta.
+        // O corpo da requisição (req.body) já contém o _id.
         const updatedCampaign = await Campaign.findOneAndUpdate(
-            { id: req.params.id, ownerId: req.user._id }, // Só o dono pode atualizar
+            // Encontra pelo _id e garante que o usuário logado é o dono.
+            { _id: req.body._id, ownerId: req.user._id }, 
             req.body,
             { new: true }
         );
