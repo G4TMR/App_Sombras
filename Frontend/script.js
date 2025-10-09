@@ -3200,17 +3200,16 @@ async function initializeCampaignManagement() {
         return;
     }
 
+    const isOwner = getObjectIdAsString(campaign.ownerId) === userId;
+    const isPlayer = campaign.players && campaign.players.some(p => getObjectIdAsString(p) === userId);
+
     // Verifica se o usuário é o dono da campanha ou um jogador
-    if (viewMode === 'player' && campaign.players && campaign.players.some(p => getObjectIdAsString(p) === userId)) {
-        // O usuário é um jogador e quer a visão de jogador
-        document.getElementById('player-view-container').style.display = 'block';
-        initializePlayerView(campaign);
-    } else if (getObjectIdAsString(campaign.ownerId) === userId) {
+    if (isOwner && viewMode !== 'player') {
         // O usuário é o mestre, mostra a visão de gerenciamento
         document.getElementById('campaign-management-container').style.display = 'block';
         initializeMasterView(campaign);
-    } else if (campaign.players && campaign.players.some(p => getObjectIdAsString(p) === userId)) {
-        // O usuário é um jogador (caso geral), mostra a visão de jogador
+    } else if (isPlayer) {
+        // O usuário é um jogador e quer a visão de jogador
         document.getElementById('player-view-container').style.display = 'block';
         initializePlayerView(campaign);
     } else {
@@ -3391,12 +3390,6 @@ function initializeMasterMap(campaign) {
     // Garante que a estrutura de dados exista
     if (!campaign.mapData) campaign.mapData = {};
     if (!campaign.mapData.fog) campaign.mapData.fog = [];
-
-    // Carrega o mapa e os tokens salvos
-    if (campaign.mapData?.imageUrl) {
-        mapBoard.style.backgroundImage = `url('${campaign.mapData.imageUrl}')`;
-        document.getElementById('map-upload-placeholder').style.display = 'none';
-    }
     if (campaign.mapData?.tokens) {
         campaign.mapData.tokens.forEach(tokenData => {
             createTokenOnBoard(tokenData, mapBoard, campaign);
@@ -3405,14 +3398,23 @@ function initializeMasterMap(campaign) {
 
     // Renderiza a névoa de guerra
     renderFogOfWar(campaign, mapBoard, true);
+    
+    function renderMapState() {
+        if (campaign.mapData?.imageUrl) {
+            mapBoard.style.backgroundImage = `url('${campaign.mapData.imageUrl}')`;
+        } else {
+            mapBoard.style.backgroundImage = 'none';
+        }
+        mapBoard.querySelectorAll('.map-token').forEach(t => t.remove());
+        renderFogOfWar(campaign, mapBoard, true);
+    }
 
     // Lógica de upload do mapa
     uploadInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (file) {
             const imageUrl = await readFileAsDataURL(file);
-            mapBoard.style.backgroundImage = `url('${imageUrl}')`;
-            document.getElementById('map-upload-placeholder').style.display = 'none';
+            mapBoard.style.backgroundImage = `url('${imageUrl}')`;            
             
             if (!campaign.mapData) campaign.mapData = {};
             campaign.mapData.imageUrl = imageUrl;
@@ -3420,23 +3422,25 @@ function initializeMasterMap(campaign) {
         }
     });
 
-    // Popula a lista de tokens arrastáveis
-    tokenList.innerHTML = '';
-    campaign.characters.forEach(char => {
-        const tokenListItem = document.createElement('div');
-        tokenListItem.className = 'token-list-item';
-        tokenListItem.draggable = true;
-        tokenListItem.dataset.characterId = char._id;
-        tokenListItem.innerHTML = `
-            <img src="${char.personalization.imageUrl || 'https://via.placeholder.com/30'}" alt="${char.personalization.name}">
-            <span>${char.personalization.name}</span>
-        `;
-        tokenList.appendChild(tokenListItem);
+    function populateTokenList() {
+        // Popula a lista de tokens arrastáveis
+        tokenList.innerHTML = '';
+        campaign.characters.forEach(char => {
+            const tokenListItem = document.createElement('div');
+            tokenListItem.className = 'token-list-item';
+            tokenListItem.draggable = true;
+            tokenListItem.dataset.characterId = char._id;
+            tokenListItem.innerHTML = `
+                <img src="${char.personalization.imageUrl || 'https://via.placeholder.com/30'}" alt="${char.personalization.name}">
+                <span>${char.personalization.name}</span>
+            `;
+            tokenList.appendChild(tokenListItem);
 
-        tokenListItem.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('text/plain', char._id);
+            tokenListItem.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', char._id);
+            });
         });
-    });
+    }
 
     // Lógica para soltar tokens no mapa
     mapBoard.addEventListener('dragover', (e) => e.preventDefault());
@@ -3559,10 +3563,12 @@ function initializeMasterMap(campaign) {
         }
     });
 
-    // Inicialização
-    renderMapState();
-    populateTokenList();
-    setupDragAndDrop();
+    function setupDragAndDrop() {
+        // Esta função pode ser expandida com mais lógica de drag and drop se necessário
+    }
+
+    renderMapState(); // Renderiza o estado inicial do mapa
+    populateTokenList(); // Popula a lista de tokens
 }
 
 /**
@@ -3579,7 +3585,7 @@ function initializeMasterView(campaign) {
     const modalOverlay = document.getElementById('edit-campaign-modal-overlay');
     const titleModalInput = document.getElementById('campaign-title-modal');
     const synopsisModalTextarea = document.getElementById('campaign-synopsis-modal');
-    const imageModalInput = document.getElementById('campaign-image-modal');
+    const imageModalInput = document.getElementById('campaign-image-modal-input');
     const inviteCodeDisplay = document.getElementById('campaign-invite-code-display');
     const generateCodeBtn = document.getElementById('generate-invite-code-btn');
     const imageModalPreview = document.getElementById('campaign-image-modal-preview');
@@ -3589,7 +3595,7 @@ function initializeMasterView(campaign) {
     if (!campaign.players) { campaign.players = []; needsSave = true; }
     if (!campaign.inviteCode) { campaign.inviteCode = generateUniqueInviteCode(); needsSave = true; }
     if (needsSave) {
-        console.log("Migrando campanha antiga. Adicionando código de convite.");
+        console.log("Migrando campanha antiga. Adicionando campos faltantes.");
         updateCampaign(campaign); // Salva a campanha com os novos campos
     }
 
@@ -3619,7 +3625,7 @@ function initializeMasterView(campaign) {
     synopsisDisplay.textContent = campaign.synopsis || 'Nenhuma sinopse fornecida.';
     if (campaign.imageUrl) {
         coverImageDisplay.style.backgroundImage = `url('${campaign.imageUrl}')`;
-    }
+    } else { coverImageDisplay.style.backgroundImage = `url('https://via.placeholder.com/800x200?text=Sem+Capa')`; }
     inviteCodeDisplay.textContent = campaign.inviteCode;
     
     // Lida com a mudança de imagem no modal
@@ -3663,11 +3669,11 @@ function initializeMasterView(campaign) {
             return;
         }
 
-        const updatedCampaignData = { id: campaign.id, title, synopsis, imageUrl };
+        const updatedCampaignData = { _id: campaign._id, id: campaign.id, title, synopsis, imageUrl };
         updateCampaign(updatedCampaignData, true);
         
         // Atualiza a UI e fecha o modal
-        initializeCampaignManagement(); // Recarrega os dados na tela
+        initializeMasterView(Object.assign(campaign, updatedCampaignData)); // Atualiza a view com os novos dados
         modalOverlay.classList.remove('visible');
     });
 
