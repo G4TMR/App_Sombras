@@ -3374,10 +3374,10 @@ function hideMapContextMenu() {
  */
 function initializeMasterMap(campaign) {
     const mapBoard = document.getElementById('map-board');
+    const mapPlaceholder = document.getElementById('map-upload-placeholder');
     mapBoard.classList.add('master-view'); // Adiciona classe para estilização
     const uploadInput = document.getElementById('map-upload-input');
     const tokenList = document.getElementById('map-character-tokens');
-    const resetMapBtn = document.getElementById('reset-map-btn');
     const contextMenu = document.getElementById('map-context-menu');
     const toggleDrawModeBtn = document.getElementById('toggle-draw-mode');
     const removeFogBtn = document.getElementById('remove-fog-area');
@@ -3389,12 +3389,6 @@ function initializeMasterMap(campaign) {
 
     // Garante que a estrutura de dados exista
     if (!campaign.mapData) campaign.mapData = {};
-    if (!campaign.mapData.fog) campaign.mapData.fog = [];
-    if (campaign.mapData?.tokens) {
-        campaign.mapData.tokens.forEach(tokenData => {
-            createTokenOnBoard(tokenData, mapBoard, campaign);
-        });
-    }
 
     // Renderiza a névoa de guerra
     renderFogOfWar(campaign, mapBoard, true);
@@ -3402,10 +3396,15 @@ function initializeMasterMap(campaign) {
     function renderMapState() {
         if (campaign.mapData?.imageUrl) {
             mapBoard.style.backgroundImage = `url('${campaign.mapData.imageUrl}')`;
+            if (mapPlaceholder) mapPlaceholder.style.display = 'none';
         } else {
             mapBoard.style.backgroundImage = 'none';
+            if (mapPlaceholder) mapPlaceholder.style.display = 'flex';
         }
         mapBoard.querySelectorAll('.map-token').forEach(t => t.remove());
+        if (campaign.mapData?.tokens) {
+            campaign.mapData.tokens.forEach(tokenData => createTokenOnBoard(tokenData, mapBoard, campaign, true));
+        }
         renderFogOfWar(campaign, mapBoard, true);
     }
 
@@ -3414,7 +3413,7 @@ function initializeMasterMap(campaign) {
         const file = e.target.files[0];
         if (file) {
             const imageUrl = await readFileAsDataURL(file);
-            mapBoard.style.backgroundImage = `url('${imageUrl}')`;            
+            mapBoard.style.backgroundImage = `url('${imageUrl}')`;
             
             if (!campaign.mapData) campaign.mapData = {};
             campaign.mapData.imageUrl = imageUrl;
@@ -3555,14 +3554,15 @@ function initializeMasterMap(campaign) {
     });
 
     // Resetar o mapa
+    const resetMapBtn = document.getElementById('reset-map-btn');
     resetMapBtn.addEventListener('click', () => {
         if (confirm('Tem certeza que deseja limpar o mapa (remover imagem de fundo, tokens e névoa)?')) {
             campaign.mapData = { imageUrl: null, tokens: [], fog: [] };
             updateCampaign(campaign, true);
             renderMapState();
+            populateTokenList(); // Repopula a lista de tokens caso algo tenha mudado
         }
     });
-
     function setupDragAndDrop() {
         // Esta função pode ser expandida com mais lógica de drag and drop se necessário
     }
@@ -3868,6 +3868,7 @@ function addAgentToCampaignUI(character) {
  * @param {boolean} isDraggable - Se o token pode ser arrastado (visão do mestre).
  */
 function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true) {
+    if (!tokenData) return;
     let tokenElement = document.getElementById(tokenData.id);
     if (!tokenElement) {
         tokenElement = document.createElement('div');
@@ -3881,6 +3882,7 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true) {
     tokenElement.style.top = `${tokenData.y}%`;
 
     if (isDraggable) {
+        tokenElement.style.cursor = 'grab';
         tokenElement.addEventListener('mousedown', (e) => {
             e.preventDefault();
             const rect = mapBoard.getBoundingClientRect();
@@ -3888,19 +3890,26 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true) {
             let offsetY = e.clientY - tokenElement.getBoundingClientRect().top;
 
             function onMouseMove(moveEvent) {
+                tokenElement.style.cursor = 'grabbing';
                 let newX = moveEvent.clientX - rect.left - offsetX;
                 let newY = moveEvent.clientY - rect.top - offsetY;
                 
-                tokenElement.style.left = `${newX}px`;
-                tokenElement.style.top = `${newY}px`;
+                // Converte para porcentagem para ser responsivo
+                tokenElement.style.left = `${(newX / rect.width) * 100}%`;
+                tokenElement.style.top = `${(newY / rect.height) * 100}%`;
             }
 
             function onMouseUp() {
+                tokenElement.style.cursor = 'grab';
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
-                tokenData.x = (parseFloat(tokenElement.style.left) / rect.width) * 100;
-                tokenData.y = (parseFloat(tokenElement.style.top) / rect.height) * 100;
-                updateCampaign(campaign);
+                // Atualiza os dados do token no objeto da campanha
+                const tokenToUpdate = campaign.mapData.tokens.find(t => t.id === tokenData.id);
+                if (tokenToUpdate) {
+                    tokenToUpdate.x = parseFloat(tokenElement.style.left);
+                    tokenToUpdate.y = parseFloat(tokenElement.style.top);
+                    updateCampaign(campaign);
+                }
             }
 
             document.addEventListener('mousemove', onMouseMove);

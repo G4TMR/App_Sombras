@@ -70,35 +70,25 @@
                     </div>
         
                     <div class="tab-content" id="mapa">
-                        <div class="map-view-controls">
-                            <button id="map-view-toggle-btn" class="wizard-btn small-btn">Configurar Mapa</button>
-                        </div>
-
-                        <!-- Visão de Jogo do Mapa (Padrão) -->
-                        <div id="map-play-view" class="map-play-view">
-                            <div class="map-container">
-                                <div id="map-board" class="map-board">
-                                    <!-- Tokens e Fog of War serão adicionados aqui -->
-                                </div>
-                                <div class="map-controls">
-                                    <h4>Agentes</h4>
-                                    <div id="map-character-tokens" class="map-character-tokens">
-                                        <!-- Lista de personagens para arrastar -->
-                                    </div>
+                        <!-- Layout Unificado do Mapa para o Mestre -->
+                        <div class="master-map-layout">
+                            <div id="map-board" class="map-board">
+                                <div id="map-upload-placeholder" class="map-upload-placeholder">
+                                    <p>Nenhum mapa carregado.</p>
+                                    <p>Use os controles para carregar uma imagem de fundo.</p>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Visão de Configuração do Mapa (Oculta) -->
-                        <div id="map-config-view" style="display: none;">
-                            <h4>Configurações do Mapa</h4>
-                            <div class="map-config-form">
-                                <label for="map-upload-input">Imagem de Fundo do Mapa</label>
-                                <img id="map-preview-image" src="https://via.placeholder.com/800x450?text=Pré-visualização+do+Mapa" alt="Pré-visualização do Mapa">
-                                <input type="file" id="map-upload-input" accept="image/*" style="display: none;">
-                                <button class="wizard-btn" onclick="document.getElementById('map-upload-input').click()">Carregar Imagem</button>
-                                <button id="save-map-btn" class="wizard-btn">Salvar Mapa</button>
-                                <button id="reset-map-btn" class="wizard-btn danger-btn">Resetar Mapa</button>
+                            <div class="map-controls-panel">
+                                <h4>Controles do Mapa</h4>
+                                <div class="map-config-form">
+                                    <label for="map-upload-input">Imagem de Fundo</label>
+                                    <input type="file" id="map-upload-input" accept="image/*" style="display: none;">
+                                    <button class="wizard-btn small-btn" onclick="document.getElementById('map-upload-input').click()">Carregar Imagem</button>
+                                    <button id="reset-map-btn" class="wizard-btn danger-btn small-btn">Limpar Mapa</button>
+                                </div>
+                                <h4>Agentes (Tokens)</h4>
+                                <p class="info-text small-text">Arraste um agente para o mapa para criar seu token.</p>
+                                <div id="map-character-tokens" class="map-character-tokens"></div>
                             </div>
                         </div>
 
