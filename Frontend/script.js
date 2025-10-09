@@ -3375,9 +3375,8 @@ function initializeMasterMap(campaign) {
     const uploadInput = document.getElementById('map-upload-input');
     const tokenList = document.getElementById('map-character-tokens');
     const contextMenu = document.getElementById('map-context-menu');
-    const toggleDrawModeBtn = document.getElementById('toggle-draw-mode-btn'); // Botão movido para o painel
+    const removeFogBtn = document.getElementById('remove-fog-area');
 
-    let isDrawingMode = false;
     let isDrawing = false;
     let startX, startY;
     let selectionRect = null;
@@ -3488,16 +3487,10 @@ function initializeMasterMap(campaign) {
         hideMapContextMenu();
     });
 
-    // Lógica para o botão de modo de desenho no painel lateral
-    toggleDrawModeBtn.addEventListener('click', () => {
-        isDrawingMode = !isDrawingMode;
-        toggleDrawModeBtn.textContent = isDrawingMode ? 'Desativar Modo Ocultador' : 'Ativar Modo Ocultador';
-        mapBoard.style.cursor = isDrawingMode ? 'crosshair' : 'default';
-    });
-
     // Eventos de desenho no mapa
     mapBoard.addEventListener('mousedown', (e) => {
-        if (!isDrawingMode || e.button !== 0) return; // Apenas botão esquerdo
+        if (e.button !== 2) return; // Apenas botão direito para desenhar
+        e.preventDefault(); // Previne o menu de contexto padrão do navegador
         isDrawing = true;
         const rect = mapBoard.getBoundingClientRect();
         startX = e.clientX - rect.left;
@@ -3511,7 +3504,7 @@ function initializeMasterMap(campaign) {
     });
 
     mapBoard.addEventListener('mousemove', (e) => {
-        if (!isDrawing) return;
+        if (!isDrawing || !selectionRect) return;
         const rect = mapBoard.getBoundingClientRect();
         const currentX = e.clientX - rect.left;
         const currentY = e.clientY - rect.top;
@@ -3528,24 +3521,29 @@ function initializeMasterMap(campaign) {
     });
 
     mapBoard.addEventListener('mouseup', (e) => {
-        if (!isDrawing) return;
+        if (!isDrawing || e.button !== 2) return;
         isDrawing = false;
-        mapBoard.removeChild(selectionRect);
-        selectionRect = null;
+        if (selectionRect) {
+            const rect = mapBoard.getBoundingClientRect();
+            const finalWidth = parseFloat(selectionRect.style.width);
+            const finalHeight = parseFloat(selectionRect.style.height);
 
-        const rect = mapBoard.getBoundingClientRect();
-        const fogData = {
-            id: `fog_${Date.now()}`,
-            x: (parseFloat(e.target.style.left || startX) / rect.width) * 100,
-            y: (parseFloat(e.target.style.top || startY) / rect.height) * 100,
-            width: (Math.abs((e.clientX - rect.left) - startX) / rect.width) * 100,
-            height: (Math.abs((e.clientY - rect.top) - startY) / rect.height) * 100,
-        };
-
-        // Adiciona a nova área de névoa e salva
-        campaign.mapData.fog.push(fogData);
-        updateCampaign(campaign);
-        renderFogOfWar(campaign, mapBoard, true); // Re-renderiza a névoa
+            // Só adiciona a névoa se ela tiver um tamanho mínimo
+            if (finalWidth > 5 && finalHeight > 5) {
+                const fogData = {
+                    id: `fog_${Date.now()}`,
+                    x: (parseFloat(selectionRect.style.left) / rect.width) * 100,
+                    y: (parseFloat(selectionRect.style.top) / rect.height) * 100,
+                    width: (finalWidth / rect.width) * 100,
+                    height: (finalHeight / rect.height) * 100,
+                };
+                campaign.mapData.fog.push(fogData);
+                updateCampaign(campaign);
+                renderFogOfWar(campaign, mapBoard, true);
+            }
+            mapBoard.removeChild(selectionRect);
+            selectionRect = null;
+        }
     });
 
     // Resetar o mapa
