@@ -3387,9 +3387,13 @@ function initializeMasterMap(campaign) {
     function renderMapState() {
         if (campaign.mapData?.imageUrl) {
             mapBoard.style.backgroundImage = `url('${campaign.mapData.imageUrl}')`;
+            mapBoard.style.backgroundSize = 'contain';
+            mapBoard.style.backgroundPosition = 'center';
+            mapBoard.style.backgroundRepeat = 'no-repeat';
             if (mapPlaceholder) mapPlaceholder.style.display = 'none';
         } else {
             mapBoard.style.backgroundImage = 'none';
+            // Não precisa resetar os outros estilos, o backgroundImage 'none' já resolve.
             if (mapPlaceholder) mapPlaceholder.style.display = 'flex';
         }
         mapBoard.querySelectorAll('.map-token').forEach(t => t.remove());
@@ -3561,6 +3565,30 @@ function initializeMasterMap(campaign) {
             collapsibleHeader.classList.toggle('active');
             const content = collapsibleHeader.nextElementSibling;
             content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        });
+    }
+
+    // Lógica para o botão de Tela Cheia
+    const fullscreenBtn = document.getElementById('map-fullscreen-btn');
+    const mapContainer = document.querySelector('.master-map-layout');
+
+    if (fullscreenBtn && mapContainer) {
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                mapContainer.requestFullscreen().catch(err => {
+                    alert(`Erro ao entrar em tela cheia: ${err.message} (${err.name})`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fullscreenBtn.textContent = 'Sair da Tela Cheia';
+            } else {
+                fullscreenBtn.textContent = 'Tela Cheia';
+            }
         });
     }
 
