@@ -373,11 +373,6 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     color: var(--color-text-primary);
 }
 
-.map-controls-panel h4 {
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
-}
-
 .map-tool-section .info-text {
     margin: 0;
     text-align: left;
@@ -2501,6 +2496,10 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     min-height: 0; /* Adicionado para corrigir bug de overflow no Firefox/Grid */
     backdrop-filter: blur(5px);
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* Espaçamento geral entre seções */
+    padding: 0.75rem; /* Padding geral menor */
 }
 
 /* --- MODO TELA CHEIA DO MAPA --- */
@@ -2547,6 +2546,39 @@ body.map-fullscreen-active #campaign-header-and-tabs,
 body.map-fullscreen-active .master-tabs, /* Garante que as abas também sumam */
 body.map-fullscreen-active .notification-sidebar {
     display: none;
+}
+
+.map-controls-panel h4 {
+    font-size: 1.2rem; /* Fonte menor para os títulos */
+    margin: 0.5rem 0 0.5rem 0;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--color-surface-2);
+}
+
+.map-controls-panel .info-text.small-text {
+    font-size: 0.8rem; /* Fonte menor para os textos de ajuda */
+    margin: 0 0 0.5rem 0;
+}
+
+.map-tool-section {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.draw-controls-container {
+    margin-bottom: 0.5rem;
+}
+
+.draw-tool-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+}
+
+.map-config-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .premium-lock {
