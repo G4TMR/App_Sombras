@@ -329,10 +329,17 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     filter: none;
 }
 
+.map-tool-section {
+    background-color: rgba(0,0,0,0.2);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--color-surface-2);
+}
+
 .draw-controls-container {
     display: flex;
     gap: 0.5rem;
-    margin-bottom: 1rem;
     align-items: center;
 }
 
@@ -360,6 +367,11 @@ body[data-page="patente"] { --page-color: #6f42c1; }
 .draw-tool-btn.active {
     background-color: var(--color-primary);
     color: var(--color-text-primary);
+}
+
+.map-controls-panel h4 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .full-screen-section {
