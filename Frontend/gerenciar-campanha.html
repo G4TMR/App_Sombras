@@ -16,7 +16,8 @@
         <div class="campaign-layout">
             <div class="campaign-main-content">
                 <div class="content-box">
-                    <div class="campaign-display-header">
+                    <!-- Adicionado ID para controle de visibilidade -->
+                    <div id="campaign-header-and-tabs">
                         <div id="campaign-cover-image-display" class="campaign-cover-image"></div>
                         <div class="campaign-title-section">
                             <h2 id="campaign-title-display">Carregando...</h2>
@@ -24,13 +25,13 @@
                             <button id="edit-campaign-info-btn" class="wizard-btn">Editar Informações</button>
                         </div>
                     </div>
-        
+
                     <!-- Abas do Mestre -->
                     <div class="master-tabs">
                         <button class="tab-link active" data-tab="escudo-mestre">Escudo do Mestre</button>
                         <button class="tab-link" data-tab="mapa">Mapa</button>
                     </div>
-        
+
                     <!-- Conteúdo das Abas -->
                     <div class="tab-content active" id="escudo-mestre">
                         <h4>Recursos do Mestre</h4>
@@ -79,14 +80,21 @@
                                 </div>
                             </div>
                             <div class="map-controls-panel">
-                                <h4>Controles do Mapa</h4>
-                                <div class="map-config-form">
-                                    <label for="map-upload-input">Imagem de Fundo</label>
-                                    <input type="file" id="map-upload-input" accept="image/*" style="display: none;">
-                                    <button class="wizard-btn small-btn" onclick="document.getElementById('map-upload-input').click()">Carregar Imagem</button>
-                                    <button id="reset-map-btn" class="wizard-btn danger-btn small-btn">Limpar Mapa</button>
+                                <div class="map-main-controls">
+                                    <h4>Controles Principais</h4>
+                                    <button id="toggle-draw-mode-btn" class="wizard-btn small-btn">Ativar Modo Ocultador</button>
                                 </div>
-                                <h4>Agentes (Tokens)</h4>
+                                <div class="map-config-collapsible">
+                                    <h4 class="collapsible-header">Configurações do Mapa &#9662;</h4>
+                                    <div class="collapsible-content" style="display: none;">
+                                        <div class="map-config-form">
+                                            <input type="file" id="map-upload-input" accept="image/*" style="display: none;">
+                                            <button class="wizard-btn small-btn" onclick="document.getElementById('map-upload-input').click()">Carregar Imagem de Fundo</button>
+                                            <button id="reset-map-btn" class="wizard-btn danger-btn small-btn">Limpar Mapa</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h4>Adicionar Token</h4>
                                 <p class="info-text small-text">Arraste um agente para o mapa para criar seu token.</p>
                                 <div id="map-character-tokens" class="map-character-tokens"></div>
                             </div>
@@ -95,7 +103,6 @@
                         <!-- Menu de Contexto Customizado para o Mapa (movido para dentro da aba) -->
                         <div id="map-context-menu" class="context-menu">
                             <ul>
-                                <li id="toggle-draw-mode">Ativar Modo Desenho</li>
                                 <li id="remove-fog-area" style="display: none;">Remover Névoa</li>
                                 <!-- Outras opções podem ser adicionadas aqui -->
                             </ul>

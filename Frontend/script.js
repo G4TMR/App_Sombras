@@ -2907,29 +2907,25 @@ async function getCampaignById(campaignId) {
  * @param {object} updatedCampaign - O objeto da campanha com os dados atualizados.
  */
 async function updateCampaign(updatedCampaign, showIndicator = false) {
-    // 1. Atualiza localmente
-    try {
-        let campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-        const campaignIndex = campaigns.findIndex(c => c.id === updatedCampaign.id);
-        if (campaignIndex > -1) {
-            campaigns[campaignIndex] = { ...campaigns[campaignIndex], ...updatedCampaign };
-            localStorage.setItem('sombras-campaigns', JSON.stringify(campaigns));
-        }
+    // Garante que estamos usando o _id do MongoDB para a requisição
+    const campaignId = updatedCampaign._id || updatedCampaign.id;
+    if (!campaignId) {
+        console.error("ID da campanha não encontrado para atualização.");
+        return;
+    }
 
-        if (showIndicator) {
-            const saveIndicator = document.getElementById('save-status-indicator');
-            if (saveIndicator) {
-                saveIndicator.textContent = 'Salvo!';
-                saveIndicator.classList.add('show');
-                setTimeout(() => saveIndicator.classList.remove('show'), 2000);
-            }
+    if (showIndicator) {
+        const saveIndicator = document.getElementById('save-status-indicator');
+        if (saveIndicator) {
+            saveIndicator.textContent = 'Salvo!';
+            saveIndicator.classList.add('show');
+            setTimeout(() => saveIndicator.classList.remove('show'), 2000);
         }
-    } catch (error) {
-        console.error("Erro ao atualizar campanha localmente:", error);
     }
 
     // 2. Tenta atualizar no servidor se estiver online
     try {
+        // A rota do backend espera o 'id' customizado no parâmetro, mas o corpo pode conter o objeto completo
         await api.put(`/api/campaigns/${updatedCampaign.id}`, updatedCampaign);
     } catch (error) {
         console.error("Erro ao atualizar campanha:", error);
@@ -3379,8 +3375,7 @@ function initializeMasterMap(campaign) {
     const uploadInput = document.getElementById('map-upload-input');
     const tokenList = document.getElementById('map-character-tokens');
     const contextMenu = document.getElementById('map-context-menu');
-    const toggleDrawModeBtn = document.getElementById('toggle-draw-mode');
-    const removeFogBtn = document.getElementById('remove-fog-area');
+    const toggleDrawModeBtn = document.getElementById('toggle-draw-mode-btn'); // Botão movido para o painel
 
     let isDrawingMode = false;
     let isDrawing = false;
@@ -3483,13 +3478,6 @@ function initializeMasterMap(campaign) {
 
     document.addEventListener('click', hideMapContextMenu);
 
-    toggleDrawModeBtn.addEventListener('click', () => {
-        isDrawingMode = !isDrawingMode;
-        toggleDrawModeBtn.textContent = isDrawingMode ? 'Desativar Modo Desenho' : 'Ativar Modo Desenho';
-        mapBoard.style.cursor = isDrawingMode ? 'crosshair' : 'default';
-        hideMapContextMenu();
-    });
-
     removeFogBtn.addEventListener('click', (e) => {
         const fogIdToRemove = e.target.dataset.fogId;
         if (fogIdToRemove) {
@@ -3498,6 +3486,13 @@ function initializeMasterMap(campaign) {
             renderFogOfWar(campaign, mapBoard, true);
         }
         hideMapContextMenu();
+    });
+
+    // Lógica para o botão de modo de desenho no painel lateral
+    toggleDrawModeBtn.addEventListener('click', () => {
+        isDrawingMode = !isDrawingMode;
+        toggleDrawModeBtn.textContent = isDrawingMode ? 'Desativar Modo Ocultador' : 'Ativar Modo Ocultador';
+        mapBoard.style.cursor = isDrawingMode ? 'crosshair' : 'default';
     });
 
     // Eventos de desenho no mapa
@@ -3563,6 +3558,17 @@ function initializeMasterMap(campaign) {
             populateTokenList(); // Repopula a lista de tokens caso algo tenha mudado
         }
     });
+
+    // Lógica para o cabeçalho expansível de configurações
+    const collapsibleHeader = document.querySelector('.map-config-collapsible .collapsible-header');
+    if (collapsibleHeader) {
+        collapsibleHeader.addEventListener('click', () => {
+            collapsibleHeader.classList.toggle('active');
+            const content = collapsibleHeader.nextElementSibling;
+            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        });
+    }
+
     function setupDragAndDrop() {
         // Esta função pode ser expandida com mais lógica de drag and drop se necessário
     }
@@ -3691,6 +3697,8 @@ function initializeMasterView(campaign) {
     // Configura a lógica das abas (tabs)
     const tabLinks = document.querySelectorAll('#campaign-management-container .tab-link');
     const tabContents = document.querySelectorAll('#campaign-management-container .tab-content');
+    const campaignHeader = document.getElementById('campaign-header-and-tabs');
+
     if (tabLinks.length > 0 && tabContents.length > 0) {
         tabLinks.forEach(link => {
             link.addEventListener('click', () => {
@@ -3698,6 +3706,11 @@ function initializeMasterView(campaign) {
                 tabLinks.forEach(l => l.classList.remove('active'));
                 link.classList.add('active');
                 tabContents.forEach(c => c.id === tabId ? c.classList.add('active') : c.classList.remove('active'));
+
+                // Oculta o cabeçalho da campanha quando a aba do mapa estiver ativa
+                if (campaignHeader) {
+                    campaignHeader.style.display = (tabId === 'mapa') ? 'none' : 'block';
+                }
             });
         });
 
