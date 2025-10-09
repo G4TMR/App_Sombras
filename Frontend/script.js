@@ -1555,11 +1555,12 @@ class CharacterCreator {
         // Lida com o campo de imagem
         const imageInput = document.getElementById('char-image-input');
         const imagePreview = document.getElementById('char-image-preview');
+        imagePreview.src = 'https://via.placeholder.com/150x150.png?text=Retrato'; // Placeholder inicial
         imageInput.addEventListener('change', async () => {
             const file = imageInput.files[0];
             if (file) {
                 this.currentCharacter.personalization.imageUrl = await readFileAsDataURL(file);
-                imagePreview.src = this.currentCharacter.personalization.imageUrl;
+                imagePreview.src = this.currentCharacter.personalization.imageUrl || 'https://via.placeholder.com/150x150.png?text=Retrato';
             }
         });
     }
@@ -1811,12 +1812,8 @@ class CharacterDisplay {
         card.dataset.id = character.id;
         card.dataset.mode = mode;
 
-        const imageHtml = p.imageUrl 
-            ? `<img src="${p.imageUrl}" alt="Retrato de ${p.name}" class="character-card-image">`
-            : '';
-
        card.innerHTML = `
-            ${imageHtml}
+            <img src="${p.imageUrl || 'https://via.placeholder.com/200x250.png?text=AGENTE'}" alt="Retrato de ${p.name}" class="character-card-image">
             <div class="character-header">
                 <h3>${p.name || 'Agente Sem Nome'}</h3>
                 <span class="character-class">${character.class || 'Classe Desconhecida'}</span>
@@ -2041,7 +2038,7 @@ class CharacterSheet {
 
         // Atualiza o cabeçalho
         if (charImage) {
-            charImage.src = personalization.imageUrl || 'https://via.placeholder.com/150';
+            charImage.src = personalization.imageUrl || 'https://via.placeholder.com/150x150.png?text=AGENTE';
             charImage.alt = `Retrato de ${personalization.name || 'Agente Sem Nome'}`;
         }
         header.querySelector('h2').textContent = personalization.name || 'Agente Sem Nome';
@@ -3424,7 +3421,7 @@ function initializeMasterMap(campaign) {
             tokenListItem.draggable = true;
             tokenListItem.dataset.characterId = char._id;
             tokenListItem.innerHTML = `
-                <img src="${char.personalization.imageUrl || 'https://via.placeholder.com/30'}" alt="${char.personalization.name}">
+                <img src="${char.personalization.imageUrl || 'https://via.placeholder.com/40x40.png?text=?'}" alt="${char.personalization.name}">
                 <span>${char.personalization.name}</span>
             `;
             tokenList.appendChild(tokenListItem);
@@ -3450,7 +3447,7 @@ function initializeMasterMap(campaign) {
             const tokenData = {
                 id: `token_${charId}`,
                 characterId: charId,
-                imageUrl: character.personalization.imageUrl || 'https://via.placeholder.com/50',
+                imageUrl: character.personalization.imageUrl || 'https://via.placeholder.com/50x50.png?text=?',
                 x: (x / rect.width) * 100, // Salva como porcentagem
                 y: (y / rect.height) * 100,
             };
@@ -3879,7 +3876,7 @@ function addAgentToCampaignUI(character) {
  * @param {boolean} isDraggable - Se o token pode ser arrastado (visão do mestre).
  */
 function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true) {
-    if (!tokenData) return;
+    if (!tokenData || typeof tokenData.x === 'undefined' || typeof tokenData.y === 'undefined') return;
     let tokenElement = document.getElementById(tokenData.id);
     if (!tokenElement) {
         tokenElement = document.createElement('div');
@@ -3888,7 +3885,7 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true) {
         mapBoard.appendChild(tokenElement);
     }
 
-    tokenElement.style.backgroundImage = `url('${tokenData.imageUrl}')`;
+    tokenElement.style.backgroundImage = `url('${tokenData.imageUrl || 'https://via.placeholder.com/50x50.png?text=?'}')`;
     tokenElement.style.left = `${tokenData.x}%`;
     tokenElement.style.top = `${tokenData.y}%`;
 
@@ -3942,9 +3939,6 @@ function createAgentCardForCampaign(character, campaignId, isMasterView = false)
     }
 
     const p = character.personalization || {};
-    const imageHtml = p.imageUrl
-        ? `<img src="${p.imageUrl}" alt="Retrato de ${p.name}" class="character-card-image">`
-        : '';
 
     // Verifica se o personagem pertence ao usuário logado (currentUserId é uma variável global)
     // O botão de deletar aparece se for a visão do mestre OU se o usuário logado for o dono do personagem.
@@ -3952,9 +3946,8 @@ function createAgentCardForCampaign(character, campaignId, isMasterView = false)
     const deleteButtonHtml = (isMasterView || isOwner)
         ? `<button class="delete-btn small-btn" title="Remover da Campanha">&times;</button>`
         : '';
-
     card.innerHTML = `
-        ${imageHtml}
+        <img src="${p.imageUrl || 'https://via.placeholder.com/200x250.png?text=AGENTE'}" alt="Retrato de ${p.name}" class="character-card-image">
         <div class="character-header">
             <h3>${p.name || 'Agente Sem Nome'}</h3>
             <span class="character-class">${character.class || 'Classe'}</span>
