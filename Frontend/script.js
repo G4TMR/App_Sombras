@@ -3608,9 +3608,6 @@ function initializeMasterView(campaign) {
     // Renderiza a lista de jogadores
     renderCampaignPlayers(campaign);
 
-    // Inicializa o mapa do mestre
-    initializeMasterMap(campaign);
-
     // Renderiza a lista de agentes para o mestre
     const masterAgentsGrid = document.getElementById('master-agents-grid');
     const noAgentsMessage = document.getElementById('no-agents-for-master');
@@ -3716,6 +3713,9 @@ function initializeMasterView(campaign) {
 
         // Inicia o listener para o log de rolagens
         initializeCampaignLogListener(campaign.id);
+
+        // Inicializa o mapa do mestre (MOVENDO PARA O FINAL PARA GARANTIR QUE TUDO ESTEJA PRONTO)
+        initializeMasterMap(campaign);
     }
 }
 
@@ -3936,7 +3936,7 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true) {
  * @param {object} character - O objeto do personagem.
  * @returns {HTMLElement} O elemento do card do agente.
  */
-function createAgentCardForCampaign(character, campaignId, isMasterView = false) { // Linha duplicada removida
+function createAgentCardForCampaign(character, campaignId, isMasterView = false) {
     const card = document.createElement('div');
     card.className = 'character-card simple-card'; // Usa a classe para diminuir o tamanho
     if (character.element) {
@@ -3949,10 +3949,9 @@ function createAgentCardForCampaign(character, campaignId, isMasterView = false)
         : '';
 
     // Verifica se o personagem pertence ao usuário logado (currentUserId é uma variável global)
-    // Se for a visão do mestre, o botão de deletar aparece em todos.
-    // Se for a visão do jogador, o botão só aparece se ele for o dono do personagem.
-    const isOwner = character.owner === currentUserId;
-    const deleteButtonHtml = (isMasterView || isOwner) // Linha duplicada removida
+    // O botão de deletar aparece se for a visão do mestre OU se o usuário logado for o dono do personagem.
+    const isOwner = getObjectIdAsString(character.owner) === currentUserId;
+    const deleteButtonHtml = (isMasterView || isOwner)
         ? `<button class="delete-btn small-btn" title="Remover da Campanha">&times;</button>`
         : '';
 
@@ -3973,7 +3972,7 @@ function createAgentCardForCampaign(character, campaignId, isMasterView = false)
 
     card.querySelector('.view-btn').addEventListener('click', () => {
         // O ID pode ser `_id` vindo do populate da API
-        const charId = character._id; // Use _id directly
+        const charId = character._id || character.id;
         window.location.href = `ficha-agente.html?id=${charId}&campaignId=${campaignId}`;
     });
 
