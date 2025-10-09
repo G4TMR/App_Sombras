@@ -81,7 +81,14 @@
                             </div>
                             <div class="map-controls-panel">
                                 <h4>Controles do Mapa</h4>
-                                <button id="toggle-draw-mode-btn" class="wizard-btn small-btn">Ocultar Área</button>
+                                <div class="draw-controls-container">
+                                    <button id="toggle-draw-mode-btn" class="wizard-btn small-btn">Ocultar Área</button>
+                                    <div id="draw-tools-panel" class="draw-tools-panel" style="display: none;">
+                                        <button class="draw-tool-btn active" data-shape="square" title="Desenhar Quadrado">■</button>
+                                        <button class="draw-tool-btn" data-shape="circle" title="Desenhar Círculo">●</button>
+                                        <button class="draw-tool-btn" data-shape="brush" title="Pincel Livre">🖌️</button>
+                                    </div>
+                                </div>
                                 <div class="map-config-collapsible">
                                     <h4 class="collapsible-header">Configurações do Mapa &#9662;</h4>
                                     <div class="collapsible-content" style="display: none;">

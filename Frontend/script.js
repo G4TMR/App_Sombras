@@ -3317,10 +3317,27 @@ function renderFogOfWar(campaign, mapBoard, isMasterView) {
             const fogElement = document.createElement('div');
             fogElement.className = 'fog-of-war';
             fogElement.id = fogData.id;
-            fogElement.style.left = `${fogData.x}%`;
-            fogElement.style.top = `${fogData.y}%`;
-            fogElement.style.width = `${fogData.width}%`;
-            fogElement.style.height = `${fogData.height}%`;
+
+            // Renderiza a forma correta
+            switch (fogData.shape) {
+                case 'circle':
+                    // Para círculos, x/y é o centro e o tamanho é o diâmetro
+                    fogElement.style.width = `${fogData.radius * 2}%`;
+                    fogElement.style.height = `${fogData.radius * 2}%`;
+                    fogElement.style.left = `${fogData.x - fogData.radius}%`;
+                    fogElement.style.top = `${fogData.y - fogData.radius}%`;
+                    fogElement.style.borderRadius = '50%';
+                    break;
+                case 'brush': // O pincel também cria quadrados
+                case 'square':
+                default:
+                    fogElement.style.left = `${fogData.x}%`;
+                    fogElement.style.top = `${fogData.y}%`;
+                    fogElement.style.width = `${fogData.width}%`;
+                    fogElement.style.height = `${fogData.height}%`;
+                    break;
+            }
+
             mapBoard.appendChild(fogElement);
 
             if (isMasterView) {
@@ -3374,6 +3391,7 @@ function initializeMasterMap(campaign) {
     const contextMenu = document.getElementById('map-context-menu');
     const removeFogBtn = document.getElementById('remove-fog-area');
 
+    let currentDrawShape = 'square'; // 'square', 'circle', 'brush'
     let isDrawingMode = false;
     let isDrawing = false;
     let startX, startY;
@@ -3485,11 +3503,29 @@ function initializeMasterMap(campaign) {
 
     // Lógica para o novo botão de modo de desenho
     const toggleDrawModeBtn = document.getElementById('toggle-draw-mode-btn');
+    const drawToolsPanel = document.getElementById('draw-tools-panel');
+    const drawToolBtns = document.querySelectorAll('.draw-tool-btn');
+
     toggleDrawModeBtn.addEventListener('click', () => {
         isDrawingMode = !isDrawingMode;
         mapBoard.style.cursor = isDrawingMode ? 'crosshair' : 'default';
         toggleDrawModeBtn.classList.toggle('active', isDrawingMode);
         toggleDrawModeBtn.textContent = isDrawingMode ? 'Sair do Modo Ocultar' : 'Ocultar Área';
+        drawToolsPanel.style.display = isDrawingMode ? 'flex' : 'none';
+    });
+
+    // Lógica para selecionar a ferramenta de desenho
+    drawToolBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove a classe 'active' de todos os botões de ferramenta
+            drawToolBtns.forEach(b => b.classList.remove('active'));
+            // Adiciona a classe 'active' ao botão clicado
+            btn.classList.add('active');
+            // Define a forma de desenho atual
+            currentDrawShape = btn.dataset.shape;
+            // Altera o cursor do mapa de acordo com a ferramenta
+            mapBoard.style.cursor = 'crosshair'; // Mantém o crosshair para todas as ferramentas por enquanto
+        });
     });
 
     // Eventos de desenho no mapa
@@ -3514,6 +3550,28 @@ function initializeMasterMap(campaign) {
 
     mapBoard.addEventListener('mousemove', (e) => {
         if (!isDrawing || !selectionRect) return;
+
+        // Se a ferramenta for o pincel, desenha pequenos quadrados
+        if (currentDrawShape === 'brush') {
+            const rect = mapBoard.getBoundingClientRect();
+            const brushSize = 10; // Tamanho do "pincel" em pixels
+            const x = e.clientX - rect.left - (brushSize / 2);
+            const y = e.clientY - rect.top - (brushSize / 2);
+
+            const dabData = {
+                id: `fog_${Date.now()}_${Math.random()}`,
+                shape: 'square',
+                x: (x / rect.width) * 100,
+                y: (y / rect.height) * 100,
+                width: (brushSize / rect.width) * 100,
+                height: (brushSize / rect.height) * 100,
+            };
+            if (!campaign.mapData.fog) campaign.mapData.fog = [];
+            campaign.mapData.fog.push(dabData);
+            renderFogOfWar(campaign, mapBoard, true); // Re-renderiza para mostrar o traço
+            return; // Não usa o selectionRect para o pincel
+        }
+
         const rect = mapBoard.getBoundingClientRect();
         const currentX = e.clientX - rect.left;
         const currentY = e.clientY - rect.top;
@@ -3527,6 +3585,13 @@ function initializeMasterMap(campaign) {
         selectionRect.style.height = `${height}px`;
         selectionRect.style.left = `${left}px`;
         selectionRect.style.top = `${top}px`;
+
+        // Se for círculo, força a ser um círculo e ajusta o estilo
+        if (currentDrawShape === 'circle') {
+            selectionRect.style.borderRadius = '50%';
+        } else {
+            selectionRect.style.borderRadius = '0';
+        }
     });
 
     mapBoard.addEventListener('mouseup', (e) => {
@@ -3537,19 +3602,51 @@ function initializeMasterMap(campaign) {
             const finalWidth = parseFloat(selectionRect.style.width);
             const finalHeight = parseFloat(selectionRect.style.height);
 
-            // Só adiciona a névoa se ela tiver um tamanho mínimo
-            if (finalWidth > 5 && finalHeight > 5) {
-                const fogData = {
-                    id: `fog_${Date.now()}`,
-                    x: (parseFloat(selectionRect.style.left) / rect.width) * 100,
-                    y: (parseFloat(selectionRect.style.top) / rect.height) * 100,
-                    width: (finalWidth / rect.width) * 100,
-                    height: (finalHeight / rect.height) * 100,
-                };
+            let fogData = null;
+
+            // A lógica de desenho varia com a forma selecionada
+            switch (currentDrawShape) {
+                case 'square':
+                    // Só adiciona a névoa se ela tiver um tamanho mínimo
+                    if (finalWidth > 5 && finalHeight > 5) {
+                        fogData = {
+                            id: `fog_${Date.now()}`,
+                            shape: 'square', // Adiciona a forma aos dados
+                            x: (parseFloat(selectionRect.style.left) / rect.width) * 100,
+                            y: (parseFloat(selectionRect.style.top) / rect.height) * 100,
+                            width: (finalWidth / rect.width) * 100,
+                            height: (finalHeight / rect.height) * 100,
+                        };
+                    }
+                    break;
+                case 'circle':
+                    if (finalWidth > 5 && finalHeight > 5) {
+                        const radiusX = (finalWidth / rect.width) * 50; // 50 = 100 / 2
+                        const radiusY = (finalHeight / rect.height) * 50;
+                        fogData = {
+                            id: `fog_${Date.now()}`,
+                            shape: 'circle',
+                            x: ((parseFloat(selectionRect.style.left) / rect.width) * 100) + radiusX,
+                            y: ((parseFloat(selectionRect.style.top) / rect.height) * 100) + radiusY,
+                            radius: (radiusX + radiusY) / 2, // Média dos raios para uma forma mais consistente
+                        };
+                    }
+                    break;
+                case 'brush':
+                    // Para o pincel, os dados já foram adicionados no mousemove.
+                    // Apenas salvamos a campanha no final.
+                    updateCampaign(campaign);
+                    renderFogOfWar(campaign, mapBoard, true);
+                    break;
+            }
+
+            if (fogData) {
+                if (!campaign.mapData.fog) campaign.mapData.fog = [];
                 campaign.mapData.fog.push(fogData);
                 updateCampaign(campaign);
                 renderFogOfWar(campaign, mapBoard, true);
             }
+
             mapBoard.removeChild(selectionRect);
             selectionRect = null;
         }

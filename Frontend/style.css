@@ -329,6 +329,39 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     filter: none;
 }
 
+.draw-controls-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.draw-tools-panel {
+    display: flex;
+    background-color: var(--color-surface-2);
+    border-radius: 8px;
+    padding: 0.25rem;
+    gap: 0.25rem;
+}
+
+.draw-tool-btn {
+    background-color: transparent;
+    border: 2px solid transparent;
+    color: var(--color-text-secondary);
+    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.draw-tool-btn:hover,
+.draw-tool-btn.active {
+    background-color: var(--color-primary);
+    color: var(--color-text-primary);
+}
+
 .full-screen-section {
     width: 100%;
     min-height: 600px;
@@ -3365,6 +3398,6 @@ body.dev-mode #dev-mode-form { display: none; }
     height: 24px;
 }
 
-.map-fullscreen-button svg path {
+.map-fullscreen-button svg path, #fullscreen-exit-icon path {
     fill: var(--color-text-primary);
 }
