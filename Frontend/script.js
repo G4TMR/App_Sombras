@@ -3374,6 +3374,7 @@ function initializeMasterMap(campaign) {
     const contextMenu = document.getElementById('map-context-menu');
     const removeFogBtn = document.getElementById('remove-fog-area');
 
+    let isDrawingMode = false;
     let isDrawing = false;
     let startX, startY;
     let selectionRect = null;
@@ -3470,12 +3471,6 @@ function initializeMasterMap(campaign) {
         }
     });
 
-    // Lógica do Menu de Contexto e Desenho
-    mapBoard.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        showMapContextMenu(e.clientX, e.clientY);
-    });
-
     document.addEventListener('click', hideMapContextMenu);
 
     removeFogBtn.addEventListener('click', (e) => {
@@ -3488,11 +3483,24 @@ function initializeMasterMap(campaign) {
         hideMapContextMenu();
     });
 
+    // Lógica para o novo botão de modo de desenho
+    const toggleDrawModeBtn = document.getElementById('toggle-draw-mode-btn');
+    toggleDrawModeBtn.addEventListener('click', () => {
+        isDrawingMode = !isDrawingMode;
+        mapBoard.style.cursor = isDrawingMode ? 'crosshair' : 'default';
+        toggleDrawModeBtn.classList.toggle('active', isDrawingMode);
+        toggleDrawModeBtn.textContent = isDrawingMode ? 'Sair do Modo Ocultar' : 'Ocultar Área';
+    });
+
     // Eventos de desenho no mapa
     mapBoard.addEventListener('mousedown', (e) => {
-        if (e.button !== 2) return; // Apenas botão direito para desenhar
-        e.preventDefault(); // Previne o menu de contexto padrão do navegador
+        // Só desenha se o modo de desenho estiver ativo e for com o botão esquerdo
+        if (!isDrawingMode || e.button !== 0) return;
+
+        // Previne o comportamento padrão (como arrastar a imagem de fundo)
+        e.preventDefault();
         isDrawing = true;
+
         const rect = mapBoard.getBoundingClientRect();
         startX = e.clientX - rect.left;
         startY = e.clientY - rect.top;
@@ -3522,7 +3530,7 @@ function initializeMasterMap(campaign) {
     });
 
     mapBoard.addEventListener('mouseup', (e) => {
-        if (!isDrawing || e.button !== 2) return;
+        if (!isDrawing || e.button !== 0) return;
         isDrawing = false;
         if (selectionRect) {
             const rect = mapBoard.getBoundingClientRect();

@@ -323,6 +323,12 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 4px 10px rgba(168, 85, 247, 0.3), 0 4px 10px rgba(50, 205, 50, 0.2);
 }
 
+.wizard-btn.active {
+    background: var(--color-danger);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    filter: none;
+}
+
 .full-screen-section {
     width: 100%;
     min-height: 600px;
@@ -2435,6 +2441,7 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     padding: 1rem;
     border-radius: 8px;
     border: 1px solid var(--color-surface-2);
+    min-height: 0; /* Adicionado para corrigir bug de overflow no Firefox/Grid */
     backdrop-filter: blur(5px);
     overflow-y: auto;
 }
@@ -2456,6 +2463,7 @@ body.map-fullscreen-active {
     box-sizing: border-box;
     display: grid;
     grid-template-columns: 1fr 320px; /* Mapa à esquerda, painel de controle à direita */
+    grid-template-rows: minmax(0, 1fr); /* Garante que as linhas do grid não ultrapassem a altura do contêiner */
     gap: 1rem;
 }
 
@@ -3355,5 +3363,8 @@ body.dev-mode #dev-mode-form { display: none; }
 .map-fullscreen-button svg {
     width: 24px;
     height: 24px;
+}
+
+.map-fullscreen-button svg path {
     fill: var(--color-text-primary);
 }
