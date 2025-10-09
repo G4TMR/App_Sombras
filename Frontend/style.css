@@ -2446,19 +2446,22 @@ body[data-page="patente"] { --page-color: #6f42c1; }
 }
 
 /* --- ESTILOS DO MAPA INTERATIVO --- */
+.map-layout-wrapper {
+    position: relative; /* Contêiner para o mapa e o botão de tela cheia */
+    width: 100%;
+}
+
 .master-map-layout {
-    position: relative; /* Necessário para posicionar o botão de tela cheia */
     display: grid;
     grid-template-columns: 1fr; /* Por padrão, só o mapa é visível */
     gap: 1rem;
     width: 100%;
-    height: 100%;
 }
 
 .map-board {
     position: relative;
     width: 100%;
-    height: 100%;
+    /* height: 100% removido para permitir que min-height funcione corretamente */
     background-color: #111;
     border: 1px solid var(--color-surface-2);
     border-radius: 8px;
@@ -2485,7 +2488,8 @@ body.map-fullscreen-active {
 }
 
 .master-map-layout.fullscreen-mode {
-    position: fixed;
+    /* Altera o posicionamento para o wrapper */
+    position: static;
     top: 0;
     left: 0;
     width: 100vw;
@@ -2500,6 +2504,16 @@ body.map-fullscreen-active {
     gap: 1rem;
 }
 
+.map-layout-wrapper.fullscreen-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2000;
+    padding: 1rem;
+}
+
 .master-map-layout.fullscreen-mode .map-controls-panel {
     display: block; /* Mostra o painel de controle em tela cheia */
 }
@@ -2507,7 +2521,8 @@ body.map-fullscreen-active {
 /* Esconde o header principal quando o mapa está em tela cheia */
 body.map-fullscreen-active #header-placeholder,
 body.map-fullscreen-active .back-to-list-btn,
-body.map-fullscreen-active .master-tabs,
+body.map-fullscreen-active #campaign-header-and-tabs,
+body.map-fullscreen-active .master-tabs, /* Garante que as abas também sumam */
 body.map-fullscreen-active .notification-sidebar {
     display: none;
 }
@@ -3398,6 +3413,6 @@ body.dev-mode #dev-mode-form { display: none; }
     height: 24px;
 }
 
-.map-fullscreen-button svg path, #fullscreen-exit-icon path {
+.map-fullscreen-button svg path {
     fill: var(--color-text-primary);
 }

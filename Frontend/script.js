@@ -3675,15 +3675,16 @@ function initializeMasterMap(campaign) {
 
     // Lógica para o botão de Tela Cheia
     const fullscreenBtn = document.getElementById('map-fullscreen-btn');
-    const mapLayout = document.getElementById('master-map-layout');
+    const mapWrapper = document.querySelector('.map-layout-wrapper'); // Pega o novo contêiner
     const enterIcon = document.getElementById('fullscreen-enter-icon');
     const exitIcon = document.getElementById('fullscreen-exit-icon');
 
-    if (fullscreenBtn && mapLayout && enterIcon && exitIcon) {
+    if (fullscreenBtn && mapWrapper && enterIcon && exitIcon) {
         fullscreenBtn.addEventListener('click', () => {
             // Alterna uma classe no corpo e no layout do mapa para controlar o modo de tela cheia via CSS
             const isFullscreen = document.body.classList.toggle('map-fullscreen-active');
-            mapLayout.classList.toggle('fullscreen-mode', isFullscreen);
+            mapWrapper.classList.toggle('fullscreen-mode', isFullscreen);
+            mapWrapper.querySelector('.master-map-layout').classList.toggle('fullscreen-mode', isFullscreen);
 
             if (isFullscreen) {
                 enterIcon.style.display = 'none';

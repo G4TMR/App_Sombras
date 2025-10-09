@@ -72,44 +72,46 @@
         
                     <div class="tab-content" id="mapa">
                         <!-- Layout Unificado do Mapa para o Mestre -->
-                        <div class="master-map-layout" id="master-map-layout">
-                            <div id="map-board" class="map-board" style="min-height: 70vh;">
-                                <div id="map-upload-placeholder" class="map-upload-placeholder">
-                                    <p>Nenhum mapa carregado.</p>
-                                    <p>Use os controles para carregar uma imagem de fundo.</p>
-                                </div>
-                            </div>
-                            <div class="map-controls-panel">
-                                <h4>Controles do Mapa</h4>
-                                <div class="draw-controls-container">
-                                    <button id="toggle-draw-mode-btn" class="wizard-btn small-btn">Ocultar Área</button>
-                                    <div id="draw-tools-panel" class="draw-tools-panel" style="display: none;">
-                                        <button class="draw-tool-btn active" data-shape="square" title="Desenhar Quadrado">■</button>
-                                        <button class="draw-tool-btn" data-shape="circle" title="Desenhar Círculo">●</button>
-                                        <button class="draw-tool-btn" data-shape="brush" title="Pincel Livre">🖌️</button>
+                        <div class="map-layout-wrapper">
+                            <div class="master-map-layout" id="master-map-layout">
+                                <div id="map-board" class="map-board" style="min-height: 70vh;">
+                                    <div id="map-upload-placeholder" class="map-upload-placeholder">
+                                        <p>Nenhum mapa carregado.</p>
+                                        <p>Use os controles para carregar uma imagem de fundo.</p>
                                     </div>
                                 </div>
-                                <div class="map-config-collapsible">
-                                    <h4 class="collapsible-header">Configurações do Mapa &#9662;</h4>
-                                    <div class="collapsible-content" style="display: none;">
-                                        <div class="map-config-form">
-                                            <input type="file" id="map-upload-input" accept="image/*" style="display: none;">
-                                            <button class="wizard-btn small-btn" onclick="document.getElementById('map-upload-input').click()">Carregar Imagem de Fundo</button>
-                                            <button id="reset-map-btn" class="wizard-btn danger-btn small-btn">Limpar Mapa</button>
+                                <div class="map-controls-panel">
+                                    <h4>Controles do Mapa</h4>
+                                    <div class="draw-controls-container">
+                                        <button id="toggle-draw-mode-btn" class="wizard-btn small-btn">Ocultar Área</button>
+                                        <div id="draw-tools-panel" class="draw-tools-panel" style="display: none;">
+                                            <button class="draw-tool-btn active" data-shape="square" title="Desenhar Quadrado">■</button>
+                                            <button class="draw-tool-btn" data-shape="circle" title="Desenhar Círculo">●</button>
+                                            <button class="draw-tool-btn" data-shape="brush" title="Pincel Livre">🖌️</button>
                                         </div>
                                     </div>
+                                    <div class="map-config-collapsible">
+                                        <h4 class="collapsible-header">Configurações do Mapa &#9662;</h4>
+                                        <div class="collapsible-content" style="display: none;">
+                                            <div class="map-config-form">
+                                                <input type="file" id="map-upload-input" accept="image/*" style="display: none;">
+                                                <button class="wizard-btn small-btn" onclick="document.getElementById('map-upload-input').click()">Carregar Imagem de Fundo</button>
+                                                <button id="reset-map-btn" class="wizard-btn danger-btn small-btn">Limpar Mapa</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="info-text small-text">Clique em "Ocultar Área" e arraste com o mouse no mapa para desenhar.</p>
+                                    <h4>Adicionar Token</h4>
+                                    <p class="info-text small-text">Arraste um agente para o mapa para criar seu token.</p>
+                                    <div id="map-character-tokens" class="map-character-tokens"></div>
                                 </div>
-                                <p class="info-text small-text">Clique em "Ocultar Área" e arraste com o mouse no mapa para desenhar.</p>
-                                <h4>Adicionar Token</h4>
-                                <p class="info-text small-text">Arraste um agente para o mapa para criar seu token.</p>
-                                <div id="map-character-tokens" class="map-character-tokens"></div>
                             </div>
-                            <!-- Botão de Tela Cheia movido para dentro do layout do mapa -->
-                            <button id="map-fullscreen-btn" class="map-fullscreen-button" title="Tela Cheia">
-                                <svg id="fullscreen-enter-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 2h-2v3h-3v2h5v-5zm-3-4V5h3v2h-3z"/></svg>
-                                <svg id="fullscreen-exit-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
-                            </button>
                         </div>
+                        <!-- Botão de Tela Cheia fora do layout principal do mapa -->
+                        <button id="map-fullscreen-btn" class="map-fullscreen-button" title="Tela Cheia">
+                            <svg id="fullscreen-enter-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 2h-2v3h-3v2h5v-5zm-3-4V5h3v2h-3z"/></svg>
+                            <svg id="fullscreen-exit-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
+                        </button>
 
                         <!-- Menu de Contexto Customizado para o Mapa (movido para dentro da aba) -->
                         <div id="map-context-menu" class="context-menu">
