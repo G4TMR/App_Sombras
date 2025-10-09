@@ -1555,12 +1555,12 @@ class CharacterCreator {
         // Lida com o campo de imagem
         const imageInput = document.getElementById('char-image-input');
         const imagePreview = document.getElementById('char-image-preview');
-        imagePreview.src = 'https://via.placeholder.com/150x150.png?text=Retrato'; // Placeholder inicial
+        imagePreview.src = 'https://via.placeholder.com/150'; // Placeholder inicial
         imageInput.addEventListener('change', async () => {
             const file = imageInput.files[0];
             if (file) {
                 this.currentCharacter.personalization.imageUrl = await readFileAsDataURL(file);
-                imagePreview.src = this.currentCharacter.personalization.imageUrl || 'https://via.placeholder.com/150x150.png?text=Retrato';
+                imagePreview.src = this.currentCharacter.personalization.imageUrl || 'https://via.placeholder.com/150';
             }
         });
     }
@@ -1813,7 +1813,7 @@ class CharacterDisplay {
         card.dataset.mode = mode;
 
        card.innerHTML = `
-            <img src="${p.imageUrl || 'https://via.placeholder.com/200x250.png?text=AGENTE'}" alt="Retrato de ${p.name}" class="character-card-image">
+            <img src="${p.imageUrl || 'https://via.placeholder.com/200x250'}" alt="Retrato de ${p.name}" class="character-card-image">
             <div class="character-header">
                 <h3>${p.name || 'Agente Sem Nome'}</h3>
                 <span class="character-class">${character.class || 'Classe Desconhecida'}</span>
@@ -2038,7 +2038,7 @@ class CharacterSheet {
 
         // Atualiza o cabeçalho
         if (charImage) {
-            charImage.src = personalization.imageUrl || 'https://via.placeholder.com/150x150.png?text=AGENTE';
+            charImage.src = personalization.imageUrl || 'https://via.placeholder.com/150';
             charImage.alt = `Retrato de ${personalization.name || 'Agente Sem Nome'}`;
         }
         header.querySelector('h2').textContent = personalization.name || 'Agente Sem Nome';
@@ -2904,9 +2904,9 @@ async function getCampaignById(campaignId) {
  * @param {object} updatedCampaign - O objeto da campanha com os dados atualizados.
  */
 async function updateCampaign(updatedCampaign, showIndicator = false) {
-    // Garante que estamos usando o _id do MongoDB para a requisição
-    const campaignId = updatedCampaign._id || updatedCampaign.id;
-    if (!campaignId) {
+    // Usa o _id se disponível, senão o id customizado. O backend agora lida com ambos.
+    const campaignIdForApi = updatedCampaign._id || updatedCampaign.id;
+    if (!campaignIdForApi) {
         console.error("ID da campanha não encontrado para atualização.");
         return;
     }
@@ -2922,8 +2922,8 @@ async function updateCampaign(updatedCampaign, showIndicator = false) {
 
     // 2. Tenta atualizar no servidor se estiver online
     try {
-        // A rota do backend espera o 'id' customizado no parâmetro, mas o corpo pode conter o objeto completo
-        await api.put(`/api/campaigns/${updatedCampaign.id}`, updatedCampaign);
+        // Usa o ID correto na URL da requisição PUT.
+        await api.put(`/api/campaigns/${campaignIdForApi}`, updatedCampaign);
     } catch (error) {
         console.error("Erro ao atualizar campanha:", error);
         alert("Ocorreu um erro ao atualizar a campanha.");
@@ -3425,7 +3425,7 @@ function initializeMasterMap(campaign) {
             tokenListItem.draggable = true;
             tokenListItem.dataset.characterId = char._id;
             tokenListItem.innerHTML = `
-                <img src="${char.personalization.imageUrl || 'https://via.placeholder.com/40x40.png?text=?'}" alt="${char.personalization.name}">
+                <img src="${char.personalization.imageUrl || 'https://via.placeholder.com/40'}" alt="${char.personalization.name}">
                 <span>${char.personalization.name}</span>
             `;
             tokenList.appendChild(tokenListItem);
@@ -3451,7 +3451,7 @@ function initializeMasterMap(campaign) {
             const tokenData = {
                 id: `token_${charId}`,
                 characterId: charId,
-                imageUrl: character.personalization.imageUrl || 'https://via.placeholder.com/50x50.png?text=?',
+                imageUrl: character.personalization.imageUrl || 'https://via.placeholder.com/50',
                 x: (x / rect.width) * 100, // Salva como porcentagem
                 y: (y / rect.height) * 100,
             };
@@ -3669,7 +3669,7 @@ function initializeMasterView(campaign) {
     document.getElementById('edit-campaign-info-btn').addEventListener('click', () => {
         titleModalInput.value = campaign.title;
         synopsisModalTextarea.value = campaign.synopsis;
-        imageModalPreview.src = campaign.imageUrl || 'https://via.placeholder.com/300x180';
+    imageModalPreview.src = campaign.imageUrl || 'https://via.placeholder.com/300x180';
         imageFileInput.value = ''; // Limpa o seletor de arquivo
         modalOverlay.classList.add('visible');
     });
@@ -3913,7 +3913,7 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true) {
         mapBoard.appendChild(tokenElement);
     }
 
-    tokenElement.style.backgroundImage = `url('${tokenData.imageUrl || 'https://via.placeholder.com/50x50.png?text=?'}')`;
+    tokenElement.style.backgroundImage = `url('${tokenData.imageUrl || 'https://via.placeholder.com/50'}')`;
     tokenElement.style.left = `${tokenData.x}%`;
     tokenElement.style.top = `${tokenData.y}%`;
 
@@ -3975,7 +3975,7 @@ function createAgentCardForCampaign(character, campaignId, isMasterView = false)
         ? `<button class="delete-btn small-btn" title="Remover da Campanha">&times;</button>`
         : '';
     card.innerHTML = `
-        <img src="${p.imageUrl || 'https://via.placeholder.com/200x250.png?text=AGENTE'}" alt="Retrato de ${p.name}" class="character-card-image">
+        <img src="${p.imageUrl || 'https://via.placeholder.com/200x250'}" alt="Retrato de ${p.name}" class="character-card-image">
         <div class="character-header">
             <h3>${p.name || 'Agente Sem Nome'}</h3>
             <span class="character-class">${character.class || 'Classe'}</span>
@@ -4224,4 +4224,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-});it
+});

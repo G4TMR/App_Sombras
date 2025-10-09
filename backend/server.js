@@ -359,10 +359,12 @@ app.get('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
 // Atualizar uma campanha
 app.put('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
     try {
-        // O parâmetro da URL agora é o _id do MongoDB
+        // CORREÇÃO: Permite que a atualização funcione com o _id do Mongo ou o id customizado.
         const updatedCampaign = await Campaign.findOneAndUpdate(
-            // Encontra pelo _id e garante que o usuário logado é o dono.
-            { _id: req.params.id, ownerId: req.user._id }, 
+            { 
+                $or: [{ _id: req.params.id }, { id: req.params.id }], // Busca por qualquer um dos IDs
+                ownerId: req.user._id // Garante que apenas o dono possa atualizar
+            }, 
             req.body,
             { new: true }
         );
