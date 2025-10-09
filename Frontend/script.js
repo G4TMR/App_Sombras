@@ -3313,42 +3313,80 @@ function renderFogOfWar(campaign, mapBoard, isMasterView) {
     mapBoard.querySelectorAll('.fog-of-war').forEach(fog => fog.remove());
 
     if (campaign.mapData?.fog) {
+        // Cria um único contêiner SVG para toda a névoa, para melhor performance
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute('class', 'fog-of-war');
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '100%');
+
+        // Máscara para "cortar" as áreas visíveis da névoa
+        const defs = document.createElementNS(svgNS, 'defs');
+        const mask = document.createElementNS(svgNS, 'mask');
+        mask.id = 'fog-mask';
+        
+        const maskBackground = document.createElementNS(svgNS, 'rect');
+        maskBackground.setAttribute('width', '100%');
+        maskBackground.setAttribute('height', '100%');
+        maskBackground.setAttribute('fill', 'white');
+        mask.appendChild(maskBackground);
+
         campaign.mapData.fog.forEach(fogData => {
-            const fogElement = document.createElement('div');
-            fogElement.className = 'fog-of-war';
-            fogElement.id = fogData.id;
+            let fogShape;
 
             // Renderiza a forma correta
             switch (fogData.shape) {
                 case 'circle':
-                    // Para círculos, x/y é o centro e o tamanho é o diâmetro
-                    fogElement.style.width = `${fogData.radius * 2}%`;
-                    fogElement.style.height = `${fogData.radius * 2}%`;
-                    fogElement.style.left = `${fogData.x - fogData.radius}%`;
-                    fogElement.style.top = `${fogData.y - fogData.radius}%`;
-                    fogElement.style.borderRadius = '50%';
+                    fogShape = document.createElementNS(svgNS, 'circle');
+                    fogShape.setAttribute('cx', `${fogData.x}%`);
+                    fogShape.setAttribute('cy', `${fogData.y}%`);
+                    fogShape.setAttribute('r', `${fogData.radius}%`);
                     break;
-                case 'brush': // O pincel também cria quadrados
+                case 'polygon':
+                    fogShape = document.createElementNS(svgNS, 'polygon');
+                    const points = fogData.points.map(p => `${p.x}%,${p.y}%`).join(' ');
+                    fogShape.setAttribute('points', points);
+                    break;
                 case 'square':
                 default:
-                    fogElement.style.left = `${fogData.x}%`;
-                    fogElement.style.top = `${fogData.y}%`;
-                    fogElement.style.width = `${fogData.width}%`;
-                    fogElement.style.height = `${fogData.height}%`;
+                    fogShape = document.createElementNS(svgNS, 'rect');
+                    fogShape.setAttribute('x', `${fogData.x}%`);
+                    fogShape.setAttribute('y', `${fogData.y}%`);
+                    fogShape.setAttribute('width', `${fogData.width}%`);
+                    fogShape.setAttribute('height', `${fogData.height}%`);
                     break;
             }
 
-            mapBoard.appendChild(fogElement);
-
-            if (isMasterView) {
-                // Permite ao mestre remover a névoa
-                fogElement.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    showMapContextMenu(e.clientX, e.clientY, fogData.id);
-                });
+            if (fogShape) {
+                fogShape.setAttribute('fill', 'black'); // Áreas a serem removidas da máscara
+                fogShape.dataset.fogId = fogData.id; // Adiciona ID para permitir remoção
+                mask.appendChild(fogShape);
             }
         });
+
+        defs.appendChild(mask);
+        svg.appendChild(defs);
+
+        // Retângulo preto que cobre tudo e é mascarado
+        const fogRect = document.createElementNS(svgNS, 'rect');
+        fogRect.setAttribute('width', '100%');
+        fogRect.setAttribute('height', '100%');
+        fogRect.setAttribute('fill', 'rgba(0,0,0,0.9)');
+        fogRect.setAttribute('mask', 'url(#fog-mask)');
+        svg.appendChild(fogRect);
+
+        mapBoard.appendChild(svg);
+
+        if (isMasterView) {
+            // Adiciona o listener de contexto ao SVG para remover a névoa
+            svg.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                const fogId = e.target.dataset.fogId;
+                if (fogId) {
+                    showMapContextMenu(e.clientX, e.clientY, fogId);
+                }
+            });
+        }
     }
 }
 
@@ -3542,7 +3580,12 @@ function initializeMasterMap(campaign) {
         startY = e.clientY - rect.top;
 
         selectionRect = document.createElement('div');
-        selectionRect.className = 'draw-selection-rect';
+        if (currentDrawShape === 'brush') {
+            const svgNS = "http://www.w3.org/2000/svg";
+            selectionRect = document.createElementNS(svgNS, 'path');
+            selectionRect.setAttribute('d', `M ${startX} ${startY}`);
+        }
+        selectionRect.className = 'draw-selection-rect'; // A classe agora estiliza tanto div quanto path
         mapBoard.appendChild(selectionRect);
         selectionRect.style.left = `${startX}px`;
         selectionRect.style.top = `${startY}px`;
@@ -3551,25 +3594,14 @@ function initializeMasterMap(campaign) {
     mapBoard.addEventListener('mousemove', (e) => {
         if (!isDrawing || !selectionRect) return;
 
-        // Se a ferramenta for o pincel, desenha pequenos quadrados
+        // Se a ferramenta for o pincel, atualiza o caminho do SVG
         if (currentDrawShape === 'brush') {
             const rect = mapBoard.getBoundingClientRect();
-            const brushSize = 10; // Tamanho do "pincel" em pixels
-            const x = e.clientX - rect.left - (brushSize / 2);
-            const y = e.clientY - rect.top - (brushSize / 2);
-
-            const dabData = {
-                id: `fog_${Date.now()}_${Math.random()}`,
-                shape: 'square',
-                x: (x / rect.width) * 100,
-                y: (y / rect.height) * 100,
-                width: (brushSize / rect.width) * 100,
-                height: (brushSize / rect.height) * 100,
-            };
-            if (!campaign.mapData.fog) campaign.mapData.fog = [];
-            campaign.mapData.fog.push(dabData);
-            renderFogOfWar(campaign, mapBoard, true); // Re-renderiza para mostrar o traço
-            return; // Não usa o selectionRect para o pincel
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            // Adiciona o novo ponto ao atributo 'd' do caminho
+            selectionRect.setAttribute('d', selectionRect.getAttribute('d') + ` L ${x} ${y}`);
+            return;
         }
 
         const rect = mapBoard.getBoundingClientRect();
@@ -3633,10 +3665,22 @@ function initializeMasterMap(campaign) {
                     }
                     break;
                 case 'brush':
-                    // Para o pincel, os dados já foram adicionados no mousemove.
-                    // Apenas salvamos a campanha no final.
-                    updateCampaign(campaign);
-                    renderFogOfWar(campaign, mapBoard, true);
+                    // Converte o caminho do SVG em uma lista de pontos percentuais
+                    const pathPoints = selectionRect.getAttribute('d').split(/[ML]/).filter(p => p.trim() !== '').map(p => {
+                        const [x, y] = p.trim().split(' ').map(Number);
+                        return {
+                            x: (x / rect.width) * 100,
+                            y: (y / rect.height) * 100
+                        };
+                    });
+
+                    if (pathPoints.length > 2) { // Precisa de pelo menos 3 pontos para um polígono
+                        fogData = {
+                            id: `fog_${Date.now()}`,
+                            shape: 'polygon',
+                            points: pathPoints
+                        };
+                    }
                     break;
             }
 
