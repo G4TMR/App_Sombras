@@ -3412,7 +3412,7 @@ function initializeMasterMap(campaign) {
             
             if (!campaign.mapData) campaign.mapData = {};
             campaign.mapData.imageUrl = imageUrl;
-            updateCampaign(campaign);
+            updateCampaign(campaign, true); // Salva a campanha com a nova imagem
         }
     });
 
@@ -3570,24 +3570,24 @@ function initializeMasterMap(campaign) {
 
     // Lógica para o botão de Tela Cheia
     const fullscreenBtn = document.getElementById('map-fullscreen-btn');
-    const mapContainer = document.querySelector('.master-map-layout');
+    const mapLayout = document.getElementById('master-map-layout');
+    const enterIcon = document.getElementById('fullscreen-enter-icon');
+    const exitIcon = document.getElementById('fullscreen-exit-icon');
 
-    if (fullscreenBtn && mapContainer) {
+    if (fullscreenBtn && mapLayout && enterIcon && exitIcon) {
         fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                mapContainer.requestFullscreen().catch(err => {
-                    alert(`Erro ao entrar em tela cheia: ${err.message} (${err.name})`);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        });
+            // Alterna uma classe no corpo e no layout do mapa para controlar o modo de tela cheia via CSS
+            const isFullscreen = document.body.classList.toggle('map-fullscreen-active');
+            mapLayout.classList.toggle('fullscreen-mode', isFullscreen);
 
-        document.addEventListener('fullscreenchange', () => {
-            if (document.fullscreenElement) {
-                fullscreenBtn.textContent = 'Sair da Tela Cheia';
+            if (isFullscreen) {
+                enterIcon.style.display = 'none';
+                exitIcon.style.display = 'block';
+                fullscreenBtn.title = 'Sair da Tela Cheia';
             } else {
-                fullscreenBtn.textContent = 'Tela Cheia';
+                enterIcon.style.display = 'block';
+                exitIcon.style.display = 'none';
+                fullscreenBtn.title = 'Tela Cheia';
             }
         });
     }
