@@ -3710,10 +3710,12 @@ function initializeMasterMap(campaign) {
     // Lógica para o cabeçalho expansível de configurações
     const collapsibleHeader = document.querySelector('.map-config-collapsible .collapsible-header');
     if (collapsibleHeader) {
+        console.log('Cabeçalho expansível encontrado. Inicializando...'); // Adiciona este log
         collapsibleHeader.addEventListener('click', () => {
+            console.log('Cabeçalho expansível clicado.'); // Adiciona este log
             collapsibleHeader.classList.toggle('active');
             const content = collapsibleHeader.nextElementSibling;
-            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+            content.style.display = content.style.display === 'none' ? 'block' : 'none';
         });
     }
 
