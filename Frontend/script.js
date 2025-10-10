@@ -4299,7 +4299,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Mostra o indicador de loading imediatamente
         myCampaignsLoading.style.display = 'flex';
-        myCampaignsGrid.style.display = 'none';
         emptyMyCampaigns.style.display = 'none';
 
         let campaignsData = [];
