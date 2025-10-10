@@ -1923,6 +1923,7 @@ class CharacterSheet {
         if (this.character) {
             this.setupEventListeners();
             this.renderSkillTree();
+            this.setupImageUpload(); // Adiciona o listener para upload de imagem
             this.checkSpecialization(); // Verifica se a escolha de especialização deve ser mostrada
             this.renderProficiencies();
             this.checkLevelUp();
@@ -2379,6 +2380,29 @@ class CharacterSheet {
 
         document.getElementById('level-up-btn').addEventListener('click', () => {
             this.levelUp();
+        });
+    }
+    setupImageUpload() {
+        const imageContainer = document.querySelector('.sheet-header-image-container');
+        const imageInput = document.getElementById('sheet-image-input');
+        const charImage = document.getElementById('sheet-char-image');
+
+        if (!imageContainer || !imageInput || !charImage) return;
+
+        imageContainer.addEventListener('click', () => {
+            imageInput.click(); // Abre o seletor de arquivos ao clicar na imagem
+        });
+
+        imageInput.addEventListener('change', async () => {
+            const file = imageInput.files[0];
+            if (file) {
+                const imageUrl = await readFileAsDataURL(file);
+                this.character.personalization.imageUrl = imageUrl;
+                charImage.src = imageUrl; // Atualiza a imagem na tela imediatamente
+                
+                // Salva a alteração no backend ou localStorage
+                await this.saveCharacterChanges();
+            }
         });
     }
 

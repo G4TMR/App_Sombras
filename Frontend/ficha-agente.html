@@ -17,7 +17,11 @@
         <!-- Cabeçalho da Ficha -->
         <header class="sheet-header">
             <div class="sheet-header-main-info">
-                <img id="sheet-char-image" src="https://via.placeholder.com/150" alt="Retrato do Agente" class="sheet-header-image">
+                <div class="sheet-header-image-container">
+                    <img id="sheet-char-image" src="https://via.placeholder.com/150" alt="Retrato do Agente" class="sheet-header-image">
+                    <input type="file" id="sheet-image-input" accept="image/*" style="display: none;">
+                    <div class="sheet-image-overlay"><span>Alterar</span></div>
+                </div>
                 <div class="sheet-header-text">
                     <h2 id="sheet-char-name">Nome do Agente</h2>
                     <p id="sheet-char-element" class="sheet-element-tag"></p>
