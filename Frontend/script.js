@@ -3435,44 +3435,6 @@ function initializeMasterMap(campaign) {
     let startX, startY;
     let selectionRect = null;
 
-    // Garante que a estrutura de dados exista
-    if (!campaign.mapData) campaign.mapData = {};
-
-    // Renderiza a névoa de guerra
-    renderFogOfWar(campaign, mapBoard, true);
-    
-    function renderMapState() {
-        if (campaign.mapData?.imageUrl) {
-            mapBoard.style.backgroundImage = `url('${campaign.mapData.imageUrl}')`;
-            mapBoard.style.backgroundSize = 'contain';
-            mapBoard.style.backgroundPosition = 'center';
-            mapBoard.style.backgroundRepeat = 'no-repeat';
-            if (mapPlaceholder) mapPlaceholder.style.display = 'none';
-        } else {
-            mapBoard.style.backgroundImage = 'none';
-            // Não precisa resetar os outros estilos, o backgroundImage 'none' já resolve.
-            if (mapPlaceholder) mapPlaceholder.style.display = 'flex';
-        }
-        mapBoard.querySelectorAll('.map-token').forEach(t => t.remove());
-        if (campaign.mapData?.tokens) {
-            campaign.mapData.tokens.forEach(tokenData => createTokenOnBoard(tokenData, mapBoard, campaign, true));
-        }
-        renderFogOfWar(campaign, mapBoard, true);
-    }
-
-    // Lógica de upload do mapa
-    uploadInput.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const imageUrl = await readFileAsDataURL(file);
-            mapBoard.style.backgroundImage = `url('${imageUrl}')`;
-            
-            if (!campaign.mapData) campaign.mapData = {};
-            campaign.mapData.imageUrl = imageUrl;
-            updateCampaign(campaign, true); // Salva a campanha com a nova imagem
-        }
-    });
-
     function populateTokenList() {
         // Popula a lista de tokens arrastáveis
         tokenList.innerHTML = '';
@@ -3759,6 +3721,22 @@ function initializeMasterView(campaign) {
     const generateCodeBtn = document.getElementById('generate-invite-code-btn');
     const imageModalPreview = document.getElementById('campaign-image-modal-preview');
 
+    // Lógica de upload do mapa (MOVIDO PARA CÁ)
+    // Garante que o upload funcione mesmo fora do modo tela cheia.
+    const mapBoard = document.getElementById('map-board');
+    const uploadInput = document.getElementById('map-upload-input');
+    if (uploadInput && mapBoard) {
+        uploadInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const imageUrl = await readFileAsDataURL(file);
+                if (!campaign.mapData) campaign.mapData = {};
+                campaign.mapData.imageUrl = imageUrl;
+                await updateCampaign(campaign, true); // Salva a campanha com a nova imagem
+                renderMapState(); // Re-renderiza o mapa para mostrar a nova imagem
+            }
+        });
+    }
     // Migração de dados para campanhas antigas
     let needsSave = false;
     if (!campaign.players) { campaign.players = []; needsSave = true; }
@@ -4315,13 +4293,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // Lógica de exibição de campanhas refatorada para garantir a ordem
+        const myCampaignsLoading = document.getElementById('my-campaigns-loading');
+        const myCampaignsGrid = document.getElementById('my-campaigns-grid');
+        const emptyMyCampaigns = document.getElementById('empty-my-campaigns');
+
+        // Mostra o indicador de loading imediatamente
+        myCampaignsLoading.style.display = 'flex';
+        myCampaignsGrid.style.display = 'none';
+        emptyMyCampaigns.style.display = 'none';
+
         let campaignsData = [];
         const userId = user ? user._id : 'local_user_id';
 
         if (user) {
             try {
                 // Adiciona um parâmetro de cache-busting para garantir dados novos
-                const response = await api.get(`/api/campaigns?t=${new Date().getTime()}`); // Linha duplicada removida
+                const response = await api.get(`/api/campaigns?t=${new Date().getTime()}`);
                 campaignsData = response.data;
             } catch (error) {
                 console.error("Falha ao buscar campanhas da API:", error);
@@ -4329,6 +4316,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             campaignsData = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
         }
+
+        // Esconde o loading e exibe os dados (ou a mensagem de vazio)
+        myCampaignsLoading.style.display = 'none';
         displayCampaigns(campaignsData, userId);
     }
     if (path.includes('gerenciar-campanha.html')) {

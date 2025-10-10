@@ -3175,6 +3175,35 @@ body.dev-mode #dev-mode-form { display: none; }
     transform: translateX(-5px);
 }
 
+/* --- ESTADO DE CARREGAMENTO (LOADING) --- */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    color: var(--color-text-secondary);
+}
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid var(--color-surface-2);
+    border-bottom-color: var(--page-color, var(--color-primary));
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    margin-bottom: 1.5rem;
+}
+
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
 /* =================================================================
    REGRAS DE RESPONSIVIDADE PARA DISPOSITIVOS MÓVEIS
    Adicione este bloco ao FINAL do seu arquivo style.css
