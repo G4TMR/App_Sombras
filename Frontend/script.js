@@ -3707,18 +3707,6 @@ function initializeMasterMap(campaign) {
         }
     });
 
-    // Lógica para o cabeçalho expansível de configurações
-    const collapsibleHeader = document.querySelector('.map-config-collapsible .collapsible-header');
-    if (collapsibleHeader) {
-        console.log('Cabeçalho expansível encontrado. Inicializando...'); // Adiciona este log
-        collapsibleHeader.addEventListener('click', () => {
-            console.log('Cabeçalho expansível clicado.'); // Adiciona este log
-            collapsibleHeader.classList.toggle('active');
-            const content = collapsibleHeader.nextElementSibling;
-            content.style.display = content.style.display === 'none' ? 'block' : 'none';
-        });
-    }
-
     // Lógica para o botão de Tela Cheia
     const fullscreenBtn = document.getElementById('map-fullscreen-btn');
     const mapWrapper = document.querySelector('.map-layout-wrapper'); // Pega o novo contêiner
@@ -3888,6 +3876,18 @@ function initializeMasterView(campaign) {
 
         // Inicia o listener para o log de rolagens
         initializeCampaignLogListener(campaign.id);
+
+        // Lógica para o cabeçalho expansível de configurações do mapa (MOVIDO PARA CÁ)
+        // Isso garante que ele funcione tanto na visão normal quanto em tela cheia.
+        const collapsibleHeader = document.querySelector('.map-config-collapsible .collapsible-header');
+        if (collapsibleHeader) {
+            collapsibleHeader.addEventListener('click', () => {
+                collapsibleHeader.classList.toggle('active');
+                const content = collapsibleHeader.nextElementSibling;
+                // Alterna a visibilidade do conteúdo
+                content.style.display = content.style.display === 'block' ? 'none' : 'block';
+            });
+        }
 
     // Renderiza o estado inicial do mapa (imagem de fundo, etc.)
     renderMapState();
