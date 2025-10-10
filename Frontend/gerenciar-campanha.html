@@ -79,6 +79,11 @@
                                         <p>Nenhum mapa carregado.</p>
                                         <p>Use os controles para carregar uma imagem de fundo.</p>
                                     </div>
+                                    <!-- Botão de Tela Cheia movido para dentro do tabuleiro do mapa -->
+                                    <button id="map-fullscreen-btn" class="map-fullscreen-button" title="Tela Cheia">
+                                        <svg id="fullscreen-enter-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 2h-2v3h-3v2h5v-5zm-3-4V5h3v2h-3z"/></svg>
+                                        <svg id="fullscreen-exit-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
+                                    </button>
                                 </div>
                                 <div class="map-controls-panel">
                                     <h4>Controles do Mapa</h4>
@@ -109,11 +114,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Botão de Tela Cheia fora do layout principal do mapa -->
-                        <button id="map-fullscreen-btn" class="map-fullscreen-button" title="Tela Cheia">
-                            <svg id="fullscreen-enter-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 2h-2v3h-3v2h5v-5zm-3-4V5h3v2h-3z"/></svg>
-                            <svg id="fullscreen-exit-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
-                        </button>
 
                         <!-- Menu de Contexto Customizado para o Mapa (movido para dentro da aba) -->
                         <div id="map-context-menu" class="context-menu">

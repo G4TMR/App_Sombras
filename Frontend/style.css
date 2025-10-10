@@ -3455,7 +3455,7 @@ body.dev-mode #dev-mode-form { display: none; }
     align-items: center;
     padding: 0;
     transition: background-color 0.3s;
-    z-index: 100; /* Garante que fique sobre o mapa */
+    z-index: 1500; /* Garante que fique sobre o mapa e a névoa */
 }
 
 .map-fullscreen-button:hover {

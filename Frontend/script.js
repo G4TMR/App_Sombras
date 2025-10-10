@@ -3887,6 +3887,9 @@ function initializeMasterView(campaign) {
         // Inicia o listener para o log de rolagens
         initializeCampaignLogListener(campaign.id);
 
+    // Renderiza o estado inicial do mapa (imagem de fundo, etc.)
+    renderMapState();
+
         // Inicializa o mapa do mestre (MOVENDO PARA O FINAL PARA GARANTIR QUE TUDO ESTEJA PRONTO)
         initializeMasterMap(campaign);
     }
