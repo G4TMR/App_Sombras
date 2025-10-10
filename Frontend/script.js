@@ -1904,6 +1904,10 @@ class CharacterSheet {
         this.characterId = characterId; // Armazena o ID passado
         this.container = container; // Onde a ficha será renderizada (página ou modal)
     }
+    // Adiciona um método debounced para salvar
+    saveDebounced = debounce(() => {
+        this.saveCharacterChanges();
+    }, 300);
 
     async initialize() {
         await this.loadCharacter();
@@ -2240,7 +2244,7 @@ class CharacterSheet {
                     if (currentValue > maxValue) currentValue = maxValue;
 
                     this.character.status[stat] = currentValue;
-                    this.saveCharacterChanges();
+                    this.saveDebounced();
                     this.updateBar(statType, currentValue, maxValue);
                 }
             }
@@ -2257,7 +2261,7 @@ class CharacterSheet {
                         this.character.attributePoints--;
                         this.character.attributes[attrName]++;
                         this.recalculateDerivedStats();
-                        this.saveCharacterChanges();
+                        this.saveDebounced();
                         this.renderSheet();
                     } else {
                         alert('Você não tem Pontos de Atributo para gastar.');
@@ -2308,7 +2312,7 @@ class CharacterSheet {
                     if (this.character.skillPoints < 0) this.character.skillPoints = 0;
 
                     document.getElementById('sheet-attribute-points').textContent = this.character.attributePoints;
-                    document.getElementById('sheet-skill-points').textContent = this.character.skillPoints;
+                    document.getElementById('sheet-skill-points').textContent = this.character.skillPoints; // Corrigido para atualizar o valor correto
 
                     document.getElementById('sheet-nf').textContent = this.character.nf;
                     this.saveCharacterChanges();
@@ -2336,7 +2340,7 @@ class CharacterSheet {
 
         const notesTextarea = document.getElementById('sheet-notes');
         if (notesTextarea) notesTextarea.addEventListener('blur', (e) => {
-            this.character.notes = e.target.value;
+            this.updatePersonalization('notes', e.target.value);
             this.saveCharacterChanges();
         });
 
@@ -2348,7 +2352,7 @@ class CharacterSheet {
             if (newItem) {
                 if (!this.character.inventario) this.character.inventario = [];
                 this.character.inventario.push(newItem);
-                this.saveCharacterChanges();
+                this.saveDebounced();
                 this.renderSheet();
                 input.value = '';
             }
@@ -2358,7 +2362,7 @@ class CharacterSheet {
             if (e.target.classList.contains('delete-item-btn')) {
                 const index = e.target.closest('li').dataset.index;
                 this.character.inventario.splice(index, 1);
-                this.saveCharacterChanges();
+                this.saveDebounced();
                 this.renderSheet();
             }
         });
@@ -2367,7 +2371,7 @@ class CharacterSheet {
             if (e.target.classList.contains('inventory-item-name')) {
                 const index = e.target.closest('li').dataset.index;
                 this.character.inventario[index] = e.target.textContent;
-                this.saveCharacterChanges();
+                this.saveDebounced();
             }
         }, true);
 
@@ -2401,7 +2405,7 @@ class CharacterSheet {
                 charImage.src = imageUrl; // Atualiza a imagem na tela imediatamente
                 
                 // Salva a alteração no backend ou localStorage
-                await this.saveCharacterChanges();
+                this.saveDebounced();
             }
         });
     }
@@ -2409,7 +2413,7 @@ class CharacterSheet {
     addXp(amount) {
         this.character.xp += amount;
         this.checkLevelUp();
-        this.saveCharacterChanges();
+        this.saveDebounced();
         this.renderSheet();
     }
 
@@ -2429,7 +2433,7 @@ class CharacterSheet {
             this.character.skillPoints += 1;
             document.getElementById('level-up-btn').style.display = 'none';
 
-            this.saveCharacterChanges();
+            this.saveDebounced();
             this.renderSheet();
         }
     }
@@ -2509,7 +2513,7 @@ class CharacterSheet {
         this.character.skillPoints--;
         this.character.specialization = specName;
         document.getElementById('specialization-choice-overlay').classList.remove('visible', 'sticky-modal');
-        this.saveCharacterChanges();
+        this.saveDebounced();
         this.renderSheet();
         this.renderSkillTree();
     }
@@ -2558,7 +2562,7 @@ class CharacterSheet {
     updatePersonalization(key, value) {
         if (!this.character.personalization) this.character.personalization = {};
         this.character.personalization[key] = value;
-        this.saveCharacterChanges();
+        this.saveDebounced();
     }
 
     updateStatus(key, value) {
@@ -2571,7 +2575,7 @@ class CharacterSheet {
             this.character.status[currentKey] = newMaxValue;
         }
         this.renderSheet();
-        this.saveCharacterChanges();
+        this.saveDebounced();
     }
 
     // Função para buscar uma habilidade pelo ID em toda a árvore
@@ -2691,7 +2695,7 @@ class CharacterSheet {
         if (this.character.skillPoints > 0) {
             this.character.skillPoints--;
             this.character.skills.push(skillId);
-            this.saveCharacterChanges();
+            this.saveDebounced();
             this.renderSkillTree();
             this.renderSheet();
         } else {
@@ -2724,23 +2728,33 @@ class CharacterSheet {
     }
 
     async saveCharacterChanges() {
+        const indicator = document.getElementById('sheet-save-indicator');
+        if (indicator) indicator.style.opacity = '1';
+
         const params = new URLSearchParams(window.location.search);
         if (params.get('mode') === 'local') {
             let localCharacters = JSON.parse(localStorage.getItem('sombras-local-characters')) || [];
             const charIndex = localCharacters.findIndex(c => c.id === this.character.id);
             if (charIndex > -1) localCharacters[charIndex] = this.character;
             localStorage.setItem('sombras-local-characters', JSON.stringify(localCharacters));
+            console.log('Ficha salva localmente!');
+            if (indicator) setTimeout(() => indicator.style.opacity = '0', 500);
             return;
         }
         // Usando Axios para atualizar o personagem (PUT request)
         try {
-            await api.put(`/characters/${this.character.id}`, this.character);
+            // Garante que estamos usando o _id do MongoDB para a requisição, se disponível
+            const idToUpdate = this.character._id || this.character.id;
+            await api.put(`/api/characters/${idToUpdate}`, this.character);
             console.log('Ficha salva no backend!');
         } catch (err) {
             console.error("Erro ao salvar ficha no backend:", err);
             if (err.response && err.response.status === 401) {
                 alert('Sua sessão expirou. Por favor, faça login novamente para salvar.');
             }
+        } finally {
+            // Esconde o indicador após a tentativa de salvar
+            if (indicator) setTimeout(() => indicator.style.opacity = '0', 500);
         }
     }
 }

@@ -1425,6 +1425,21 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     text-shadow: 0 0 8px var(--element-shadow-color, rgba(168, 85, 247, 0.4));
 }
 
+.sheet-header-main-info {
+    position: relative; /* Necessário para o posicionamento do indicador de salvamento */
+}
+
+.sheet-save-indicator {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 0.8rem;
+    font-style: italic;
+    color: var(--color-accent-rare);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
 .sheet-header-image-container {
     position: relative;
     cursor: pointer;
