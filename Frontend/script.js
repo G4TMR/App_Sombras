@@ -3664,7 +3664,7 @@ function initializeMasterMap(campaign) {
         if (confirm('Tem certeza que deseja limpar o mapa (remover imagem de fundo, tokens e névoa)?')) {
             campaign.mapData = { imageUrl: null, tokens: [], fog: [] };
             updateCampaign(campaign, true);
-            renderMapState();
+            renderMapState(campaign);
             populateTokenList(); // Repopula a lista de tokens caso algo tenha mudado
         }
     });
@@ -3698,7 +3698,7 @@ function initializeMasterMap(campaign) {
         // Esta função pode ser expandida com mais lógica de drag and drop se necessário
     }
 
-    renderMapState(); // Renderiza o estado inicial do mapa
+    renderMapState(campaign); // Renderiza o estado inicial do mapa
     populateTokenList(); // Popula a lista de tokens
 }
 
@@ -3733,7 +3733,7 @@ function initializeMasterView(campaign) {
                 if (!campaign.mapData) campaign.mapData = {};
                 campaign.mapData.imageUrl = imageUrl;
                 await updateCampaign(campaign, true); // Salva a campanha com a nova imagem
-                renderMapState(); // Re-renderiza o mapa para mostrar a nova imagem
+                renderMapState(campaign); // Re-renderiza o mapa para mostrar a nova imagem
             }
         });
     }
@@ -3868,11 +3868,33 @@ function initializeMasterView(campaign) {
         }
 
     // Renderiza o estado inicial do mapa (imagem de fundo, etc.)
-    renderMapState();
+    renderMapState(campaign);
 
         // Inicializa o mapa do mestre (MOVENDO PARA O FINAL PARA GARANTIR QUE TUDO ESTEJA PRONTO)
         initializeMasterMap(campaign);
     }
+}
+
+/**
+ * Renderiza o estado atual do mapa, incluindo imagem de fundo, tokens e névoa.
+ * @param {object} campaign - O objeto da campanha.
+ */
+function renderMapState(campaign) {
+    const mapBoard = document.getElementById('map-board');
+    const mapPlaceholder = document.getElementById('map-upload-placeholder');
+
+    if (!mapBoard || !mapPlaceholder) return;
+
+    // Renderiza a imagem de fundo
+    if (campaign.mapData?.imageUrl) {
+        mapBoard.style.backgroundImage = `url('${campaign.mapData.imageUrl}')`;
+        mapPlaceholder.style.display = 'none';
+    } else {
+        mapBoard.style.backgroundImage = 'none';
+        mapPlaceholder.style.display = 'flex';
+    }
+
+    // Futuramente, as chamadas para renderizar tokens e névoa virão aqui.
 }
 
 /**
