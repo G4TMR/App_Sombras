@@ -2979,11 +2979,11 @@ function getObjectIdAsString(idField) {
  * Salva uma nova campanha no localStorage e redireciona para a página de campanhas.
  * @param {object} campaignData - O objeto da campanha a ser salvo.
  */
-async function saveCampaign(campaignData) {
+async function saveCampaign(campaignData, formElement) {
     try {
         const user = await checkAuthStatus();
         if (!user) {
-            alert('Você precisa estar logado para criar uma campanha.');
+            alert('Você precisa estar logado para criar uma campanha. Redirecionando...');
             window.location.href = `${API_BASE_URL}/auth/google`;
             return;
         }
@@ -2991,7 +2991,7 @@ async function saveCampaign(campaignData) {
         await api.post('/api/campaigns', { ...campaignData, inviteCode: generateUniqueInviteCode() });
         window.location.href = 'campanhas.html';
     } catch (error) {
-        console.error("Erro ao salvar campanha:", error);
+        console.error("Erro ao salvar campanha:", error.response?.data || error);
         alert("Ocorreu um erro ao salvar a campanha. Verifique o console para mais detalhes.");
     }
 }
@@ -3000,7 +3000,7 @@ async function saveCampaign(campaignData) {
  * Exibe as campanhas salvas na página de campanhas.
  */
 function displayCampaigns(allCampaigns, userId) {
-    const myCampaignsGrid = document.getElementById('my-campaigns-grid');
+    const myCampaignsGrid = document.getElementById('my-campaigns-grid'); // Corrigido
     const joinedCampaignsSection = document.getElementById('joined-campaigns-section');
     const emptyMyCampaigns = document.getElementById('empty-my-campaigns');
     const joinedCampaignsGrid = document.getElementById('joined-campaigns-grid');
@@ -3015,7 +3015,7 @@ function displayCampaigns(allCampaigns, userId) {
     const ownedCampaigns = allCampaigns.filter(c => getObjectIdAsString(c.ownerId) === userId);
 
     // 2. Filtra as campanhas onde o usuário é um jogador, mas NÃO o dono.
-    const joinedCampaigns = allCampaigns.filter(c => 
+    const joinedCampaigns = allCampaigns.filter(c =>
         getObjectIdAsString(c.ownerId) !== userId && c.players?.some(p => getObjectIdAsString(p) === userId)
     );
 
@@ -4388,7 +4388,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const myCampaignsLoading = document.getElementById('my-campaigns-loading');
         const emptyMyCampaigns = document.getElementById('empty-my-campaigns');
 
-        myCampaignsLoading.style.display = 'flex';
+        if (myCampaignsLoading) myCampaignsLoading.style.display = 'flex';
         emptyMyCampaigns.style.display = 'none';
 
         let campaignsData = [];
@@ -4403,8 +4403,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        myCampaignsLoading.style.display = 'none';
-        displayCampaigns(campaignsData, userId);
+        if (myCampaignsLoading) myCampaignsLoading.style.display = 'none';
+        displayCampaigns(campaignsData, currentUserId); // CORREÇÃO: Usa a variável global `currentUserId`
     }
     if (path.includes('gerenciar-campanha.html') && user) {
         initializeCampaignManagement();
