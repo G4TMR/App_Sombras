@@ -2671,6 +2671,18 @@ body.map-fullscreen-active .notification-sidebar {
     cursor: context-menu;
 }
 
+.context-menu-option {
+    padding: 0.8rem 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.context-menu-option:hover {
+    background-color: var(--color-primary);
+    color: var(--color-text-primary);
+}
+
+
 .draw-selection-rect {
     position: absolute;
     border: 2px dashed var(--color-primary);

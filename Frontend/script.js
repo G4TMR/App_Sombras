@@ -2871,7 +2871,14 @@ async function getCampaignById(campaignId) {
  * @param {object} updatedCampaign - O objeto da campanha com os dados atualizados.
  */
 async function updateCampaign(updatedCampaign, showIndicator = false) {
-    // Usa o _id se disponível, senão o id customizado. O backend agora lida com ambos.
+    // Função interna para transmitir a atualização via socket
+    function broadcastUpdate(socket, campaignData) {
+        if (socket && socket.connected) {
+            socket.emit('map-update', { campaignId: campaignData._id || campaignData.id, updatedCampaignData: campaignData });
+        }
+    }
+
+    const socket = window.socketInstance; // Pega a instância global do socket
     const campaignIdForApi = updatedCampaign._id || updatedCampaign.id;
     if (!campaignIdForApi) {
         console.error("ID da campanha não encontrado para atualização.");
@@ -2891,6 +2898,7 @@ async function updateCampaign(updatedCampaign, showIndicator = false) {
     try {
         // Usa o ID correto na URL da requisição PUT.
         await api.put(`/api/campaigns/${campaignIdForApi}`, updatedCampaign);
+        broadcastUpdate(socket, updatedCampaign); // Transmite a atualização após salvar
     } catch (error) {
         console.error("Erro ao atualizar campanha:", error);
         alert("Ocorreu um erro ao atualizar a campanha.");
@@ -3115,6 +3123,8 @@ async function initializeCampaignManagement() {
     const campaignId = params.get('id');
     const viewMode = params.get('view'); // Novo: Captura o modo de visualização
 
+    let socket; // Variável para o socket
+
     if (!campaignId) {
         alert('ID da campanha não encontrado.');
         window.location.href = 'campanhas.html';
@@ -3130,7 +3140,7 @@ async function initializeCampaignManagement() {
     }
     const userId = user._id;
 
-    const campaign = await getCampaignById(campaignId);
+    let campaign = await getCampaignById(campaignId);
     if (!campaign) {
         alert('Campanha não encontrada ou você não tem permissão para acessá-la.');
         window.location.href = 'campanhas.html';
@@ -3140,15 +3150,34 @@ async function initializeCampaignManagement() {
     const isOwner = getObjectIdAsString(campaign.ownerId) === userId;
     const isPlayer = campaign.players && campaign.players.some(p => getObjectIdAsString(p) === userId);
 
+    // Conectar ao Socket.IO e entrar na sala da campanha
+    socket = io(API_BASE_URL);
+    socket.on('connect', () => {
+        console.log('Conectado ao servidor de sockets!', socket.id);
+        socket.emit('join-campaign-room', campaign._id || campaign.id);
+    });
+
+    // Ouvir por atualizações do mapa
+    socket.on('map-updated', (updatedCampaignData) => {
+        console.log('Recebida atualização do mapa via socket.');
+        campaign = updatedCampaignData; // Atualiza o objeto da campanha local
+        // Re-renderiza a visão apropriada
+        if (isOwner && viewMode !== 'player') {
+            initializeMasterView(campaign, socket);
+        } else if (isPlayer) {
+            initializePlayerView(campaign, socket);
+        }
+    });
+
     // Verifica se o usuário é o dono da campanha ou um jogador
     if (isOwner && viewMode !== 'player') {
         // O usuário é o mestre, mostra a visão de gerenciamento
         document.getElementById('campaign-management-container').style.display = 'block';
-        initializeMasterView(campaign);
+        initializeMasterView(campaign, socket);
     } else if (isPlayer) {
         // O usuário é um jogador e quer a visão de jogador
         document.getElementById('player-view-container').style.display = 'block';
-        initializePlayerView(campaign);
+        initializePlayerView(campaign, socket);
     } else {
         // O usuário não é nem o mestre nem um jogador
         alert('Você não tem permissão para acessar esta campanha.');
@@ -3365,12 +3394,13 @@ function hideMapContextMenu() {
  * @param {object} campaign - O objeto da campanha.
  */
 function initializeMasterMap(campaign) {
+    window.socketInstance = socket; // Torna o socket acessível globalmente
     const mapBoard = document.getElementById('map-board');
     const mapPlaceholder = document.getElementById('map-upload-placeholder');
     mapBoard.classList.add('master-view'); // Adiciona classe para estilização
     const uploadInput = document.getElementById('map-upload-input');
     const tokenList = document.getElementById('map-character-tokens');
-    const contextMenu = document.getElementById('map-context-menu');
+    const tokenContextMenu = document.getElementById('token-context-menu');
     const removeFogBtn = document.getElementById('remove-fog-area');
 
     let currentDrawShape = 'square'; // 'square', 'circle', 'brush'
@@ -3411,25 +3441,27 @@ function initializeMasterMap(campaign) {
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
 
+            const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
             const tokenData = {
                 id: `token_${charId}`,
                 characterId: charId,
                 imageUrl: character.personalization.imageUrl || 'https://via.placeholder.com/50',
                 x: (x / rect.width) * 100, // Salva como porcentagem
                 y: (y / rect.height) * 100,
+                locked: false,
             };
 
             if (!campaign.mapData) campaign.mapData = { tokens: [] };
             if (!campaign.mapData.tokens) campaign.mapData.tokens = [];
 
             // Remove token antigo se já existir
-            campaign.mapData.tokens = campaign.mapData.tokens.filter(t => t.characterId !== charId);
-            campaign.mapData.tokens.push(tokenData);
+            currentBoard.tokens = currentBoard.tokens.filter(t => t.characterId !== charId);
+            currentBoard.tokens.push(tokenData);
             
             updateCampaign(campaign);
             // Limpa e recria todos os tokens para evitar duplicatas
             mapBoard.querySelectorAll('.map-token').forEach(t => t.remove());
-            campaign.mapData.tokens.forEach(td => createTokenOnBoard(td, mapBoard, campaign));
+            currentBoard.tokens.forEach(td => createTokenOnBoard(td, mapBoard, campaign));
         }
     });
 
@@ -3439,14 +3471,14 @@ function initializeMasterMap(campaign) {
         const fogIdToRemove = e.target.dataset.fogId;
         if (fogIdToRemove) {
             campaign.mapData.fog = campaign.mapData.fog.filter(f => f.id !== fogIdToRemove);
-            updateCampaign(campaign);
+            updateCampaign(campaign, false);
             renderFogOfWar(campaign, mapBoard, true);
         }
         hideMapContextMenu();
     });
 
     // Lógica para o novo botão de modo de desenho
-    const toggleDrawModeBtn = document.getElementById('toggle-draw-mode-btn');
+    const toggleDrawModeBtn = document.getElementById('toggle-draw-mode-btn'); // Corrigido
     const drawToolsPanel = document.getElementById('draw-tools-panel');
     const drawToolBtns = document.querySelectorAll('.draw-tool-btn');
 
@@ -3611,7 +3643,7 @@ function initializeMasterMap(campaign) {
     resetMapBtn.addEventListener('click', () => {
         if (confirm('Tem certeza que deseja limpar o mapa (remover imagem de fundo, tokens e névoa)?')) {
             campaign.mapData = { imageUrl: null, tokens: [], fog: [] };
-            updateCampaign(campaign, true);
+            updateCampaign(campaign);
             renderMapState(campaign);
             populateTokenList(); // Repopula a lista de tokens caso algo tenha mudado
         }
@@ -3646,7 +3678,7 @@ function initializeMasterMap(campaign) {
         // Esta função pode ser expandida com mais lógica de drag and drop se necessário
     }
 
-    renderMapState(campaign); // Renderiza o estado inicial do mapa
+    renderMapState(campaign, true, campaign.currentBoardIndex || 0); // Renderiza o estado inicial do mapa para o mestre
     populateTokenList(); // Popula a lista de tokens
 }
 
@@ -3654,7 +3686,8 @@ function initializeMasterMap(campaign) {
  * Inicializa a visualização do Mestre para gerenciar a campanha.
  * @param {object} campaign - O objeto da campanha.
  */
-function initializeMasterView(campaign) {
+function initializeMasterView(campaign, socket) {
+    window.socketInstance = socket; // Torna o socket acessível globalmente nesta página
     // Elementos de exibição
     const titleDisplay = document.getElementById('campaign-title-display');
     const synopsisDisplay = document.getElementById('campaign-synopsis-display');
@@ -3676,12 +3709,13 @@ function initializeMasterView(campaign) {
     if (uploadInput && mapBoard) {
         uploadInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
+            const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
             if (file) {
                 const imageUrl = await readFileAsDataURL(file);
-                if (!campaign.mapData) campaign.mapData = {};
-                campaign.mapData.imageUrl = imageUrl;
+                if (!currentBoard) return;
+                currentBoard.imageUrl = imageUrl;
                 await updateCampaign(campaign, true); // Salva a campanha com a nova imagem
-                renderMapState(campaign); // Re-renderiza o mapa para mostrar a nova imagem
+                renderMapState(campaign, true, campaign.currentBoardIndex); // Re-renderiza o mapa para mostrar a nova imagem
             }
         });
     }
@@ -3689,6 +3723,13 @@ function initializeMasterView(campaign) {
     let needsSave = false;
     if (!campaign.players) { campaign.players = []; needsSave = true; }
     if (!campaign.inviteCode) { campaign.inviteCode = generateUniqueInviteCode(); needsSave = true; }
+    // Migração para múltiplos quadros de mapa
+    if (!campaign.mapBoards || !Array.isArray(campaign.mapBoards) || campaign.mapBoards.length === 0) {
+        campaign.mapBoards = [{ id: `board_${Date.now()}`, name: 'Quadro Principal', imageUrl: campaign.mapData?.imageUrl || null, tokens: campaign.mapData?.tokens || [], fog: campaign.mapData?.fog || [] }];
+        campaign.currentBoardIndex = 0;
+        delete campaign.mapData; // Remove a estrutura antiga
+        needsSave = true;
+    }
     if (needsSave) {
         console.log("Migrando campanha antiga. Adicionando campos faltantes.");
         updateCampaign(campaign); // Salva a campanha com os novos campos
@@ -3789,6 +3830,12 @@ function initializeMasterView(campaign) {
         tabLinks.forEach(link => {
             link.addEventListener('click', () => {
                 const tabId = link.dataset.tab;
+
+                // Se a aba do mapa for clicada, força a re-renderização do estado do mapa
+                if (tabId === 'mapa') {
+                    renderMapState(campaign, true, campaign.currentBoardIndex || 0);
+                }
+
                 tabLinks.forEach(l => l.classList.remove('active'));
                 link.classList.add('active');
                 tabContents.forEach(c => c.id === tabId ? c.classList.add('active') : c.classList.remove('active'));
@@ -3801,7 +3848,7 @@ function initializeMasterView(campaign) {
         });
 
         // Inicia o listener para o log de rolagens
-        initializeCampaignLogListener(campaign.id);
+        initializeCampaignLogListener(campaign._id || campaign.id);
 
         // Lógica para o cabeçalho expansível de configurações do mapa (MOVIDO PARA CÁ)
         // Isso garante que ele funcione tanto na visão normal quanto em tela cheia.
@@ -3816,47 +3863,48 @@ function initializeMasterView(campaign) {
         }
 
     // Renderiza o estado inicial do mapa (imagem de fundo, etc.)
-    renderMapState(campaign);
+    renderMapState(campaign, true, campaign.currentBoardIndex || 0);
 
         // Inicializa o mapa do mestre (MOVENDO PARA O FINAL PARA GARANTIR QUE TUDO ESTEJA PRONTO)
         initializeMasterMap(campaign);
     }
+    renderMapBoardsList(campaign); // Renderiza a lista de quadros
 }
 
 /**
  * Renderiza o estado atual do mapa, incluindo imagem de fundo, tokens e névoa.
  * @param {object} campaign - O objeto da campanha.
+ * @param {boolean} isMasterView - Indica se a renderização é para a visão do mestre.
  */
-function renderMapState(campaign) {
-    // Usa o ID correto dependendo da visão (mestre ou jogador)
-    const isMasterView = document.body.classList.contains('master-view');
+function renderMapState(campaign, isMasterView, currentBoardIndex = 0) {
     const mapBoardId = isMasterView ? 'map-board' : 'player-map-board';
     const mapBoard = document.getElementById(mapBoardId);
     const mapPlaceholder = document.getElementById('map-upload-placeholder');
 
+    const currentBoard = campaign.mapBoards?.[currentBoardIndex] || { tokens: [], fog: [] };
     if (!mapBoard || !mapPlaceholder) return;
 
     // Limpa os tokens antigos antes de renderizar os novos
     mapBoard.querySelectorAll('.map-token').forEach(token => token.remove());
 
     // Renderiza os tokens
-    if (campaign.mapData?.tokens) {
-        campaign.mapData.tokens.forEach(tokenData => {
+    if (currentBoard.tokens) {
+        currentBoard.tokens.forEach(tokenData => {
             createTokenOnBoard(tokenData, mapBoard, campaign, isMasterView);
         });
     }
 
     // Renderiza a imagem de fundo
-    if (campaign.mapData?.imageUrl) {
-        mapBoard.style.backgroundImage = `url('${campaign.mapData.imageUrl}')`;
+    if (currentBoard.imageUrl) {
+        mapBoard.style.backgroundImage = `url('${currentBoard.imageUrl}')`;
         mapPlaceholder.style.display = 'none';
     } else {
         mapBoard.style.backgroundImage = 'none';
         mapPlaceholder.style.display = 'flex';
     }
 
-    // Renderiza a névoa de guerra
-    renderFogOfWar(campaign, mapBoard, isMasterView);
+    // Renderiza a névoa de guerra do quadro atual
+    renderFogOfWar(currentBoard, mapBoard, isMasterView);
 }
 
 /**
@@ -3864,25 +3912,9 @@ function renderMapState(campaign) {
  * @param {object} campaign - O objeto da campanha.
  */
 function initializePlayerMap(campaign) {
+    renderMapState(campaign, false, campaign.currentBoardIndex || 0); // Renderiza o mapa para a visão do jogador
     const mapBoard = document.getElementById('player-map-board');
     mapBoard.classList.add('player-view'); // Adiciona classe para estilização
-    mapBoard.innerHTML = ''; // Limpa o mapa
-
-    if (campaign.mapData?.imageUrl) {
-        mapBoard.style.backgroundImage = `url('${campaign.mapData.imageUrl}')`;
-    } else {
-        mapBoard.innerHTML = '<div class="map-upload-placeholder"><p>O mestre ainda não carregou um mapa.</p></div>';
-    }
-
-    if (campaign.mapData?.tokens) {
-        campaign.mapData.tokens.forEach(tokenData => {
-            // Cria o token, mas sem a funcionalidade de arrastar
-            const tokenElement = createTokenOnBoard(tokenData, mapBoard, campaign, false);
-        });
-    }
-
-    // Renderiza a névoa de guerra para o jogador
-    renderFogOfWar(campaign, mapBoard, false);
 }
 
 /**
@@ -3890,6 +3922,7 @@ function initializePlayerMap(campaign) {
  * @param {object} campaign - O objeto da campanha.
  */
 async function initializePlayerView(campaign) {
+    window.socketInstance = socket; // Torna o socket acessível globalmente nesta página
     // Garante que o ID do usuário está carregado
     const user = await checkAuthStatus();
     if (!user) {
@@ -3993,8 +4026,14 @@ async function initializePlayerView(campaign) {
             playerTabLinks.forEach(l => l.classList.remove('active'));
             link.classList.add('active');
             playerTabContents.forEach(c => c.id === tabId ? c.classList.add('active') : c.classList.remove('active'));
+
+            // Re-renderiza o mapa do jogador quando a aba do mapa é clicada
+            if (tabId === 'player-map') {
+                renderMapState(campaign, false, campaign.currentBoardIndex || 0);
+            }
         });
     });
+    renderMapState(campaign, false, campaign.currentBoardIndex || 0); // Renderiza o estado inicial do mapa do jogador
 }
 
 /**
@@ -4019,8 +4058,9 @@ function addAgentToCampaignUI(character) {
  * @param {HTMLElement} mapBoard - O elemento do tabuleiro do mapa.
  * @param {object} campaign - O objeto da campanha.
  * @param {boolean} isDraggable - Se o token pode ser arrastado (visão do mestre).
+ * @param {boolean} isOwner - Se o usuário atual é o dono do personagem do token.
  */
-function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true) {
+function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true, isOwner = false) {
     if (!tokenData || typeof tokenData.x === 'undefined' || typeof tokenData.y === 'undefined') return;
     let tokenElement = document.getElementById(tokenData.id);
     if (!tokenElement) {
@@ -4034,10 +4074,20 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true) {
     tokenElement.style.left = `${tokenData.x}%`;
     tokenElement.style.top = `${tokenData.y}%`;
 
-    if (isDraggable) {
+    // Adiciona a classe 'locked' se o token estiver bloqueado
+    tokenElement.classList.toggle('locked', tokenData.locked);
+
+    const canMove = isDraggable && !tokenData.locked && (isOwner || getObjectIdAsString(campaign.ownerId) === currentUserId);
+
+    if (canMove) {
         tokenElement.style.cursor = 'grab';
         tokenElement.addEventListener('mousedown', (e) => {
             e.preventDefault();
+
+            // Impede o arrasto se o token estiver bloqueado
+            const currentTokenData = campaign.mapBoards[campaign.currentBoardIndex || 0].tokens.find(t => t.id === tokenData.id);
+            if (currentTokenData?.locked) return;
+
             const rect = mapBoard.getBoundingClientRect();
             let offsetX = e.clientX - tokenElement.getBoundingClientRect().left;
             let offsetY = e.clientY - tokenElement.getBoundingClientRect().top;
@@ -4056,8 +4106,9 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true) {
                 tokenElement.style.cursor = 'grab';
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
-                // Atualiza os dados do token no objeto da campanha
-                const tokenToUpdate = campaign.mapData.tokens.find(t => t.id === tokenData.id);
+                
+                const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
+                const tokenToUpdate = currentBoard.tokens.find(t => t.id === tokenData.id);
                 if (tokenToUpdate) {
                     tokenToUpdate.x = parseFloat(tokenElement.style.left);
                     tokenToUpdate.y = parseFloat(tokenElement.style.top);
@@ -4068,7 +4119,47 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true) {
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
         });
+    } else {
+        tokenElement.style.cursor = tokenData.locked ? 'not-allowed' : 'default';
     }
+
+    // Menu de contexto para o mestre
+    if (getObjectIdAsString(campaign.ownerId) === currentUserId) {
+        tokenElement.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showTokenContextMenu(e.clientX, e.clientY, tokenData, campaign);
+        });
+    }
+}
+
+/**
+ * Exibe o menu de contexto para um token.
+ * @param {number} x - Posição X do mouse.
+ * @param {number} y - Posição Y do mouse.
+ * @param {object} tokenData - Os dados do token.
+ * @param {object} campaign - O objeto da campanha.
+ */
+function showTokenContextMenu(x, y, tokenData, campaign) {
+    hideMapContextMenu(); // Esconde outros menus
+    const menu = document.getElementById('token-context-menu');
+    menu.style.display = 'block';
+    menu.style.left = `${x}px`;
+    menu.style.top = `${y}px`;
+
+    const lockOption = document.getElementById('lock-token-option');
+    lockOption.textContent = tokenData.locked ? 'Desbloquear Token' : 'Bloquear Token';
+
+    // Remove listeners antigos para evitar múltiplas execuções
+    const newLockOption = lockOption.cloneNode(true);
+    lockOption.parentNode.replaceChild(newLockOption, lockOption);
+
+    newLockOption.addEventListener('click', () => {
+        tokenData.locked = !tokenData.locked;
+        updateCampaign(campaign); // Salva e transmite a mudança
+        renderMapState(campaign, true, campaign.currentBoardIndex); // Re-renderiza o mapa,
+        hideMapContextMenu();
+    });
 }
 /**
  * Cria um card de agente para ser exibido dentro da página da campanha.

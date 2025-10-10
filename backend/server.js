@@ -10,9 +10,12 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 const MongoStore = require('connect-mongo'); // 1. Importa o MongoStore
+const http = require('http'); // 1. Importa o módulo HTTP
+const { Server } = require("socket.io"); // 2. Importa o Socket.IO
 
 // --- 2. Configuração Inicial ---
 const app = express();
+const server = http.createServer(app); // 3. Cria um servidor HTTP a partir do app Express
 const PORT = process.env.PORT || 3000;
 
 // --- 3. Middlewares ---
@@ -20,6 +23,14 @@ app.use(express.json({ limit: '10mb' })); // Aumenta o limite para 10MB para ace
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://127.0.0.1:5500';
 const BACKEND_URL = process.env.BACKEND_URL || `http://localhost:${PORT}`;
+
+// 4. Configuração do Socket.IO
+const io = new Server(server, {
+    cors: {
+        origin: FRONTEND_URL,
+        methods: ["GET", "POST"]
+    }
+});
 
 app.use(cors({
     origin: FRONTEND_URL,
@@ -534,7 +545,35 @@ app.delete('/api/campaigns/:campaignId/players/:playerId', ensureAuthenticated, 
         res.status(500).json({ message: 'Erro interno do servidor.' });
     }
 });
+
+// --- 6.5. Lógica do Socket.IO para Tempo Real ---
+io.on('connection', (socket) => {
+    console.log('🔌 Um usuário se conectou:', socket.id);
+
+    // Evento para entrar em uma sala de campanha
+    socket.on('join-campaign-room', (campaignId) => {
+        socket.join(campaignId);
+        console.log(`Usuário ${socket.id} entrou na sala da campanha ${campaignId}`);
+    });
+
+    // Evento para receber atualizações do mapa de um cliente
+    socket.on('map-update', async ({ campaignId, updatedCampaignData }) => {
+        try {
+            // Opcional: Salvar no banco de dados aqui se necessário, mas a rota PUT já faz isso.
+            // A principal função aqui é retransmitir.
+            // Transmite a atualização para todos os outros na mesma sala de campanha
+            socket.to(campaignId).emit('map-updated', updatedCampaignData);
+        } catch (error) {
+            console.error('Erro ao processar atualização do mapa via socket:', error);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('🔌 Usuário desconectado:', socket.id);
+    });
+});
+
 // --- 7. Iniciando o Servidor ---
-app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => { // 5. Inicia o servidor HTTP, não o app Express diretamente
     console.log(`🚀 Servidor rodando na porta ${PORT}.`);
 });

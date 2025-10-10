@@ -72,7 +72,16 @@
         
                     <div class="tab-content" id="mapa">
                         <!-- Layout Unificado do Mapa para o Mestre -->
-                        <div class="map-layout-wrapper">
+                        <div class="map-layout-wrapper" id="map-layout-wrapper">
+                            <!-- NOVA BARRA LATERAL DE QUADROS DO MAPA -->
+                            <div class="map-boards-sidebar">
+                                <h4>Quadros da Campanha</h4>
+                                <div id="map-boards-list" class="map-boards-list">
+                                    <!-- A lista de quadros será populada aqui -->
+                                </div>
+                                <button id="add-map-board-btn" class="wizard-btn small-btn">Adicionar Quadro</button>
+                            </div>
+
                             <div class="master-map-layout" id="master-map-layout">
                                 <div id="map-board" class="map-board" style="min-height: 70vh;">
                                     <div id="map-upload-placeholder" class="map-upload-placeholder">
@@ -121,6 +130,11 @@
                                 <li id="remove-fog-area" style="display: none;">Remover Névoa</li>
                                 <!-- Outras opções podem ser adicionadas aqui -->
                             </ul>
+                        </div>
+                        <!-- Menu de Contexto para Tokens -->
+                        <div id="token-context-menu" class="context-menu">
+                            <div id="lock-token-option" class="context-menu-option">Bloquear Token</div>
+                            <div id="delete-token-option" class="context-menu-option">Remover Token</div>
                         </div>
                     </div>
         
@@ -238,6 +252,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script> <!-- Adiciona o cliente Socket.IO -->
     <script src="script.js"></script>
 </body>
 </html>
