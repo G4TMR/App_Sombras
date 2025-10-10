@@ -3503,9 +3503,12 @@ body.dev-mode #dev-mode-form { display: none; }
 
     /* --- MODAL --- */
     .element-lore-modal-content {
-        width: 95%; /* Garante que o modal não ocupe 100% da tela */
+        width: 95%; /* Garante que o modal não cole nas bordas */
         padding: 1.5rem;
+        max-height: 90vh; /* Impede que o modal seja maior que a tela */
+        overflow-y: auto; /* Adiciona rolagem se o conteúdo for muito grande */
     }
+    .element-lore-modal-content h1 { font-size: 2.5rem; }
 
     /* --- BOTÕES --- */
     .hero-cta-btn, .wizard-btn, .create-agent-btn, .tier-btn {
