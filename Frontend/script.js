@@ -1734,16 +1734,19 @@ class CharacterDisplay {
     constructor() {
         this.onlineContainer = document.getElementById('online-agents-content');
         this.localContainer = document.getElementById('local-agents-content');
+        this.container = document.getElementById('online-agents-content');
         this.loadOnlineCharacters();
         this.loadLocalCharacters();
     }
 
     async loadOnlineCharacters() {
         if (!this.onlineContainer) return;
+        if (!this.container) return;
         try {
             // Usando Axios para buscar os personagens do usuário logado
             const response = await api.get('/characters');
             this.renderCharacters(response.data, this.onlineContainer, 'online');
+            this.renderCharacters(response.data, this.container);
         } catch (error) {
             if (error.response) {
                 // O servidor respondeu com um status de erro
@@ -1751,11 +1754,13 @@ class CharacterDisplay {
                 if (error.response.status === 401) {
                     // Se não estiver autorizado, mostra a mensagem de login
                     this.onlineContainer.innerHTML = `<div class="empty-state" style="padding: 2rem 0;"><p class="empty-message">Você precisa estar logado para ver seus agentes online.</p><a href="${API_BASE_URL}/auth/google" class="create-character-btn">Fazer Login com Google</a></div>`;
+                    this.container.innerHTML = `<div class="empty-state" style="padding: 2rem 0;"><p class="empty-message">Você precisa estar logado para ver seus agentes.</p><a href="${API_BASE_URL}/auth/google" class="create-agent-btn" style="text-decoration: none;">Fazer Login com Google</a></div>`;
                 }
             } else {
                 // Erro de rede
                 console.error('Erro de rede ao carregar personagens:', error.message);
                 this.onlineContainer.innerHTML = `<div class="empty-state" style="padding: 2rem 0;"><p class="empty-message">Erro de conexão com o servidor.</p><p class="empty-submessage">Verifique se o backend está rodando e tente novamente.</p></div>`;
+                this.container.innerHTML = `<div class="empty-state" style="padding: 2rem 0;"><p class="empty-message">Erro de conexão com o servidor.</p><p class="empty-submessage">Verifique se o backend está rodando e tente novamente.</p></div>`;
             }
         }
     }
@@ -1772,6 +1777,7 @@ class CharacterDisplay {
     }
 
     renderCharacters(characters, container, mode) {
+    renderCharacters(characters, container) {
         if (!container) return;
 
         container.innerHTML = ''; // Limpa o container
@@ -1781,6 +1787,7 @@ class CharacterDisplay {
                 ? 'Nenhum agente online criado ainda.'
                 : 'Nenhum agente de teste criado. Crie um para vê-lo aqui!';
             container.innerHTML = `<p class="empty-message" style="text-align: center; padding: 2rem 0;">${message}</p>`;
+            container.innerHTML = `<p class="empty-message" style="text-align: center; padding: 2rem 0;">Nenhum agente criado ainda.</p>`;
             return;
         }
 
@@ -1794,11 +1801,13 @@ class CharacterDisplay {
 
         characters.forEach(char => {
             const card = this.createCharacterCard(char, mode);
+            const card = this.createCharacterCard(char);
             grid.appendChild(card);
         });
     }
 
     createCharacterCard(character, mode = 'online') {
+    createCharacterCard(character) {
         const card = document.createElement('div');
         card.className = 'character-card';
         if (character.element) {
@@ -1856,6 +1865,8 @@ class CharacterDisplay {
         const viewUrl = mode === 'local' 
             ? `ficha-agente.html?id=${character.id}&mode=local`
             : `ficha-agente.html?id=${character.id}`;
+        card.querySelector('.view-btn').addEventListener('click', () => window.location.href = `ficha-agente.html?id=${character.id}`);
+        card.querySelector('.delete-btn').addEventListener('click', () => this.deleteCharacter(character.id));
 
         card.querySelector('.view-btn').addEventListener('click', () => window.location.href = viewUrl);
         card.querySelector('.delete-btn').addEventListener('click', () => this.deleteCharacter(character.id, mode));
@@ -1864,6 +1875,7 @@ class CharacterDisplay {
     }
 
     async deleteCharacter(characterId, mode) {
+    async deleteCharacter(characterId) {
         if (confirm('Tem certeza que deseja excluir este agente? Esta ação não pode ser desfeita.')) {
             if (mode === 'local') {
                 let localCharacters = JSON.parse(localStorage.getItem('sombras-local-characters')) || [];
@@ -1945,6 +1957,7 @@ class CharacterSheet {
                 const localCharacters = JSON.parse(localStorage.getItem('sombras-local-characters')) || [];
                 this.character = localCharacters.find(char => char.id === charId) || null;
             } else if (charId) {
+        try {            if (charId) {
                 // Carrega da API para modo online
                 const response = await api.get(`/api/characters/${charId}`);
                 this.character = response.data;
@@ -3922,10 +3935,23 @@ function initializeMasterView(campaign) {
  * @param {object} campaign - O objeto da campanha.
  */
 function renderMapState(campaign) {
-    const mapBoard = document.getElementById('map-board');
+    // Usa o ID correto dependendo da visão (mestre ou jogador)
+    const isMasterView = document.body.classList.contains('master-view');
+    const mapBoardId = isMasterView ? 'map-board' : 'player-map-board';
+    const mapBoard = document.getElementById(mapBoardId);
     const mapPlaceholder = document.getElementById('map-upload-placeholder');
 
     if (!mapBoard || !mapPlaceholder) return;
+
+    // Limpa os tokens antigos antes de renderizar os novos
+    mapBoard.querySelectorAll('.map-token').forEach(token => token.remove());
+
+    // Renderiza os tokens
+    if (campaign.mapData?.tokens) {
+        campaign.mapData.tokens.forEach(tokenData => {
+            createTokenOnBoard(tokenData, mapBoard, campaign, isMasterView);
+        });
+    }
 
     // Renderiza a imagem de fundo
     if (campaign.mapData?.imageUrl) {
@@ -3936,7 +3962,8 @@ function renderMapState(campaign) {
         mapPlaceholder.style.display = 'flex';
     }
 
-    // Futuramente, as chamadas para renderizar tokens e névoa virão aqui.
+    // Renderiza a névoa de guerra
+    renderFogOfWar(campaign, mapBoard, isMasterView);
 }
 
 /**
