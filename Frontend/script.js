@@ -22,14 +22,17 @@ api.interceptors.response.use(
     error => {
         if (error.response && error.response.status === 401) {
             // Se for um erro 401 (Não Autorizado), redireciona para a página de login
-            console.warn("Sessão expirada ou não autorizado. Redirecionando para login.");
+            console.warn("Sessão expirada ou não autorizado. Redirecionando para login.", window.location.pathname);
+            // Salva a página atual para redirecionar de volta após o login
+            // O backend precisaria ser ajustado para lidar com este parâmetro `redirect_url`
+            // window.location.href = `${API_BASE_URL}/auth/google?redirect_url=${window.location.href}`;
             window.location.href = `${API_BASE_URL}/auth/google`; // Ou sua página de login
         }
         return Promise.reject(error);
     }
 );
 
-let currentUserId = 'local_user_id'; // ID padrão para modo local/não logado. Será atualizado por checkAuthStatus.
+let currentUserId = null; // ID do usuário logado. Será preenchido por checkAuthStatus.
 
 const CLASS_BASE_ATTRIBUTES = {
     'Bélico': { forca: 3, agilidade: 2, presenca: 1, vitalidade: 3, inteligencia: 1 },
@@ -1353,8 +1356,6 @@ class CharacterCreator {
         this.elements = {
             steps: document.querySelectorAll('.full-screen-section'),
             navSteps: document.querySelectorAll('.step-item'),
-            classCards: document.querySelectorAll('.class-card'),
-            elementCards: document.querySelectorAll('.element-card'),
             attributeControls: document.querySelectorAll('.attribute-control'),
             attributePointsSpan: document.getElementById('attribute-points'),
             personalizationForm: document.getElementById('personalization-form'),
@@ -1375,14 +1376,12 @@ class CharacterCreator {
             }
         };
 
-        this.creationMode = new URLSearchParams(window.location.search).get('mode') || 'online';
-
         this.initialize();
     }
 
     initialize() {
         if (!document.getElementById('step-1')) return;
-
+ 
         this.setupClassSelection();
         this.setupElementSelection();
         this.setupAttributeDistribution();
@@ -1391,20 +1390,6 @@ class CharacterCreator {
         this.displayLocalModeWarning();
         this.restoreFormData();
         this.updateCharacterSummary();
-    }
-
-    displayLocalModeWarning() {
-        if (this.creationMode !== 'local') return;
-
-        const placeholder = document.getElementById('local-mode-warning-placeholder');
-        if (placeholder) {
-            placeholder.innerHTML = `
-                <div class="content-box" style="background-color: rgba(255, 193, 7, 0.1); border-color: #ffc107; text-align: center; margin-bottom: 2rem;">
-                    <h3 style="color: #ffc107; font-family: var(--font-display); font-size: 1.8rem; margin-top: 0;">⚠️ MODO DE TESTE ATIVADO ⚠️</h3>
-                    <p style="color: #f0f0f0; margin-bottom: 0;">Você está criando um agente de teste. Esta ficha será salva <strong>apenas no seu navegador</strong> e será perdida se você limpar os dados do site.</p>
-                </div>
-            `;
-        }
     }
 
     navigateToStep(stepNumber) {
@@ -1425,9 +1410,9 @@ class CharacterCreator {
     }
 
     setupClassSelection() {
-        this.elements.classCards.forEach(card => {
+        document.querySelectorAll('.class-card').forEach(card => {
             card.addEventListener('click', () => {
-                this.elements.classCards.forEach(c => c.classList.remove('active'));
+                document.querySelectorAll('.class-card').forEach(c => c.classList.remove('active'));
                 card.classList.add('active');
                 
                 const selectedClass = card.dataset.class;
@@ -1439,7 +1424,7 @@ class CharacterCreator {
     }
 
     setupElementSelection() {
-        this.elements.elementCards.forEach(card => {
+        document.querySelectorAll('.element-card').forEach(card => {
             card.addEventListener('click', () => {
                 const elementName = card.dataset.element;
                 this.showLoreModal(elementName);
@@ -1639,34 +1624,11 @@ class CharacterCreator {
         sessionStorage.removeItem('character-in-progress'); 
     }
 
-    async saveCharacterLocally() {
-        try {
-            let localCharacters = JSON.parse(localStorage.getItem('sombras-local-characters')) || [];
-            // Garante que não haja IDs duplicados
-            localCharacters = localCharacters.filter(char => char.id !== this.currentCharacter.id);
-            localCharacters.unshift(this.currentCharacter); // Adiciona no início
-            localStorage.setItem('sombras-local-characters', JSON.stringify(localCharacters));
-            
-            this.clearFormData();
-            window.location.href = 'agentes.html';
-
-        } catch (error) {
-            console.error('Erro ao salvar personagem localmente:', error);
-            alert('Ocorreu um erro ao salvar a ficha de teste. Verifique o console.');
-        }
-    }
-
     async saveCharacter() {
         const { name, player } = this.currentCharacter.personalization;
         const campaignId = new URLSearchParams(window.location.search).get('campaignId');
         if (!name || !player) {
             alert('Por favor, preencha os campos obrigatórios (Nome do Agente e Nome do Jogador) para finalizar.');
-            return;
-        }
-
-        // Se estiver em modo local, usa a função de salvamento local
-        if (this.creationMode === 'local') {
-            this.saveCharacterLocally();
             return;
         }
 
@@ -1732,30 +1694,22 @@ class CharacterCreator {
 // =================================================================================
 class CharacterDisplay {
     constructor() {
-        this.onlineContainer = document.getElementById('online-agents-content');
-        this.localContainer = document.getElementById('local-agents-content');
         this.container = document.getElementById('online-agents-content');
-        this.loadOnlineCharacters();
-        this.loadLocalCharacters();
+        this.loadCharacters();
     }
 
-    async loadOnlineCharacters() {
-        if (!this.onlineContainer) return;
+    async loadCharacters() {
         if (!this.container) return;
         try {
             // Usando Axios para buscar os personagens do usuário logado
-            const response = await api.get('/characters');
-            this.renderCharacters(response.data, this.onlineContainer, 'online');
+            const response = await api.get('/api/characters');
             this.renderCharacters(response.data, this.container);
         } catch (error) {
             if (error.response) {
-                // O servidor respondeu com um status de erro
-                console.error('Falha ao carregar personagens. O usuário pode não estar logado.');
-                if (error.response.status === 401) {
-                    // Se não estiver autorizado, mostra a mensagem de login
-                    this.onlineContainer.innerHTML = `<div class="empty-state" style="padding: 2rem 0;"><p class="empty-message">Você precisa estar logado para ver seus agentes online.</p><a href="${API_BASE_URL}/auth/google" class="create-character-btn">Fazer Login com Google</a></div>`;
-                    this.container.innerHTML = `<div class="empty-state" style="padding: 2rem 0;"><p class="empty-message">Você precisa estar logado para ver seus agentes.</p><a href="${API_BASE_URL}/auth/google" class="create-agent-btn" style="text-decoration: none;">Fazer Login com Google</a></div>`;
-                }
+                console.error('Falha ao carregar personagens. Status:', error.response.status);
+                // O interceptor global já deve ter redirecionado para o login em caso de 401.
+                // Aqui, apenas exibimos uma mensagem de erro genérica se o container existir.
+                this.container.innerHTML = `<div class="empty-state" style="padding: 2rem 0;"><p class="empty-message">Erro ao carregar agentes.</p><p class="empty-submessage">Tente recarregar a página. Se o erro persistir, pode ser um problema com o servidor.</p></div>`;
             } else {
                 // Erro de rede
                 console.error('Erro de rede ao carregar personagens:', error.message);
@@ -1765,29 +1719,14 @@ class CharacterDisplay {
         }
     }
 
-    loadLocalCharacters() {
-        if (!this.localContainer) return;
-        try {
-            const localCharacters = JSON.parse(localStorage.getItem('sombras-local-characters')) || [];
-            this.renderCharacters(localCharacters, this.localContainer, 'local');
-        } catch (error) {
-            console.error('Erro ao carregar personagens locais:', error);
-            this.localContainer.innerHTML = `<p>Ocorreu um erro ao ler os agentes de teste.</p>`;
-        }
-    }
-
-    renderCharacters(characters, container, mode) {
     renderCharacters(characters, container) {
         if (!container) return;
 
         container.innerHTML = ''; // Limpa o container
 
         if (characters.length === 0) {
-            const message = mode === 'online' 
-                ? 'Nenhum agente online criado ainda.'
-                : 'Nenhum agente de teste criado. Crie um para vê-lo aqui!';
-            container.innerHTML = `<p class="empty-message" style="text-align: center; padding: 2rem 0;">${message}</p>`;
-            container.innerHTML = `<p class="empty-message" style="text-align: center; padding: 2rem 0;">Nenhum agente criado ainda.</p>`;
+            // Mensagem para quando não há agentes, com um botão para criar o primeiro.
+            container.innerHTML = `<div class="empty-state" style="padding: 2rem 0;"><p class="empty-message">Nenhum agente criado ainda.</p><p class="empty-submessage">Clique no botão acima para criar seu primeiro agente e começar a aventura.</p></div>`;
             return;
         }
 
@@ -1800,13 +1739,11 @@ class CharacterDisplay {
         grid.innerHTML = '';
 
         characters.forEach(char => {
-            const card = this.createCharacterCard(char, mode);
             const card = this.createCharacterCard(char);
             grid.appendChild(card);
         });
     }
 
-    createCharacterCard(character, mode = 'online') {
     createCharacterCard(character) {
         const card = document.createElement('div');
         card.className = 'character-card';
@@ -1818,8 +1755,7 @@ class CharacterDisplay {
         const attrs = character.attributes || { forca: '?', agilidade: '?', presenca: '?', vitalidade: '?', inteligencia: '?' };
         const creationDate = character.createdAt ? new Date(character.createdAt).toLocaleDateString('pt-BR') : 'Data inválida';
 
-        card.dataset.id = character.id;
-        card.dataset.mode = mode;
+        card.dataset.id = character._id || character.id;
 
        card.innerHTML = `
             <img src="${p.imageUrl || 'https://via.placeholder.com/200x250'}" alt="Retrato de ${p.name}" class="character-card-image">
@@ -1862,35 +1798,21 @@ class CharacterDisplay {
             </div>
         `;
 
-        const viewUrl = mode === 'local' 
-            ? `ficha-agente.html?id=${character.id}&mode=local`
-            : `ficha-agente.html?id=${character.id}`;
-        card.querySelector('.view-btn').addEventListener('click', () => window.location.href = `ficha-agente.html?id=${character.id}`);
-        card.querySelector('.delete-btn').addEventListener('click', () => this.deleteCharacter(character.id));
-
-        card.querySelector('.view-btn').addEventListener('click', () => window.location.href = viewUrl);
-        card.querySelector('.delete-btn').addEventListener('click', () => this.deleteCharacter(character.id, mode));
+        const charId = character._id || character.id;
+        card.querySelector('.view-btn').addEventListener('click', () => window.location.href = `ficha-agente.html?id=${charId}`);
+        card.querySelector('.delete-btn').addEventListener('click', () => this.deleteCharacter(charId));
 
         return card;
     }
 
-    async deleteCharacter(characterId, mode) {
     async deleteCharacter(characterId) {
         if (confirm('Tem certeza que deseja excluir este agente? Esta ação não pode ser desfeita.')) {
-            if (mode === 'local') {
-                let localCharacters = JSON.parse(localStorage.getItem('sombras-local-characters')) || [];
-                localCharacters = localCharacters.filter(char => char.id !== characterId);
-                localStorage.setItem('sombras-local-characters', JSON.stringify(localCharacters));
-                this.loadLocalCharacters(); // Recarrega apenas a lista local
-                return;
-            }
-
             // Lógica para deletar online
             try {
                 // Usando Axios para deletar o personagem
-                await api.delete(`/characters/${characterId}`);
+                await api.delete(`/api/characters/${characterId}`);
                 // Recarrega a lista de personagens online para refletir a exclusão
-                this.loadOnlineCharacters();
+                this.loadCharacters();
             } catch (error) {
                 if (error.response) {
                     alert(`Erro ao excluir personagem: ${error.response.data.message || 'Tente novamente.'}`);
@@ -1949,26 +1871,20 @@ class CharacterSheet {
     async loadCharacter() {
         const params = new URLSearchParams(window.location.search);
         const charId = params.get('id');
-        const mode = params.get('mode');
 
         try {
-            if (mode === 'local') {
-                // Carrega do localStorage para modo de teste
-                const localCharacters = JSON.parse(localStorage.getItem('sombras-local-characters')) || [];
-                this.character = localCharacters.find(char => char.id === charId) || null;
-            } else if (charId) {
-        try {            if (charId) {
+            if (charId) {
                 // Carrega da API para modo online
                 const response = await api.get(`/api/characters/${charId}`);
                 this.character = response.data;
             } else {
-                // Nenhum ID e não é modo local, então não há o que carregar.
+                // Nenhum ID, então não há o que carregar.
                 this.character = null;
             }
         } catch (error) {
             console.error('Erro ao carregar a ficha do personagem:', error);
             this.character = null; // Garante que o personagem é nulo em caso de erro
-            if (error.response && (error.response.status === 401 || error.response.status === 404)) {
+            if (error.response && (error.response.status === 401 || error.response.status === 403 || error.response.status === 404)) {
                 alert('Sua sessão expirou ou você não tem permissão para ver esta ficha. Por favor, faça login novamente.');
                 window.location.href = 'agentes.html';
             }
@@ -3056,31 +2972,15 @@ function getObjectIdAsString(idField) {
  * @param {object} campaignData - O objeto da campanha a ser salvo.
  */
 async function saveCampaign(campaignData) {
-    const user = await checkAuthStatus();
-    const ownerId = user ? user._id : 'local_user_id';
-
-    // CORREÇÃO: Garante que o ownerId seja um objeto, mesmo localmente, para consistência.
-    const newCampaignData = { 
-        ...campaignData, 
-        ownerId: user ? { _id: user._id, displayName: user.displayName } : ownerId, 
-        players: [], inviteCode: generateUniqueInviteCode() 
-    };
-
-    // 1. Salva localmente SEMPRE
     try {
-        const localCampaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-        localCampaigns.unshift(newCampaignData);
-        localStorage.setItem('sombras-campaigns', JSON.stringify(localCampaigns));
-    } catch (error) {
-        console.error("Erro ao salvar campanha localmente:", error);
-    }
-
-    // 2. Se estiver logado, salva no servidor
-    try {
-        if (user) {
-            // Envia para a API apenas o ID, como o backend espera, com o prefixo correto.
-            await api.post('/api/campaigns', { ...newCampaignData, ownerId: user._id });
+        const user = await checkAuthStatus();
+        if (!user) {
+            alert('Você precisa estar logado para criar uma campanha.');
+            window.location.href = `${API_BASE_URL}/auth/google`;
+            return;
         }
+        // Envia para a API, o backend associará o ownerId
+        await api.post('/api/campaigns', { ...campaignData, inviteCode: generateUniqueInviteCode() });
         window.location.href = 'campanhas.html';
     } catch (error) {
         console.error("Erro ao salvar campanha:", error);
@@ -3105,11 +3005,10 @@ function displayCampaigns(allCampaigns, userId) {
 
     // 1. Filtra as campanhas onde o usuário é o dono.
     const ownedCampaigns = allCampaigns.filter(c => getObjectIdAsString(c.ownerId) === userId);
-    const ownedCampaignIds = new Set(ownedCampaigns.map(c => c.id)); // Cria um conjunto de IDs das campanhas do usuário.
 
     // 2. Filtra as campanhas onde o usuário é um jogador, mas NÃO o dono.
     const joinedCampaigns = allCampaigns.filter(c => 
-        !ownedCampaignIds.has(c.id) && c.players?.some(p => getObjectIdAsString(p) === userId)
+        getObjectIdAsString(c.ownerId) !== userId && c.players?.some(p => getObjectIdAsString(p) === userId)
     );
 
     // Renderizar "Minhas Campanhas"
@@ -3156,7 +3055,7 @@ function createCampaignCard(campaign, isOwned) {
         <p>${synopsisSnippet}</p>
         <div class="campaign-card-footer">
             <span class="campaign-date">Criada em: ${new Date(campaign.createdAt).toLocaleDateString('pt-BR')}</span>
-            <button class="wizard-btn" onclick="window.location.href='gerenciar-campanha.html?id=${campaign.id}${isOwned ? '' : '&view=player'}'">
+            <button class="wizard-btn" onclick="window.location.href='gerenciar-campanha.html?id=${campaign._id || campaign.id}${isOwned ? '' : '&view=player'}'">
                 ${isOwned ? 'Gerenciar' : 'JOGAR'}
             </button>
         </div>
@@ -3174,11 +3073,6 @@ function generateUniqueInviteCode() {
     for (let i = 0; i < 4; i++) {
         result += characters.charAt(Math.floor(Math.random() * characters.length));
     }
-    // Verifica se o código já existe (improvável para 4 caracteres, mas boa prática)
-    const campaigns = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
-    if (campaigns.some(c => c.inviteCode === result)) {
-        return generateUniqueInviteCode(); // Gera novamente se houver colisão
-    }
     return result;
 }
 
@@ -3189,20 +3083,14 @@ function generateUniqueInviteCode() {
 async function joinCampaignByCode(inviteCode, formElement) {    
     const user = await checkAuthStatus();
     if (!user) {
-        alert('Você precisa estar logado para entrar em uma campanha.');
+        alert('Você precisa estar logado para entrar em uma campanha. Redirecionando...');
+        window.location.href = `${API_BASE_URL}/auth/google`;
         return;
     }
-
     const submitButton = formElement.querySelector('button[type="submit"]');
     const originalButtonText = submitButton.innerHTML;
     submitButton.disabled = true;
-    submitButton.innerHTML = '<span class="loader"></span>Entrando...'; // Adiciona um spinner (CSS necessário)
-
-    // Adicione este CSS ao seu style.css para o spinner
-    /*
-    .loader { width: 16px; height: 16px; border: 2px solid #FFF; border-bottom-color: transparent; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; margin-right: 8px; }
-    @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    */
+    submitButton.innerHTML = '<div class="loader" style="width: 16px; height: 16px; border-width: 2px; margin: 0 auto;"></div>';
 
     try {
         const response = await api.post('/api/campaigns/join', { inviteCode });
@@ -3235,7 +3123,12 @@ async function initializeCampaignManagement() {
 
     // Garante que o ID do usuário atual está carregado
     const user = await checkAuthStatus();
-    const userId = user ? user._id : 'local_user_id'; // Define o ID para online ou offline
+    if (!user) {
+        alert('Sessão expirada. Por favor, faça login para continuar.');
+        window.location.href = `${API_BASE_URL}/auth/google`;
+        return;
+    }
+    const userId = user._id;
 
     const campaign = await getCampaignById(campaignId);
     if (!campaign) {
@@ -4304,12 +4197,14 @@ async function checkAuthStatus() {
         const user = response.data;
 
         if (user && user._id) {
-            // Se encontrar um usuário logado, atualiza o container
+            // Se encontrar um usuário logado, atualiza o container e define o ID global
             authContainer.innerHTML = `<span class="user-info">Olá, <span class="user-display-name">${user.displayName}</span>! <a href="${API_BASE_URL}/auth/logout" class="auth-link">[Sair]</a></span>`;
             currentUserId = user._id;
             return user;
         }
-        return null; // Retorna nulo se não houver usuário
+        // Se a API retornar sucesso mas sem usuário, força o estado de deslogado
+        currentUserId = null;
+        return null;
     } catch (error) {
         // Se a API falhar (ex: 401, erro de rede), o botão de login já está na tela.
         console.log('Nenhuma sessão de usuário ativa encontrada. O botão de login será exibido.');
@@ -4366,29 +4261,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     const user = await checkAuthStatus(); // Espera a verificação de auth e armazena o usuário
     
     const path = window.location.pathname;
-    if (path.includes('criar-agente.html')) {
-        // A classe CharacterCreator agora lida com a lógica de modo internamente
-        const creator = new CharacterCreator();
-        // A inicialização já é chamada dentro do construtor, então não precisa de `creator.initialize()`
+    const protectedPages = ['criar-agente.html', 'agentes.html', 'campanhas.html', 'ficha-agente.html', 'gerenciar-campanha.html'];
 
+    // Verifica se a página atual é protegida e se o usuário não está logado
+    if (protectedPages.some(p => path.includes(p)) && !user) {
+        console.log(`Acesso negado à página ${path}. Redirecionando para login.`);
+        const mainContent = document.querySelector('main');
+        if (mainContent) {
+            mainContent.innerHTML = `
+                <div class="content-box" style="text-align: center; max-width: 600px; margin: 4rem auto;">
+                    <h2>Acesso Restrito</h2>
+                    <p class="info-text">Você precisa estar logado para acessar esta página.</p>
+                    <a href="${API_BASE_URL}/auth/google" class="wizard-btn">Fazer Login com Google</a>
+                </div>
+            `;
+        }
+        // Impede a execução do resto do script da página
+        return;
     }
-    if (path.includes('campanhas.html')) {
-        // Adiciona o listener para o formulário de entrar na campanha
+
+    // Se o usuário estiver logado, continua com a inicialização da página
+    if (path.includes('criar-agente.html') && user) {
+        const creator = new CharacterCreator();
+    }
+    if (path.includes('campanhas.html') && user) {
         const joinCampaignForm = document.getElementById('join-campaign-form');
         if (joinCampaignForm) {
             joinCampaignForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const inviteCode = document.getElementById('join-code-input').value.trim().toUpperCase();
-                joinCampaignByCode(inviteCode, joinCampaignForm);
+                if (inviteCode) joinCampaignByCode(inviteCode, joinCampaignForm);
             });
         }
 
-        // Lógica de exibição de campanhas refatorada para garantir a ordem
         const myCampaignsLoading = document.getElementById('my-campaigns-loading');
-        const myCampaignsGrid = document.getElementById('my-campaigns-grid');
         const emptyMyCampaigns = document.getElementById('empty-my-campaigns');
 
-        // Mostra o indicador de loading imediatamente
         myCampaignsLoading.style.display = 'flex';
         emptyMyCampaigns.style.display = 'none';
 
@@ -4397,27 +4305,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (user) {
             try {
-                // Adiciona um parâmetro de cache-busting para garantir dados novos
                 const response = await api.get(`/api/campaigns?t=${new Date().getTime()}`);
                 campaignsData = response.data;
             } catch (error) {
                 console.error("Falha ao buscar campanhas da API:", error);
             }
-        } else {
-            campaignsData = JSON.parse(localStorage.getItem('sombras-campaigns')) || [];
         }
 
-        // Esconde o loading e exibe os dados (ou a mensagem de vazio)
         myCampaignsLoading.style.display = 'none';
         displayCampaigns(campaignsData, userId);
     }
-    if (path.includes('gerenciar-campanha.html')) {
+    if (path.includes('gerenciar-campanha.html') && user) {
         initializeCampaignManagement();
     }
-    if (path.includes('agentes.html')) {
+    if (path.includes('agentes.html') && user) {
         new CharacterDisplay();
     }
-    if (path.includes('ficha-agente.html')) {
+    if (path.includes('ficha-agente.html') && user) {
         const sheet = new CharacterSheet();
         await sheet.initialize();
     }
