@@ -3583,7 +3583,7 @@ function initializeMasterMap(campaign) {
         if (currentDrawShape === 'brush') {
             const svgNS = "http://www.w3.org/2000/svg";
             selectionRect = document.createElementNS(svgNS, 'path');
-            selectionRect.setAttribute('d', `M ${startX} ${startY}`);
+            selectionRect.setAttribute('d', `M ${startX} ${startY} `);
         }
         selectionRect.className = 'draw-selection-rect'; // A classe agora estiliza tanto div quanto path
         mapBoard.appendChild(selectionRect);
@@ -3600,7 +3600,7 @@ function initializeMasterMap(campaign) {
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             // Adiciona o novo ponto ao atributo 'd' do caminho
-            selectionRect.setAttribute('d', selectionRect.getAttribute('d') + ` L ${x} ${y}`);
+            selectionRect.setAttribute('d', selectionRect.getAttribute('d') + `L ${x} ${y} `);
             return;
         }
 
@@ -3674,6 +3674,10 @@ function initializeMasterMap(campaign) {
                         };
                     });
 
+                    // Adiciona o comando 'Z' para fechar o caminho e formar um polígono válido
+                    if (selectionRect.getAttribute('d').trim().length > 0) {
+                        selectionRect.setAttribute('d', selectionRect.getAttribute('d') + 'Z');
+                    }
                     if (pathPoints.length > 2) { // Precisa de pelo menos 3 pontos para um polígono
                         fogData = {
                             id: `fog_${Date.now()}`,
