@@ -3631,14 +3631,13 @@ function initializeMasterMap(campaign, socket) {
     // Resetar o mapa
     const resetMapBtn = document.getElementById('reset-map-btn');
     resetMapBtn.addEventListener('click', () => {
-        if (confirm('Tem certeza que deseja limpar a prancheta atual (remover imagem de fundo, tokens e névoa)?')) {
-            // CORREÇÃO: Limpa a prancheta atual em vez da estrutura antiga.
-            const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
-            if (currentBoard) {
-                currentBoard.imageUrl = null;
-                currentBoard.tokens = [];
-                currentBoard.fog = [];
-                updateCampaign(campaign, true); // Salva e transmite a alteração
+        if (confirm('Tem certeza que deseja limpar o Quadro Principal (remover todos os tokens e toda a névoa)? A imagem de fundo será mantida.')) {
+            // SIMPLIFICAÇÃO: Limpa apenas os elementos interativos do mapa principal.
+            const mainMap = campaign.mapData;
+            if (mainMap) {
+                mainMap.tokens = [];
+                mainMap.fog = [];
+                updateCampaign(campaign, true);
             }
         }
     });
@@ -3682,6 +3681,7 @@ function initializeMasterMap(campaign, socket) {
  */
 function initializeMasterView(campaign, socket) {
     window.socketInstance = socket; // Torna o socket acessível globalmente nesta página
+
     // Elementos de exibição
     const titleDisplay = document.getElementById('campaign-title-display');
     const synopsisDisplay = document.getElementById('campaign-synopsis-display');
@@ -3702,12 +3702,15 @@ function initializeMasterView(campaign, socket) {
     const mapUploadInput = document.getElementById('map-upload-input');
     if (mapUploadInput && mapBoard) {
         mapUploadInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];            
-            const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
-            if (file && currentBoard) {
+            const file = e.target.files[0];
+            const activePranchetaId = document.querySelector('.board-thumbnail.active')?.dataset.id;
+            if (file && activePranchetaId) {
                 const imageUrl = await readFileAsDataURL(file);
-                currentBoard.imageUrl = imageUrl;
-                await updateCampaign(campaign, true); // Salva a campanha com a nova imagem
+                const prancheta = campaign.pranchetas.find(p => p.id === activePranchetaId);
+                if (prancheta) {
+                    prancheta.imageUrl = imageUrl;
+                }
+                await updateCampaign(campaign, true); // Salva e transmite para todos
             }
         });
     }
@@ -3716,10 +3719,13 @@ function initializeMasterView(campaign, socket) {
     if (!campaign.players) { campaign.players = []; needsSave = true; }
     if (!campaign.inviteCode) { campaign.inviteCode = generateUniqueInviteCode(); needsSave = true; }
     // Migração para múltiplos quadros de mapa
-    if (!campaign.mapBoards || !Array.isArray(campaign.mapBoards) || campaign.mapBoards.length === 0) {
-        campaign.mapBoards = [{ id: `board_${Date.now()}`, name: 'Quadro Principal', imageUrl: campaign.mapData?.imageUrl || null, tokens: campaign.mapData?.tokens || [], fog: campaign.mapData?.fog || [] }];
-        campaign.currentBoardIndex = 0;
-        delete campaign.mapData; // Remove a estrutura antiga
+    if (!campaign.mapData) {
+        campaign.mapData = { imageUrl: null, tokens: [], fog: [] };
+        needsSave = true;
+    }
+    // NOVA ESTRUTURA: Garante que a galeria de pranchetas exista
+    if (!campaign.pranchetas) {
+        campaign.pranchetas = [];
         needsSave = true;
     }
     if (needsSave) {
@@ -3869,16 +3875,14 @@ function initializeMasterView(campaign, socket) {
     const addBoardBtn = document.getElementById('add-map-board-btn');
     if (addBoardBtn) {
         addBoardBtn.addEventListener('click', () => {
-            const newBoardName = `Prancheta ${campaign.mapBoards.length + 1}`;
-            const newBoard = {
+            const newPrancheta = {
                 id: `board_${Date.now()}`,
-                name: newBoardName,
-                imageUrl: null, 
-                tokens: [],
-                fog: []
+                name: `Imagem ${campaign.pranchetas.length + 1}`,
+                imageUrl: null
             };
-            campaign.mapBoards.push(newBoard);
-            updateCampaign(campaign, true); // Salva e transmite a nova prancheta
+            campaign.pranchetas.push(newPrancheta);
+            updateCampaign(campaign, true);
+            renderBoardGallery(campaign, true); // Re-renderiza a galeria para o mestre
         });
     }
 }
@@ -3899,32 +3903,10 @@ function renderMapState(campaign, isMasterView, currentBoardIndex = 0) {
     const mapBoard = document.getElementById(mapBoardId);
     const mapPlaceholder = mapBoard.querySelector('.map-upload-placeholder'); // Busca dentro do board correto
 
-    const currentBoard = campaign.mapBoards?.[currentBoardIndex] || { tokens: [], fog: [] };
-    if (!mapBoard || !mapPlaceholder) return;
-
-    // Limpa os tokens antigos antes de renderizar os novos
-    mapBoard.querySelectorAll('.map-token').forEach(token => token.remove());
-    // Limpa a névoa antiga
-    mapBoard.querySelectorAll('.fog-of-war').forEach(fog => fog.remove());
-
-    // Renderiza os tokens
-    if (currentBoard.tokens) {
-        currentBoard.tokens.forEach(tokenData => {
-            createTokenOnBoard(tokenData, mapBoard, campaign, isMasterView);
-        });
-    }
-
-    // Renderiza a imagem de fundo
-    if (currentBoard.imageUrl) {
-        mapBoard.style.backgroundImage = `url('${currentBoard.imageUrl}')`;
-        mapPlaceholder.style.display = 'none';
-    } else {
-        mapBoard.style.backgroundImage = 'none';
-        mapPlaceholder.style.display = 'flex';
-    }
-
-    // Renderiza a névoa de guerra do quadro atual
-    renderFogOfWar(currentBoard, mapBoard, isMasterView); 
+    // A renderização agora é feita por funções mais específicas
+    renderMapBackground(campaign.mapData.imageUrl);
+    renderMapTokens(campaign.mapData.tokens, isMasterView, campaign);
+    renderFogOfWar(campaign.mapData.fog, isMasterView);
 }
 
 /**
@@ -3937,14 +3919,15 @@ function initializePlayerMap(campaign) {
 
     // Listener para atualizações do mestre
     window.socketInstance.on('map-updated', (updatedCampaignData) => {
-        console.log('Jogador recebeu atualização do mapa via socket.');
+        console.log('Jogador recebeu atualização da campanha via socket.');
         // Atualiza o objeto da campanha local e re-renderiza tudo
         Object.assign(campaign, updatedCampaignData);
-        renderMapState(campaign, false, campaign.currentBoardIndex);
+        renderMapBackground(campaign.mapData.imageUrl);
+        renderMapTokens(campaign.mapData.tokens, false, campaign);
         renderBoardGallery(campaign, false); // Re-renderiza a galeria de pranchetas
     });
 
-    renderMapState(campaign, false, campaign.currentBoardIndex || 0); // Renderiza o estado inicial
+    renderMapState(campaign, false); // Renderiza o estado inicial
 }
 
 /**
@@ -4063,8 +4046,7 @@ async function initializePlayerView(campaign, socket) {
             }
         });
     });
-    renderMapState(campaign, false, campaign.currentBoardIndex || 0);
-    renderBoardGallery(campaign, false); // Renderiza a galeria de pranchetas para o jogador
+    renderMapState(campaign, false);
 }
 
 /**
@@ -4282,11 +4264,14 @@ function renderGalleryForContainer(campaign, isMasterView, galleryContainer) {
                 updateCampaign(campaign, true); // Salva e transmite a mudança. O listener 'map-updated' cuidará do resto.
             } else {
                 // Jogador: visualiza a prancheta clicada
-                // SIMPLIFICAÇÃO: O jogador sempre troca a visão principal ao clicar.
-                renderMapState(campaign, false, index);
-                // Atualiza qual thumbnail está "ativo" na visão do jogador
-                galleryContainer.querySelectorAll('.board-thumbnail').forEach(t => t.classList.remove('active'));
-                thumb.classList.add('active');
+                // Se for uma imagem, abre no modal. Se for um mapa, troca a visão principal.
+                if (board.type === 'image') {
+                    showImageViewer(board.imageUrl, board.name);
+                } else {
+                    renderMapState(campaign, false, index);
+                    galleryContainer.querySelectorAll('.board-thumbnail').forEach(t => t.classList.remove('active'));
+                    thumb.classList.add('active');
+                }
             }
         });
 

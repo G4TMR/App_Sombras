@@ -73,14 +73,6 @@
                     <div class="tab-content" id="mapa">
                         <!-- Layout Unificado do Mapa para o Mestre -->
                         <div class="map-layout-wrapper" id="map-layout-wrapper">
-                            <!-- NOVA BARRA LATERAL DE QUADROS DO MAPA -->
-                            <div class="board-gallery-container">
-                                <div id="board-gallery" class="board-gallery">
-                                    <!-- A galeria de pranchetas será populada aqui -->
-                                </div>
-                                <button id="add-map-board-btn" class="wizard-btn small-btn" title="Adicionar Nova Prancheta">+</button>
-                            </div>
-
                             <div class="master-map-layout" id="master-map-layout">
                                 <div id="map-board" class="map-board" style="min-height: 70vh;">
                                     <div id="map-upload-placeholder" class="map-upload-placeholder">
@@ -121,6 +113,14 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            <!-- GALERIA DE PRANCHETAS MOVIDA PARA BAIXO -->
+                            <div class="board-gallery-container">
+                                <h4>Pranchetas de Exibição</h4>
+                                <div id="board-gallery" class="board-gallery">
+                                    <!-- A galeria de pranchetas será populada aqui -->
+                                </div>
+                                <button id="add-map-board-btn" class="wizard-btn small-btn" title="Adicionar Nova Prancheta">+</button>
                             </div>
                         </div>
 
@@ -245,7 +245,7 @@
     <div id="add-agent-modal-overlay" class="modal-overlay">
         <div class="specialization-modal-content">
             <h1>Adicionar Agente à Campanha</h1>
-            <p class="info-text">Escolha um dos seus agentes existentes ou crie um novo para se juntar a esta campanha.</p>
+            <p class="info-text">Escolha um dosã seus agentes existentes ou crie um novo para se juntar a esta campanha.</p>
             
             <div id="select-agent-list" class="characters-grid modal-character-list">
                 <!-- Lista de agentes do usuário para seleção -->

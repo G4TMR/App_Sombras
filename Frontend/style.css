@@ -2516,6 +2516,7 @@ body[data-page="patente"] { --page-color: #6f42c1; }
 .master-map-layout {
     display: grid;
     grid-template-columns: 1fr; /* Por padrão, só o mapa é visível */
+    grid-template-rows: minmax(0, 1fr); /* Garante que a linha não estoure a altura */
     gap: 1rem;
     width: 100%;
 }
@@ -2531,6 +2532,7 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
+    min-height: 50vh; /* Garante uma altura mínima, mas permite encolher */
 }
 
 .map-controls-panel {
@@ -2554,16 +2556,6 @@ body.map-fullscreen-active {
 }
 
 .master-map-layout.fullscreen-mode {
-    /* Altera o posicionamento para o wrapper */
-    /* position: static; */
-    /* top: 0; */
-    /* left: 0; */
-    /* width: 100vw; */
-    /* height: 100vh; */
-    /* z-index: 2000; */
-    /* background-color: var(--color-background); */
-    /* padding: 1rem; */
-    /* box-sizing: border-box; */
     display: grid;
     grid-template-columns: 1fr 320px; /* Mapa à esquerda, painel de controle à direita */
     grid-template-rows: minmax(0, 1fr); /* Garante que as linhas do grid não ultrapassem a altura do contêiner */
