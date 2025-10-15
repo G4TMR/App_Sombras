@@ -3262,15 +3262,15 @@ function renderCampaignPlayers(campaign) {
 
 /**
  * Renderiza as áreas de "Fog of War" no mapa.
- * @param {object} campaign - O objeto da campanha.
+ * @param {object} boardData - Os dados da prancheta atual.
  * @param {HTMLElement} mapBoard - O elemento do tabuleiro do mapa.
  * @param {boolean} isMasterView - Se a visão é a do mestre.
  */
-function renderFogOfWar(campaign, mapBoard, isMasterView) {
+function renderFogOfWar(boardData, mapBoard, isMasterView) {
     // Limpa a névoa antiga
     mapBoard.querySelectorAll('.fog-of-war').forEach(fog => fog.remove());
 
-    if (campaign.mapData?.fog) {
+    if (boardData?.fog) {
         // Cria um único contêiner SVG para toda a névoa, para melhor performance
         const svgNS = "http://www.w3.org/2000/svg";
         const svg = document.createElementNS(svgNS, "svg");
@@ -3289,7 +3289,7 @@ function renderFogOfWar(campaign, mapBoard, isMasterView) {
         maskBackground.setAttribute('fill', 'white');
         mask.appendChild(maskBackground);
 
-        campaign.mapData.fog.forEach(fogData => {
+        boardData.fog.forEach(fogData => {
             let fogShape;
 
             // Renderiza a forma correta
@@ -3635,7 +3635,7 @@ function initializeMasterMap(campaign, socket) {
             // SIMPLIFICAÇÃO: Limpa apenas os elementos interativos do mapa principal.
             const mainMap = campaign.mapData;
             if (mainMap) {
-                mainMap.tokens = [];
+            mainMap.tokens = []; // Isso ainda está usando a estrutura antiga. Precisa ser corrigido.
                 mainMap.fog = [];
                 updateCampaign(campaign, true);
             }
@@ -3671,7 +3671,7 @@ function initializeMasterMap(campaign, socket) {
         // Esta função pode ser expandida com mais lógica de drag and drop se necessário
     }
 
-    renderMapState(campaign, true, campaign.currentBoardIndex || 0); // Renderiza o estado inicial do mapa para o mestre
+    renderMapState(campaign, true); // Renderiza o estado inicial do mapa para o mestre
     populateTokenList(); // Popula a lista de tokens
 }
 
@@ -3834,7 +3834,7 @@ function initializeMasterView(campaign, socket) {
 
                 // Se a aba do mapa for clicada, força a re-renderização do estado do mapa
                 if (tabId === 'mapa') {
-                    renderMapState(campaign, true, campaign.currentBoardIndex || 0);
+                    renderMapState(campaign, true);
                 }
 
                 tabLinks.forEach(l => l.classList.remove('active'));
@@ -3863,9 +3863,6 @@ function initializeMasterView(campaign, socket) {
             });
         }
 
-    // Renderiza o estado inicial do mapa (imagem de fundo, etc.)
-    renderMapState(campaign, true, campaign.currentBoardIndex || 0);
-
         // Inicializa o mapa do mestre (MOVENDO PARA O FINAL PARA GARANTIR QUE TUDO ESTEJA PRONTO)
         initializeMasterMap(campaign, socket);
     }
@@ -3892,21 +3889,27 @@ function initializeMasterView(campaign, socket) {
  * @param {object} campaign - O objeto da campanha.
  * @param {boolean} isMasterView - Indica se a renderização é para a visão do mestre.
  */
-function renderMapState(campaign, isMasterView, currentBoardIndex = 0) {
-    // SIMPLIFICAÇÃO: Os controles do mapa agora aparecem sempre para o mestre.
+function renderMapState(campaign, isMasterView) {
     const controlsPanel = document.querySelector('.map-controls-panel');
     if (controlsPanel) {
         controlsPanel.style.display = isMasterView ? 'flex' : 'none';
     }
 
+    const currentBoardIndex = campaign.currentBoardIndex || 0;
+    const currentBoardData = campaign.pranchetas[currentBoardIndex];
+
+    if (!currentBoardData) {
+        console.warn(`Tentando renderizar o mapa, mas a prancheta no índice ${currentBoardIndex} não foi encontrada.`);
+        return;
+    }
+
     const mapBoardId = isMasterView ? 'map-board' : 'player-map-board';
     const mapBoard = document.getElementById(mapBoardId);
-    const mapPlaceholder = mapBoard.querySelector('.map-upload-placeholder'); // Busca dentro do board correto
+    const mapPlaceholder = mapBoard.querySelector('.map-upload-placeholder');
 
-    // A renderização agora é feita por funções mais específicas
-    renderMapBackground(mapBoard, mapPlaceholder, campaign.mapData.imageUrl);
-    renderMapTokens(mapBoard, campaign.mapData.tokens, isMasterView, campaign);
-    renderFogOfWar(campaign, mapBoard, isMasterView);
+    renderMapBackground(mapBoard, mapPlaceholder, currentBoardData.imageUrl);
+    renderMapTokens(mapBoard, currentBoardData.tokens, isMasterView, campaign);
+    renderFogOfWar(currentBoardData, mapBoard, isMasterView);
 }
 
 /**
@@ -4070,7 +4073,7 @@ async function initializePlayerView(campaign, socket) {
 
             // Re-renderiza o mapa do jogador quando a aba do mapa é clicada
             if (tabId === 'player-map') {
-                renderMapState(campaign, false, campaign.currentBoardIndex || 0);
+                renderMapState(campaign, false);
             }
         });
     });
