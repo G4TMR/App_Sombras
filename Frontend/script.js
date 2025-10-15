@@ -3152,36 +3152,22 @@ async function initializeCampaignManagement() {
     let socket;
     socket = io(API_BASE_URL); // Inicializa a conexão.
     socket.on('connect', () => {
-        console.log('Conectado ao servidor de sockets!', socket.id);
+        console.log('✅ Conectado ao servidor de sockets! Entrando na sala da campanha...');
         socket.emit('join-campaign-room', campaign._id || campaign.id);
-    });
 
-    // Ouvir por atualizações do mapa
-    socket.on('map-updated', (updatedCampaignData) => {
-        console.log('Recebida atualização do mapa via socket.');
-        campaign = updatedCampaignData; // Atualiza o objeto da campanha local
-        // Re-renderiza a visão apropriada
+        // CORREÇÃO: Move a lógica de renderização para DENTRO do callback de conexão.
+        // Isso garante que a tela só seja desenhada DEPOIS que o socket estiver pronto.
         if (isOwner && viewMode !== 'player') {
+            document.getElementById('campaign-management-container').style.display = 'block';
             initializeMasterView(campaign, socket);
         } else if (isPlayer) {
+            document.getElementById('player-view-container').style.display = 'block';
             initializePlayerView(campaign, socket);
+        } else {
+            alert('Você não tem permissão para acessar esta campanha.');
+            window.location.href = 'campanhas.html';
         }
     });
-
-    // Verifica se o usuário é o dono da campanha ou um jogador
-    if (isOwner && viewMode !== 'player') {
-        // O usuário é o mestre, mostra a visão de gerenciamento
-        document.getElementById('campaign-management-container').style.display = 'block';
-        initializeMasterView(campaign, socket);
-    } else if (isPlayer) {
-        // O usuário é um jogador e quer a visão de jogador
-        document.getElementById('player-view-container').style.display = 'block';
-        initializePlayerView(campaign, socket);
-    } else {
-        // O usuário não é nem o mestre nem um jogador
-        alert('Você não tem permissão para acessar esta campanha.');
-        window.location.href = 'campanhas.html';
-    }
 }
 
 /**
