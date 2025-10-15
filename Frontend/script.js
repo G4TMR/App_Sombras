@@ -3123,8 +3123,6 @@ async function initializeCampaignManagement() {
     const campaignId = params.get('id');
     const viewMode = params.get('view'); // Novo: Captura o modo de visualização
 
-    let socket; // Variável para o socket
-
     if (!campaignId) {
         alert('ID da campanha não encontrado.');
         window.location.href = 'campanhas.html';
