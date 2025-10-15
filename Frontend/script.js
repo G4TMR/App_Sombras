@@ -3168,7 +3168,7 @@ async function initializeCampaignManagement() {
             window.location.href = 'campanhas.html';
         }
     });
-}
+} 
 
 /**
  * Adiciona uma entrada de log ao painel de atividades da campanha.
@@ -3306,6 +3306,11 @@ function renderFogOfWar(campaign, mapBoard, isMasterView) {
                     fogShape.setAttribute('points', points);
                     break;
                 case 'square':
+                // CORREÇÃO: Adiciona o case para 'path' (pincel livre)
+                case 'path':
+                    fogShape = document.createElementNS(svgNS, 'path');
+                    fogShape.setAttribute('d', fogData.d);
+                    break;
                 default:
                     fogShape = document.createElementNS(svgNS, 'rect');
                     fogShape.setAttribute('x', `${fogData.x}%`);
@@ -3316,7 +3321,14 @@ function renderFogOfWar(campaign, mapBoard, isMasterView) {
             }
 
             if (fogShape) {
+                // Estilos para o 'path' do pincel
+                if (fogData.shape === 'path') {
+                    fogShape.setAttribute('stroke', 'black'); // A cor que será removida da máscara
+                    fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}%`);
+                    fogShape.setAttribute('fill', 'none');
+                } else {
                 fogShape.setAttribute('fill', 'black'); // Áreas a serem removidas da máscara
+                }
                 fogShape.dataset.fogId = fogData.id; // Adiciona ID para permitir remoção
                 mask.appendChild(fogShape);
             }
@@ -3455,9 +3467,12 @@ function initializeMasterMap(campaign, socket) {
     removeFogBtn.addEventListener('click', (e) => {
         const fogIdToRemove = e.target.dataset.fogId;
         if (fogIdToRemove) {
-            campaign.mapData.fog = campaign.mapData.fog.filter(f => f.id !== fogIdToRemove);
-            updateCampaign(campaign, false);
-            renderFogOfWar(campaign, mapBoard, true);
+            // CORREÇÃO: Acessa o quadro de mapa atual para remover a névoa.
+            const currentBoardIndex = campaign.currentBoardIndex || 0;
+            const currentBoard = campaign.mapBoards[currentBoardIndex];
+            currentBoard.fog = currentBoard.fog.filter(f => f.id !== fogIdToRemove);
+            updateCampaign(campaign, false); // Salva a campanha inteira com a névoa do quadro atualizada.
+            renderFogOfWar(currentBoard, mapBoard, true); // Re-renderiza a névoa do quadro atual.
         }
         hideMapContextMenu();
     });
@@ -3588,24 +3603,14 @@ function initializeMasterMap(campaign, socket) {
                     }
                     break;
                 case 'brush':
-                    // Converte o caminho do SVG em uma lista de pontos percentuais
-                    const pathPoints = selectionRect.getAttribute('d').split(/[ML]/).filter(p => p.trim() !== '').map(p => {
-                        const [x, y] = p.trim().split(' ').map(Number);
-                        return {
-                            x: (x / rect.width) * 100,
-                            y: (y / rect.height) * 100
-                        };
-                    });
-
-                    // Adiciona o comando 'Z' para fechar o caminho e formar um polígono válido
-                    if (selectionRect.getAttribute('d').trim().length > 0) {
-                        selectionRect.setAttribute('d', selectionRect.getAttribute('d') + 'Z');
-                    }
-                    if (pathPoints.length > 2) { // Precisa de pelo menos 3 pontos para um polígono
+                    // CORREÇÃO: Salva o caminho do pincel como um 'path', não como um polígono.
+                    const pathData = selectionRect.getAttribute('d');
+                    if (pathData && pathData.trim().length > "M 0 0".length) { // Garante que não é só o ponto inicial
                         fogData = {
                             id: `fog_${Date.now()}`,
-                            shape: 'polygon',
-                            points: pathPoints
+                            shape: 'path',
+                            d: pathData, // Salva a string do caminho diretamente
+                            strokeWidth: 2 // Define a espessura do pincel (em porcentagem do mapa)
                         };
                     }
                     break;
@@ -3667,7 +3672,7 @@ function initializeMasterMap(campaign, socket) {
     populateTokenList(); // Popula a lista de tokens
 }
 
-/**
+/** 
  * Inicializa a visualização do Mestre para gerenciar a campanha.
  * @param {object} campaign - O objeto da campanha.
  */
@@ -3856,7 +3861,7 @@ function initializeMasterView(campaign, socket) {
         // Inicializa o mapa do mestre (MOVENDO PARA O FINAL PARA GARANTIR QUE TUDO ESTEJA PRONTO)
         initializeMasterMap(campaign, socket);
     }
-    renderMapBoardsList(campaign); // Renderiza a lista de quadros
+    renderBoardGallery(campaign, true); // Renderiza a galeria de pranchetas
 }
 
 /**
@@ -3867,13 +3872,15 @@ function initializeMasterView(campaign, socket) {
 function renderMapState(campaign, isMasterView, currentBoardIndex = 0) {
     const mapBoardId = isMasterView ? 'map-board' : 'player-map-board';
     const mapBoard = document.getElementById(mapBoardId);
-    const mapPlaceholder = document.getElementById('map-upload-placeholder');
+    const mapPlaceholder = mapBoard.querySelector('.map-upload-placeholder'); // Busca dentro do board correto
 
     const currentBoard = campaign.mapBoards?.[currentBoardIndex] || { tokens: [], fog: [] };
     if (!mapBoard || !mapPlaceholder) return;
 
     // Limpa os tokens antigos antes de renderizar os novos
     mapBoard.querySelectorAll('.map-token').forEach(token => token.remove());
+    // Limpa a névoa antiga
+    mapBoard.querySelectorAll('.fog-of-war').forEach(fog => fog.remove());
 
     // Renderiza os tokens
     if (currentBoard.tokens) {
@@ -3892,7 +3899,7 @@ function renderMapState(campaign, isMasterView, currentBoardIndex = 0) {
     }
 
     // Renderiza a névoa de guerra do quadro atual
-    renderFogOfWar(currentBoard, mapBoard, isMasterView);
+    renderFogOfWar(currentBoard, mapBoard, isMasterView); 
 }
 
 /**
@@ -3900,16 +3907,26 @@ function renderMapState(campaign, isMasterView, currentBoardIndex = 0) {
  * @param {object} campaign - O objeto da campanha.
  */
 function initializePlayerMap(campaign) {
-    renderMapState(campaign, false, campaign.currentBoardIndex || 0); // Renderiza o mapa para a visão do jogador
     const mapBoard = document.getElementById('player-map-board');
     mapBoard.classList.add('player-view'); // Adiciona classe para estilização
+
+    // Listener para atualizações do mestre
+    window.socketInstance.on('map-updated', (updatedCampaignData) => {
+        console.log('Jogador recebeu atualização do mapa via socket.');
+        // Atualiza o objeto da campanha local e re-renderiza tudo
+        Object.assign(campaign, updatedCampaignData);
+        renderMapState(campaign, false, campaign.currentBoardIndex);
+        renderBoardGallery(campaign, false); // Re-renderiza a galeria de pranchetas
+    });
+
+    renderMapState(campaign, false, campaign.currentBoardIndex || 0); // Renderiza o estado inicial
 }
 
 /**
  * Inicializa a visualização do Jogador para a campanha.
  * @param {object} campaign - O objeto da campanha.
  */
-async function initializePlayerView(campaign) {
+async function initializePlayerView(campaign, socket) {
     window.socketInstance = socket; // Torna o socket acessível globalmente nesta página
     // Garante que o ID do usuário está carregado
     const user = await checkAuthStatus();
@@ -4021,7 +4038,8 @@ async function initializePlayerView(campaign) {
             }
         });
     });
-    renderMapState(campaign, false, campaign.currentBoardIndex || 0); // Renderiza o estado inicial do mapa do jogador
+    renderMapState(campaign, false, campaign.currentBoardIndex || 0);
+    renderBoardGallery(campaign, false); // Renderiza a galeria de pranchetas para o jogador
 }
 
 /**
@@ -4198,6 +4216,83 @@ function createAgentCardForCampaign(character, campaignId, isMasterView = false)
     }
 
     return card;
+}
+
+/**
+ * Renderiza a galeria de pranchetas (mapas, imagens, etc.).
+ * @param {object} campaign - O objeto da campanha.
+ * @param {boolean} isMasterView - Se a visão é a do mestre.
+ */
+function renderBoardGallery(campaign, isMasterView) {
+    const galleryId = isMasterView ? 'board-gallery' : 'player-board-gallery';
+    const galleryContainer = document.getElementById(galleryId);
+    if (!galleryContainer) return;
+
+    galleryContainer.innerHTML = ''; // Limpa a galeria
+
+    campaign.mapBoards.forEach((board, index) => {
+        const thumb = document.createElement('div');
+        thumb.className = 'board-thumbnail';
+        thumb.title = board.name;
+        if (index === (campaign.currentBoardIndex || 0)) {
+            thumb.classList.add('active');
+        }
+
+        // Usa a imagem do quadro como miniatura, ou um placeholder
+        const thumbnailUrl = board.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjcwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyMjIiPjwvcmVjdD48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY2NiIgZm9udC1zaXplPSIxMnB4Ij5zZW0gaW1hZ2VtPC90ZXh0Pjwvc3ZnPg==';
+
+        thumb.innerHTML = `
+            <img src="${thumbnailUrl}" alt="${board.name}" class="board-thumbnail-img">
+            <div class="board-thumbnail-name">${board.name}</div>
+        `;
+
+        thumb.addEventListener('click', () => {
+            if (isMasterView) {
+                // Mestre: muda a prancheta ativa para todos
+                campaign.currentBoardIndex = index;
+                updateCampaign(campaign, true); // Salva e transmite a mudança
+                renderMapState(campaign, true, index);
+                renderBoardGallery(campaign, true); // Re-renderiza a galeria para mostrar o estado 'active'
+            } else {
+                // Jogador: visualiza a prancheta clicada
+                // Se for um mapa, troca a visão principal. Se for imagem, abre em modal.
+                const isImageOnly = board.type === 'image' || (board.imageUrl && (!board.tokens || board.tokens.length === 0) && (!board.fog || board.fog.length === 0));
+
+                if (isImageOnly) {
+                    showImageViewer(board.imageUrl, board.name);
+                    // Não muda o 'active' para que o jogador saiba qual é o mapa principal
+                } else {
+                    // Se for um mapa, apenas muda a visão localmente para o jogador
+                    renderMapState(campaign, false, index);
+                    // Atualiza qual thumbnail está "ativo" na visão do jogador
+                    galleryContainer.querySelectorAll('.board-thumbnail').forEach(t => t.classList.remove('active'));
+                    thumb.classList.add('active');
+                }
+            }
+        });
+
+        galleryContainer.appendChild(thumb);
+    });
+}
+
+/**
+ * Exibe uma imagem (pista, documento) em um modal.
+ * @param {string} imageUrl - A URL da imagem a ser exibida.
+ * @param {string} imageName - O nome/título da imagem.
+ */
+function showImageViewer(imageUrl, imageName) {
+    const modal = document.getElementById('image-viewer-modal');
+    const img = document.getElementById('image-viewer-img');
+    const closeBtn = document.getElementById('close-image-viewer-btn');
+
+    if (!modal || !img || !closeBtn) return;
+
+    img.src = imageUrl;
+    img.alt = imageName;
+    modal.classList.add('visible');
+
+    closeBtn.onclick = () => modal.classList.remove('visible');
+    modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('visible'); };
 }
 
 // =================================================================================

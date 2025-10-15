@@ -74,12 +74,11 @@
                         <!-- Layout Unificado do Mapa para o Mestre -->
                         <div class="map-layout-wrapper" id="map-layout-wrapper">
                             <!-- NOVA BARRA LATERAL DE QUADROS DO MAPA -->
-                            <div class="map-boards-sidebar">
-                                <h4>Quadros da Campanha</h4>
-                                <div id="map-boards-list" class="map-boards-list">
-                                    <!-- A lista de quadros será populada aqui -->
+                            <div class="board-gallery-container">
+                                <div id="board-gallery" class="board-gallery">
+                                    <!-- A galeria de pranchetas será populada aqui -->
                                 </div>
-                                <button id="add-map-board-btn" class="wizard-btn small-btn">Adicionar Quadro</button>
+                                <button id="add-map-board-btn" class="wizard-btn small-btn" title="Adicionar Nova Prancheta">+</button>
                             </div>
 
                             <div class="master-map-layout" id="master-map-layout">
@@ -195,6 +194,13 @@
 
             <!-- Mapa do Jogador -->
             <div class="tab-content" id="player-map">
+                <!-- Galeria de Pranchetas para o Jogador -->
+                <div class="board-gallery-container player-view">
+                    <div id="player-board-gallery" class="board-gallery">
+                        <!-- A galeria de pranchetas do jogador será populada aqui -->
+                    </div>
+                </div>
+
                 <div class="map-container player-view">
                     <div id="player-map-board" class="map-board">
                     </div>
@@ -248,6 +254,14 @@
                 <button id="cancel-add-agent-btn" class="wizard-btn danger-btn">Cancelar</button>
                 <a href="criar-agente.html" id="create-and-add-agent-btn" class="wizard-btn">Criar Novo Agente</a>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal para Visualizar Imagens (Pistas, Documentos) -->
+    <div id="image-viewer-modal" class="modal-overlay">
+        <div class="image-viewer-content">
+            <button id="close-image-viewer-btn" class="close-viewer-btn">&times;</button>
+            <img id="image-viewer-img" src="" alt="Visualização de Imagem">
         </div>
     </div>
 
