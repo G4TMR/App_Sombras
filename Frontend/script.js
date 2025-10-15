@@ -3675,26 +3675,6 @@ function initializeMasterMap(campaign, socket) {
     populateTokenList(); // Popula a lista de tokens
 }
 
-/**
- * Alterna entre a visão da galeria e a visão do mapa principal.
- * @param {boolean} showMap - True para mostrar o mapa, false para mostrar a galeria.
- * @param {object} campaign - O objeto da campanha.
- */
-function toggleMapGalleryView(showMap, campaign) {
-    const galleryView = document.getElementById('gallery-view');
-    const mapView = document.getElementById('map-view');
-
-    if (showMap) {
-        galleryView.style.display = 'none';
-        mapView.style.display = 'block';
-        // Garante que o mapa seja renderizado corretamente ao ser exibido
-        renderMapState(campaign, true);
-    } else {
-        galleryView.style.display = 'block';
-        mapView.style.display = 'none';
-    }
-}
-
 /** 
  * Inicializa a visualização do Mestre para gerenciar a campanha.
  * @param {object} campaign - O objeto da campanha.
@@ -3892,18 +3872,6 @@ function initializeMasterView(campaign, socket) {
             renderBoardGallery(campaign, true); // Re-renderiza a galeria para o mestre
         });
     }
-
-    // Lógica para alternar entre galeria e mapa
-    const openMapViewBtn = document.getElementById('open-map-view-btn');
-    const backToGalleryBtn = document.getElementById('back-to-gallery-btn');
-
-    openMapViewBtn.addEventListener('click', () => {
-        toggleMapGalleryView(true, campaign);
-    });
-
-    backToGalleryBtn.addEventListener('click', () => {
-        toggleMapGalleryView(false, campaign);
-    });
 }
 
 /**
@@ -4312,21 +4280,13 @@ function renderGalleryForContainer(campaign, isMasterView, galleryContainer) {
             ${isMasterView ? '<button class="delete-board-btn">&times;</button>' : ''}
         `;
 
-        thumb.addEventListener('click', () => {
-            // Define esta prancheta como a ativa
+        // O evento de clique agora é no contêiner da imagem para não conflitar com o input
+        const imgContainer = thumb.querySelector('.board-thumbnail-img');
+        imgContainer.addEventListener('click', () => {
+            // Define esta prancheta como a ativa e atualiza tudo
             campaign.currentBoardIndex = index;
-            
-            // Para o mestre, a mudança de prancheta ativa é salva e transmitida
-            if (isMasterView) {
-                updateCampaign(campaign, true);
-            }
-
-            // Atualiza a UI para refletir a seleção
-            galleryContainer.querySelectorAll('.board-thumbnail').forEach(t => t.classList.remove('active'));
-            thumb.classList.add('active');
-
-            // Se não for o mestre, renderiza o mapa para o jogador
-            if (!isMasterView) renderMapState(campaign, false);
+            updateCampaign(campaign, true); // Salva e transmite a mudança para todos
+            // A atualização da UI (renderMapState) será tratada pelo listener 'map-updated'
         });
 
         galleryContainer.appendChild(thumb);
