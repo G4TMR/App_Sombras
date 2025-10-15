@@ -3867,7 +3867,7 @@ function initializeMasterView(campaign, socket) {
     renderMapState(campaign, true, campaign.currentBoardIndex || 0);
 
         // Inicializa o mapa do mestre (MOVENDO PARA O FINAL PARA GARANTIR QUE TUDO ESTEJA PRONTO)
-        initializeMasterMap(campaign);
+        initializeMasterMap(campaign, socket);
     }
     renderBoardGallery(campaign, true); // Renderiza a galeria de pranchetas
 
