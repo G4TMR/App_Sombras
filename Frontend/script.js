@@ -3123,12 +3123,6 @@ async function initializeCampaignManagement() {
     const campaignId = params.get('id');
     const viewMode = params.get('view'); // Novo: Captura o modo de visualização
 
-    if (!campaignId) {
-        alert('ID da campanha não encontrado.');
-        window.location.href = 'campanhas.html';
-        return;
-    }
-
     // Garante que o ID do usuário atual está carregado
     const user = await checkAuthStatus();
     if (!user) {
@@ -3137,6 +3131,12 @@ async function initializeCampaignManagement() {
         return;
     }
     const userId = user._id;
+
+    if (!campaignId) {
+        alert('ID da campanha não encontrado.');
+        window.location.href = 'campanhas.html';
+        return;
+    }
 
     let campaign = await getCampaignById(campaignId);
     if (!campaign) {
@@ -3148,8 +3148,9 @@ async function initializeCampaignManagement() {
     const isOwner = getObjectIdAsString(campaign.ownerId) === userId;
     const isPlayer = campaign.players && campaign.players.some(p => getObjectIdAsString(p) === userId);
 
-    // Conectar ao Socket.IO e entrar na sala da campanha
-    socket = io(API_BASE_URL);
+    // CORREÇÃO: Declara o socket no escopo da função para que seja acessível em todos os blocos.
+    let socket;
+    socket = io(API_BASE_URL); // Inicializa a conexão.
     socket.on('connect', () => {
         console.log('Conectado ao servidor de sockets!', socket.id);
         socket.emit('join-campaign-room', campaign._id || campaign.id);
