@@ -3631,12 +3631,12 @@ function initializeMasterMap(campaign, socket) {
     // Resetar o mapa
     const resetMapBtn = document.getElementById('reset-map-btn');
     resetMapBtn.addEventListener('click', () => {
-        if (confirm('Tem certeza que deseja limpar o Quadro Principal (remover todos os tokens e toda a névoa)? A imagem de fundo será mantida.')) {
-            // SIMPLIFICAÇÃO: Limpa apenas os elementos interativos do mapa principal.
-            const mainMap = campaign.mapData;
-            if (mainMap) {
-            mainMap.tokens = []; // Isso ainda está usando a estrutura antiga. Precisa ser corrigido.
-                mainMap.fog = [];
+        if (confirm('Tem certeza que deseja limpar esta prancheta (remover todos os tokens e toda a névoa)? A imagem de fundo será mantida.')) {
+            const currentBoardIndex = campaign.currentBoardIndex || 0;
+            const currentBoard = campaign.pranchetas[currentBoardIndex];
+            if (currentBoard) {
+                currentBoard.tokens = [];
+                currentBoard.fog = [];
                 updateCampaign(campaign, true);
             }
         }
@@ -3675,6 +3675,26 @@ function initializeMasterMap(campaign, socket) {
     populateTokenList(); // Popula a lista de tokens
 }
 
+/**
+ * Alterna entre a visão da galeria e a visão do mapa principal.
+ * @param {boolean} showMap - True para mostrar o mapa, false para mostrar a galeria.
+ * @param {object} campaign - O objeto da campanha.
+ */
+function toggleMapGalleryView(showMap, campaign) {
+    const galleryView = document.getElementById('gallery-view');
+    const mapView = document.getElementById('map-view');
+
+    if (showMap) {
+        galleryView.style.display = 'none';
+        mapView.style.display = 'block';
+        // Garante que o mapa seja renderizado corretamente ao ser exibido
+        renderMapState(campaign, true);
+    } else {
+        galleryView.style.display = 'block';
+        mapView.style.display = 'none';
+    }
+}
+
 /** 
  * Inicializa a visualização do Mestre para gerenciar a campanha.
  * @param {object} campaign - O objeto da campanha.
@@ -3699,30 +3719,20 @@ function initializeMasterView(campaign, socket) {
     // Lógica de upload do mapa (MOVIDO PARA CÁ)
     // Garante que o upload funcione mesmo fora do modo tela cheia.
     const mapBoard = document.getElementById('map-board');
-    const mapUploadInput = document.getElementById('map-upload-input');
-    if (mapUploadInput && mapBoard) {
-        mapUploadInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            const activePranchetaId = document.querySelector('.board-thumbnail.active')?.dataset.id;
-            if (file && activePranchetaId) {
-                const imageUrl = await readFileAsDataURL(file);
-                const prancheta = campaign.pranchetas.find(p => p.id === activePranchetaId);
-                if (prancheta) {
-                    prancheta.imageUrl = imageUrl;
-                }
-                await updateCampaign(campaign, true); // Salva e transmite para todos
-            }
-        });
-    }
+    const mapUploadInput = document.getElementById('map-upload-input'); // O input de arquivo
+    mapUploadInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        const currentBoardIndex = campaign.currentBoardIndex || 0;
+        const prancheta = campaign.pranchetas[currentBoardIndex];
+        if (file && prancheta) {
+            prancheta.imageUrl = await readFileAsDataURL(file);
+            await updateCampaign(campaign, true); // Salva e transmite para todos
+        }
+    });
     // Migração de dados para campanhas antigas
     let needsSave = false;
     if (!campaign.players) { campaign.players = []; needsSave = true; }
     if (!campaign.inviteCode) { campaign.inviteCode = generateUniqueInviteCode(); needsSave = true; }
-    // Migração para múltiplos quadros de mapa
-    if (!campaign.mapData) {
-        campaign.mapData = { imageUrl: null, tokens: [], fog: [] };
-        needsSave = true;
-    }
     // NOVA ESTRUTURA: Garante que a galeria de pranchetas exista
     if (!campaign.pranchetas) {
         campaign.pranchetas = [];
@@ -3882,6 +3892,18 @@ function initializeMasterView(campaign, socket) {
             renderBoardGallery(campaign, true); // Re-renderiza a galeria para o mestre
         });
     }
+
+    // Lógica para alternar entre galeria e mapa
+    const openMapViewBtn = document.getElementById('open-map-view-btn');
+    const backToGalleryBtn = document.getElementById('back-to-gallery-btn');
+
+    openMapViewBtn.addEventListener('click', () => {
+        toggleMapGalleryView(true, campaign);
+    });
+
+    backToGalleryBtn.addEventListener('click', () => {
+        toggleMapGalleryView(false, campaign);
+    });
 }
 
 /**
@@ -4267,13 +4289,14 @@ function renderBoardGallery(campaign, isMasterView) {
     const playerGallery = document.getElementById('player-board-gallery');
     if (masterGallery) renderGalleryForContainer(campaign, true, masterGallery);
     if (playerGallery) renderGalleryForContainer(campaign, false, playerGallery);
+    
 }
 
 function renderGalleryForContainer(campaign, isMasterView, galleryContainer) {
     galleryContainer.innerHTML = ''; // Limpa a galeria
 
-    campaign.mapBoards.forEach((board, index) => {
-        const thumb = document.createElement('div');
+    campaign.pranchetas.forEach((board, index) => {
+        const thumb = document.createElement('div'); // A miniatura clicável
         thumb.className = 'board-thumbnail';
         thumb.title = board.name;
         if (index === (campaign.currentBoardIndex || 0)) {
@@ -4284,26 +4307,26 @@ function renderGalleryForContainer(campaign, isMasterView, galleryContainer) {
         const thumbnailUrl = board.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjcwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyMjIiPjwvcmVjdD48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY2NiIgZm9udC1zaXplPSIxMnB4Ij5zZW0gaW1hZ2VtPC90ZXh0Pjwvc3ZnPg==';
 
         thumb.innerHTML = `
-            <img src="${thumbnailUrl}" alt="${board.name}" class="board-thumbnail-img">
-            <div class="board-thumbnail-name">${board.name}</div>
+            <div class="board-thumbnail-img" style="background-image: url('${thumbnailUrl}')"></div>
+            <input type="text" class="board-thumbnail-name" value="${board.name}" ${isMasterView ? '' : 'readonly'}>
+            ${isMasterView ? '<button class="delete-board-btn">&times;</button>' : ''}
         `;
 
         thumb.addEventListener('click', () => {
+            // Define esta prancheta como a ativa
+            campaign.currentBoardIndex = index;
+            
+            // Para o mestre, a mudança de prancheta ativa é salva e transmitida
             if (isMasterView) {
-                // Mestre: muda a prancheta ativa para todos
-                campaign.currentBoardIndex = index;
-                updateCampaign(campaign, true); // Salva e transmite a mudança. O listener 'map-updated' cuidará do resto.
-            } else {
-                // Jogador: visualiza a prancheta clicada
-                // Se for uma imagem, abre no modal. Se for um mapa, troca a visão principal.
-                if (board.type === 'image') {
-                    showImageViewer(board.imageUrl, board.name);
-                } else {
-                    renderMapState(campaign, false, index);
-                    galleryContainer.querySelectorAll('.board-thumbnail').forEach(t => t.classList.remove('active'));
-                    thumb.classList.add('active');
-                }
+                updateCampaign(campaign, true);
             }
+
+            // Atualiza a UI para refletir a seleção
+            galleryContainer.querySelectorAll('.board-thumbnail').forEach(t => t.classList.remove('active'));
+            thumb.classList.add('active');
+
+            // Se não for o mestre, renderiza o mapa para o jogador
+            if (!isMasterView) renderMapState(campaign, false);
         });
 
         galleryContainer.appendChild(thumb);
