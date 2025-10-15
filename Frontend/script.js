@@ -3867,7 +3867,7 @@ function initializeMasterView(campaign, socket) {
     renderMapState(campaign, true, campaign.currentBoardIndex || 0);
 
         // Inicializa o mapa do mestre (MOVENDO PARA O FINAL PARA GARANTIR QUE TUDO ESTEJA PRONTO)
-        initializeMasterMap(campaign, socket);
+        initializeMasterMap(campaign);
     }
     renderBoardGallery(campaign, true); // Renderiza a galeria de pranchetas
 
@@ -3916,16 +3916,6 @@ function renderMapState(campaign, isMasterView, currentBoardIndex = 0) {
 function initializePlayerMap(campaign) {
     const mapBoard = document.getElementById('player-map-board');
     mapBoard.classList.add('player-view'); // Adiciona classe para estilização
-
-    // Listener para atualizações do mestre
-    window.socketInstance.on('map-updated', (updatedCampaignData) => {
-        console.log('Jogador recebeu atualização da campanha via socket.');
-        // Atualiza o objeto da campanha local e re-renderiza tudo
-        Object.assign(campaign, updatedCampaignData);
-        renderMapBackground(campaign.mapData.imageUrl);
-        renderMapTokens(campaign.mapData.tokens, false, campaign);
-        renderBoardGallery(campaign, false); // Re-renderiza a galeria de pranchetas
-    });
 
     renderMapState(campaign, false); // Renderiza o estado inicial
 }
