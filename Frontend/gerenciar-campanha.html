@@ -252,7 +252,16 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script> <!-- Adiciona o cliente Socket.IO -->
+    <!-- CORREÇÃO: Carrega o cliente Socket.IO dinamicamente a partir da URL do backend -->
+    <script>
+        // Esta lógica precisa estar ANTES de carregar o script.js
+        const backendUrl = localStorage.getItem('devMode') === 'true' 
+            ? 'http://localhost:3000' 
+            : 'https://app-sombras.onrender.com';
+        const socketScript = document.createElement('script');
+        socketScript.src = `${backendUrl}/socket.io/socket.io.js`;
+        document.body.appendChild(socketScript);
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
