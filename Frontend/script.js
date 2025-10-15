@@ -3904,9 +3904,47 @@ function renderMapState(campaign, isMasterView, currentBoardIndex = 0) {
     const mapPlaceholder = mapBoard.querySelector('.map-upload-placeholder'); // Busca dentro do board correto
 
     // A renderização agora é feita por funções mais específicas
-    renderMapBackground(campaign.mapData.imageUrl);
-    renderMapTokens(campaign.mapData.tokens, isMasterView, campaign);
-    renderFogOfWar(campaign.mapData.fog, isMasterView);
+    renderMapBackground(mapBoard, mapPlaceholder, campaign.mapData.imageUrl);
+    renderMapTokens(mapBoard, campaign.mapData.tokens, isMasterView, campaign);
+    renderFogOfWar(campaign, mapBoard, isMasterView);
+}
+
+/**
+ * Renderiza a imagem de fundo do mapa.
+ * @param {HTMLElement} mapBoard - O elemento do tabuleiro do mapa.
+ * @param {HTMLElement} mapPlaceholder - O elemento do placeholder.
+ * @param {string|null} imageUrl - A URL da imagem de fundo.
+ */
+function renderMapBackground(mapBoard, mapPlaceholder, imageUrl) {
+    if (imageUrl) {
+        mapBoard.style.backgroundImage = `url('${imageUrl}')`;
+        if (mapPlaceholder) mapPlaceholder.style.display = 'none';
+    } else {
+        mapBoard.style.backgroundImage = 'none';
+        if (mapPlaceholder) mapPlaceholder.style.display = 'flex';
+    }
+}
+
+/**
+ * Renderiza os tokens no mapa.
+ * @param {HTMLElement} mapBoard - O elemento do tabuleiro do mapa.
+ * @param {Array} tokens - A lista de tokens da campanha.
+ * @param {boolean} isMasterView - Se a visão é a do mestre.
+ * @param {object} campaign - O objeto da campanha.
+ */
+function renderMapTokens(mapBoard, tokens, isMasterView, campaign) {
+    // Limpa tokens antigos para evitar duplicação
+    mapBoard.querySelectorAll('.map-token').forEach(t => t.remove());
+
+    if (tokens && tokens.length > 0) {
+        tokens.forEach(tokenData => {
+            const isOwner = getObjectIdAsString(campaign.ownerId) === currentUserId;
+            // Para a visão do jogador, o token só é arrastável se ele for o dono do personagem
+            // Para a visão do mestre, todos os tokens são arrastáveis
+            const isDraggable = isMasterView || isOwner;
+            createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable, isOwner);
+        });
+    }
 }
 
 /**
