@@ -2515,8 +2515,8 @@ body[data-page="patente"] { --page-color: #6f42c1; }
 
 .master-map-layout {
     display: grid;
-    grid-template-columns: 1fr; /* Por padrão, só o mapa é visível */
-    grid-template-rows: minmax(0, 1fr); /* Garante que a linha não estoure a altura */
+    grid-template-columns: 1fr 320px; /* Mapa à esquerda, painel de controle à direita */
+    grid-template-rows: minmax(0, 1fr); /* Garante que as linhas do grid não ultrapassem a altura do contêiner */
     gap: 1rem;
     width: 100%;
 }
@@ -2536,7 +2536,6 @@ body[data-page="patente"] { --page-color: #6f42c1; }
 }
 
 .map-controls-panel {
-    display: none; /* Oculto por padrão */
     background-color: rgba(24, 24, 24, 0.8);
     padding: 1rem;
     border-radius: 8px;
@@ -2556,12 +2555,7 @@ body.map-fullscreen-active {
 }
 
 .master-map-layout.fullscreen-mode {
-    display: grid;
-    grid-template-columns: 1fr 320px; /* Mapa à esquerda, painel de controle à direita */
-    grid-template-rows: minmax(0, 1fr); /* Garante que as linhas do grid não ultrapassem a altura do contêiner */
-    gap: 1rem;
-}
-
+    /* A estrutura de grid já é a padrão, então não precisamos redefinir aqui */
 .map-layout-wrapper.fullscreen-mode {
     position: fixed;
     top: 0;
@@ -2571,10 +2565,6 @@ body.map-fullscreen-active {
     z-index: 2000;
     box-sizing: border-box;
     padding: 1rem;
-}
-
-.master-map-layout.fullscreen-mode .map-controls-panel {
-    display: block; /* Mostra o painel de controle em tela cheia */
 }
 
 /* Esconde o header principal quando o mapa está em tela cheia */

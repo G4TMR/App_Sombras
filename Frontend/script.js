@@ -3884,11 +3884,6 @@ function initializeMasterView(campaign, socket) {
  * @param {boolean} isMasterView - Indica se a renderização é para a visão do mestre.
  */
 function renderMapState(campaign, isMasterView) {
-    const controlsPanel = document.querySelector('.map-controls-panel');
-    if (controlsPanel) {
-        controlsPanel.style.display = isMasterView ? 'flex' : 'none';
-    }
-
     const currentBoardIndex = campaign.currentBoardIndex || 0;
     const currentBoardData = campaign.pranchetas[currentBoardIndex];
 
