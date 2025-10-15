@@ -3715,8 +3715,12 @@ function initializeMasterView(campaign, socket) {
     if (!campaign.inviteCode) { campaign.inviteCode = generateUniqueInviteCode(); needsSave = true; }
     // NOVA ESTRUTURA: Garante que a galeria de pranchetas exista
     if (!campaign.pranchetas) {
-        campaign.pranchetas = [];
-        needsSave = true;
+        // Se não existir, cria com UMA prancheta padrão
+        campaign.pranchetas = [{
+            id: `board_${Date.now()}`,
+            name: 'Cena 1',
+            imageUrl: null, tokens: [], fog: []
+        }];
     }
     if (needsSave) {
         console.log("Migrando campanha antiga. Adicionando campos faltantes.");
