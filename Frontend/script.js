@@ -1514,7 +1514,7 @@ class CharacterCreator {
     setupPersonalizationForm() {
         const form = this.elements.personalizationForm;
         if (!form) return;
-
+ 
         // Se estiver criando para uma campanha, passa o ID para o formulário
         const campaignId = new URLSearchParams(window.location.search).get('campaignId');
         if (campaignId) {
@@ -1540,12 +1540,12 @@ class CharacterCreator {
         // Lida com o campo de imagem
         const imageInput = document.getElementById('char-image-input');
         const imagePreview = document.getElementById('char-image-preview');
-        imagePreview.src = 'https://via.placeholder.com/150'; // Placeholder inicial
+        imagePreview.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjM2QzZDRmIj48L3JlY3Q+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNhYWFiYmYiIGZvbnQtc2l6ZT0iMjBweCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiPjE1MHgxNTA8L3RleHQ+PC9zdmc+'; // Placeholder inicial
         imageInput.addEventListener('change', async () => {
             const file = imageInput.files[0];
             if (file) {
                 this.currentCharacter.personalization.imageUrl = await readFileAsDataURL(file);
-                imagePreview.src = this.currentCharacter.personalization.imageUrl || 'https://via.placeholder.com/150';
+                imagePreview.src = this.currentCharacter.personalization.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjM2QzZDRmIj48L3JlY3Q+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNhYWFiYmYiIGZvbnQtc2l6ZT0iMjBweCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiPjE1MHgxNTA8L3RleHQ+PC9zdmc+';
             }
         });
     }
@@ -1758,7 +1758,7 @@ class CharacterDisplay {
         card.dataset.id = character._id || character.id;
 
        card.innerHTML = `
-            <img src="${p.imageUrl || 'https://via.placeholder.com/200x250'}" alt="Retrato de ${p.name}" class="character-card-image">
+            <img src="${p.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjM2QzZDRmIj48L3JlY3Q+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNhYWFiYmYiIGZvbnQtc2l6ZT0iMjBweCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiPjIwMHgyNTA8L3RleHQ+PC9zdmc+'}" alt="Retrato de ${p.name}" class="character-card-image">
             <div class="character-header">
                 <h3>${p.name || 'Agente Sem Nome'}</h3>
                 <span class="character-class">${character.class || 'Classe Desconhecida'}</span>
@@ -1972,7 +1972,7 @@ class CharacterSheet {
 
         // Atualiza o cabeçalho
         if (charImage) {
-            charImage.src = personalization.imageUrl || 'https://via.placeholder.com/150';
+            charImage.src = personalization.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjM2QzZDRmIj48L3JlY3Q+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNhYWFiYmYiIGZvbnQtc2l6ZT0iMjBweCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiPjE1MHgxNTA8L3RleHQ+PC9zdmc+';
             charImage.alt = `Retrato de ${personalization.name || 'Agente Sem Nome'}`;
         }
         header.querySelector('h2').textContent = personalization.name || 'Agente Sem Nome';
@@ -3378,7 +3378,7 @@ function hideMapContextMenu() {
  * Inicializa a funcionalidade do mapa interativo para o mestre.
  * @param {object} campaign - O objeto da campanha.
  */
-function initializeMasterMap(campaign) {
+function initializeMasterMap(campaign, socket) {
     window.socketInstance = socket; // Torna o socket acessível globalmente
     const mapBoard = document.getElementById('map-board');
     const mapPlaceholder = document.getElementById('map-upload-placeholder');
@@ -3403,7 +3403,7 @@ function initializeMasterMap(campaign) {
             tokenListItem.draggable = true;
             tokenListItem.dataset.characterId = char._id;
             tokenListItem.innerHTML = `
-                <img src="${char.personalization.imageUrl || 'https://via.placeholder.com/40'}" alt="${char.personalization.name}">
+                <img src="${char.personalization.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzNkM2Q0ZiI+PC9yZWN0Pjwvc3ZnPg=='}" alt="${char.personalization.name}">
                 <span>${char.personalization.name}</span>
             `;
             tokenList.appendChild(tokenListItem);
@@ -3430,7 +3430,7 @@ function initializeMasterMap(campaign) {
             const tokenData = {
                 id: `token_${charId}`,
                 characterId: charId,
-                imageUrl: character.personalization.imageUrl || 'https://via.placeholder.com/50',
+                imageUrl: character.personalization.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzNkM2Q0ZiI+PC9yZWN0Pjwvc3ZnPg==',
                 x: (x / rect.width) * 100, // Salva como porcentagem
                 y: (y / rect.height) * 100,
                 locked: false,
@@ -3761,7 +3761,7 @@ function initializeMasterView(campaign, socket) {
     document.getElementById('edit-campaign-info-btn').addEventListener('click', () => {
         titleModalInput.value = campaign.title;
         synopsisModalTextarea.value = campaign.synopsis;
-    imageModalPreview.src = campaign.imageUrl || 'https://via.placeholder.com/300x180';
+    imageModalPreview.src = campaign.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjM2QzZDRmIj48L3JlY3Q+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNhYWFiYmYiIGZvbnQtc2l6ZT0iMjBweCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiPjMwMHgyNTA8L3RleHQ+PC9zdmc+';
         imageFileInput.value = ''; // Limpa o seletor de arquivo
         modalOverlay.classList.add('visible');
     });
@@ -3787,11 +3787,14 @@ function initializeMasterView(campaign, socket) {
             return;
         }
 
-        const updatedCampaignData = { _id: campaign._id, id: campaign.id, title, synopsis, imageUrl };
-        updateCampaign(updatedCampaignData, true);
+        // Atualiza o objeto da campanha localmente
+        campaign.title = title;
+        campaign.synopsis = synopsis;
+        campaign.imageUrl = imageUrl;
         
+        updateCampaign(campaign, true); // Envia o objeto completo para o backend
+
         // Atualiza a UI e fecha o modal
-        initializeMasterView(Object.assign(campaign, updatedCampaignData)); // Atualiza a view com os novos dados
         modalOverlay.classList.remove('visible');
     });
 
@@ -3851,7 +3854,7 @@ function initializeMasterView(campaign, socket) {
     renderMapState(campaign, true, campaign.currentBoardIndex || 0);
 
         // Inicializa o mapa do mestre (MOVENDO PARA O FINAL PARA GARANTIR QUE TUDO ESTEJA PRONTO)
-        initializeMasterMap(campaign);
+        initializeMasterMap(campaign, socket);
     }
     renderMapBoardsList(campaign); // Renderiza a lista de quadros
 }
@@ -4055,7 +4058,7 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true, i
         mapBoard.appendChild(tokenElement);
     }
 
-    tokenElement.style.backgroundImage = `url('${tokenData.imageUrl || 'https://via.placeholder.com/50'}')`;
+    tokenElement.style.backgroundImage = `url('${tokenData.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzNkM2Q0ZiI+PC9yZWN0Pjwvc3ZnPg=='}')`;
     tokenElement.style.left = `${tokenData.x}%`;
     tokenElement.style.top = `${tokenData.y}%`;
 
@@ -4168,7 +4171,7 @@ function createAgentCardForCampaign(character, campaignId, isMasterView = false)
         ? `<button class="delete-btn small-btn" title="Remover da Campanha">&times;</button>`
         : '';
     card.innerHTML = `
-        <img src="${p.imageUrl || 'https://via.placeholder.com/200x250'}" alt="Retrato de ${p.name}" class="character-card-image">
+        <img src="${p.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjM2QzZDRmIj48L3JlY3Q+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNhYWFiYmYiIGZvbnQtc2l6ZT0iMjBweCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiPjIwMHgyNTA8L3RleHQ+PC9zdmc+'}" alt="Retrato de ${p.name}" class="character-card-image">
         <div class="character-header">
             <h3>${p.name || 'Agente Sem Nome'}</h3>
             <span class="character-class">${character.class || 'Classe'}</span>
