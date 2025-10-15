@@ -3631,11 +3631,15 @@ function initializeMasterMap(campaign, socket) {
     // Resetar o mapa
     const resetMapBtn = document.getElementById('reset-map-btn');
     resetMapBtn.addEventListener('click', () => {
-        if (confirm('Tem certeza que deseja limpar o mapa (remover imagem de fundo, tokens e névoa)?')) {
-            campaign.mapData = { imageUrl: null, tokens: [], fog: [] };
-            updateCampaign(campaign);
-            renderMapState(campaign);
-            populateTokenList(); // Repopula a lista de tokens caso algo tenha mudado
+        if (confirm('Tem certeza que deseja limpar a prancheta atual (remover imagem de fundo, tokens e névoa)?')) {
+            // CORREÇÃO: Limpa a prancheta atual em vez da estrutura antiga.
+            const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
+            if (currentBoard) {
+                currentBoard.imageUrl = null;
+                currentBoard.tokens = [];
+                currentBoard.fog = [];
+                updateCampaign(campaign, true); // Salva e transmite a alteração
+            }
         }
     });
 
@@ -3695,17 +3699,15 @@ function initializeMasterView(campaign, socket) {
     // Lógica de upload do mapa (MOVIDO PARA CÁ)
     // Garante que o upload funcione mesmo fora do modo tela cheia.
     const mapBoard = document.getElementById('map-board');
-    const uploadInput = document.getElementById('map-upload-input');
-    if (uploadInput && mapBoard) {
-        uploadInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
+    const mapUploadInput = document.getElementById('map-upload-input');
+    if (mapUploadInput && mapBoard) {
+        mapUploadInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];            
             const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
-            if (file) {
+            if (file && currentBoard) {
                 const imageUrl = await readFileAsDataURL(file);
-                if (!currentBoard) return;
                 currentBoard.imageUrl = imageUrl;
                 await updateCampaign(campaign, true); // Salva a campanha com a nova imagem
-                renderMapState(campaign, true, campaign.currentBoardIndex); // Re-renderiza o mapa para mostrar a nova imagem
             }
         });
     }
@@ -3862,6 +3864,23 @@ function initializeMasterView(campaign, socket) {
         initializeMasterMap(campaign, socket);
     }
     renderBoardGallery(campaign, true); // Renderiza a galeria de pranchetas
+
+    // FUNCIONALIDADE: Adicionar nova prancheta
+    const addBoardBtn = document.getElementById('add-map-board-btn');
+    if (addBoardBtn) {
+        addBoardBtn.addEventListener('click', () => {
+            const newBoardName = `Prancheta ${campaign.mapBoards.length + 1}`;
+            const newBoard = {
+                id: `board_${Date.now()}`,
+                name: newBoardName,
+                imageUrl: null, 
+                tokens: [],
+                fog: []
+            };
+            campaign.mapBoards.push(newBoard);
+            updateCampaign(campaign, true); // Salva e transmite a nova prancheta
+        });
+    }
 }
 
 /**
@@ -3870,6 +3889,12 @@ function initializeMasterView(campaign, socket) {
  * @param {boolean} isMasterView - Indica se a renderização é para a visão do mestre.
  */
 function renderMapState(campaign, isMasterView, currentBoardIndex = 0) {
+    // SIMPLIFICAÇÃO: Os controles do mapa agora aparecem sempre para o mestre.
+    const controlsPanel = document.querySelector('.map-controls-panel');
+    if (controlsPanel) {
+        controlsPanel.style.display = isMasterView ? 'flex' : 'none';
+    }
+
     const mapBoardId = isMasterView ? 'map-board' : 'player-map-board';
     const mapBoard = document.getElementById(mapBoardId);
     const mapPlaceholder = mapBoard.querySelector('.map-upload-placeholder'); // Busca dentro do board correto
@@ -4224,10 +4249,14 @@ function createAgentCardForCampaign(character, campaignId, isMasterView = false)
  * @param {boolean} isMasterView - Se a visão é a do mestre.
  */
 function renderBoardGallery(campaign, isMasterView) {
-    const galleryId = isMasterView ? 'board-gallery' : 'player-board-gallery';
-    const galleryContainer = document.getElementById(galleryId);
-    if (!galleryContainer) return;
+    // BUGFIX: Garante que a galeria do jogador seja renderizada mesmo que a do mestre não esteja na tela
+    const masterGallery = document.getElementById('board-gallery');
+    const playerGallery = document.getElementById('player-board-gallery');
+    if (masterGallery) renderGalleryForContainer(campaign, true, masterGallery);
+    if (playerGallery) renderGalleryForContainer(campaign, false, playerGallery);
+}
 
+function renderGalleryForContainer(campaign, isMasterView, galleryContainer) {
     galleryContainer.innerHTML = ''; // Limpa a galeria
 
     campaign.mapBoards.forEach((board, index) => {
@@ -4250,24 +4279,14 @@ function renderBoardGallery(campaign, isMasterView) {
             if (isMasterView) {
                 // Mestre: muda a prancheta ativa para todos
                 campaign.currentBoardIndex = index;
-                updateCampaign(campaign, true); // Salva e transmite a mudança
-                renderMapState(campaign, true, index);
-                renderBoardGallery(campaign, true); // Re-renderiza a galeria para mostrar o estado 'active'
+                updateCampaign(campaign, true); // Salva e transmite a mudança. O listener 'map-updated' cuidará do resto.
             } else {
                 // Jogador: visualiza a prancheta clicada
-                // Se for um mapa, troca a visão principal. Se for imagem, abre em modal.
-                const isImageOnly = board.type === 'image' || (board.imageUrl && (!board.tokens || board.tokens.length === 0) && (!board.fog || board.fog.length === 0));
-
-                if (isImageOnly) {
-                    showImageViewer(board.imageUrl, board.name);
-                    // Não muda o 'active' para que o jogador saiba qual é o mapa principal
-                } else {
-                    // Se for um mapa, apenas muda a visão localmente para o jogador
-                    renderMapState(campaign, false, index);
-                    // Atualiza qual thumbnail está "ativo" na visão do jogador
-                    galleryContainer.querySelectorAll('.board-thumbnail').forEach(t => t.classList.remove('active'));
-                    thumb.classList.add('active');
-                }
+                // SIMPLIFICAÇÃO: O jogador sempre troca a visão principal ao clicar.
+                renderMapState(campaign, false, index);
+                // Atualiza qual thumbnail está "ativo" na visão do jogador
+                galleryContainer.querySelectorAll('.board-thumbnail').forEach(t => t.classList.remove('active'));
+                thumb.classList.add('active');
             }
         });
 
