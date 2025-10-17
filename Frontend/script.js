@@ -3355,7 +3355,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView) {
                 const fogId = e.target.dataset.fogId;
                 if (fogId) {
                     showMapContextMenu(e.clientX, e.clientY, fogId);
-                }
+                } 
             });
         }
     }
@@ -3367,13 +3367,18 @@ function renderFogOfWar(boardData, mapBoard, isMasterView) {
  * @param {number} y - Posição Y do mouse.
  * @param {string|null} fogId - O ID da área de névoa clicada, se houver.
  */
-function showMapContextMenu(x, y, fogId = null) {
+function showMapContextMenu(x, y, contextData) {
     const menu = document.getElementById('map-context-menu');
     menu.style.display = 'block';
     menu.style.left = `${x}px`;
     menu.style.top = `${y}px`;
 
+    const { fogId, boardId } = contextData;
+
     const removeFogOption = document.getElementById('remove-fog-area');
+    const renameBoardOption = document.getElementById('rename-board-option');
+    const deleteBoardOption = document.getElementById('delete-board-option');
+
     removeFogOption.style.display = fogId ? 'block' : 'none';
     removeFogOption.dataset.fogId = fogId;
 }
@@ -3385,7 +3390,6 @@ function hideMapContextMenu() {
     const menu = document.getElementById('map-context-menu');
     if (menu) menu.style.display = 'none';
 }
-
 
 /**
  * Inicializa a funcionalidade do mapa interativo para o mestre.
@@ -4252,41 +4256,96 @@ function createAgentCardForCampaign(character, campaignId, isMasterView = false)
  * @param {boolean} isMasterView - Se a visão é a do mestre.
  */
 function renderBoardGallery(campaign, isMasterView) {
-    // BUGFIX: Garante que a galeria do jogador seja renderizada mesmo que a do mestre não esteja na tela
     const masterGallery = document.getElementById('board-gallery');
     const playerGallery = document.getElementById('player-board-gallery');
     if (masterGallery) renderGalleryForContainer(campaign, true, masterGallery);
     if (playerGallery) renderGalleryForContainer(campaign, false, playerGallery);
-    
 }
 
 function renderGalleryForContainer(campaign, isMasterView, galleryContainer) {
     galleryContainer.innerHTML = ''; // Limpa a galeria
 
     campaign.pranchetas.forEach((board, index) => {
-        const thumb = document.createElement('div'); // A miniatura clicável
+        const thumb = document.createElement('div');
         thumb.className = 'board-thumbnail';
         thumb.title = board.name;
+        thumb.dataset.boardId = board.id;
+
         if (index === (campaign.currentBoardIndex || 0)) {
             thumb.classList.add('active');
         }
 
-        // Usa a imagem do quadro como miniatura, ou um placeholder
         const thumbnailUrl = board.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjcwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyMjIiPjwvcmVjdD48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY2NiIgZm9udC1zaXplPSIxMnB4Ij5zZW0gaW1hZ2VtPC90ZXh0Pjwvc3ZnPg==';
 
         thumb.innerHTML = `
             <div class="board-thumbnail-img" style="background-image: url('${thumbnailUrl}')"></div>
-            <input type="text" class="board-thumbnail-name" value="${board.name}" ${isMasterView ? '' : 'readonly'}>
-            ${isMasterView ? '<button class="delete-board-btn">&times;</button>' : ''}
+            <span class="board-thumbnail-name">${board.name}</span>
         `;
 
-        // O evento de clique agora é no contêiner da imagem para não conflitar com o input
-        const imgContainer = thumb.querySelector('.board-thumbnail-img');
-        imgContainer.addEventListener('click', () => {
-            // Define esta prancheta como a ativa e atualiza tudo
+        thumb.addEventListener('click', () => {
             campaign.currentBoardIndex = index;
-            updateCampaign(campaign, true); // Salva e transmite a mudança para todos
-            // A atualização da UI (renderMapState) será tratada pelo listener 'map-updated'
+            updateCampaign(campaign, true);
+        });
+
+        if (isMasterView) {
+            thumb.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showBoardContextMenu(e.clientX, e.clientY, board.id, campaign);
+            });
+        }
+
+        galleryContainer.appendChild(thumb);
+    });
+}
+
+function showBoardContextMenu(x, y, boardId, campaign) {
+    hideMapContextMenu(); // Esconde o menu de token se estiver aberto
+    const menu = document.getElementById('map-context-menu');
+    menu.style.display = 'block';
+    menu.style.left = `${x}px`;
+    menu.style.top = `${y}px`;
+
+    // Remove listeners antigos para evitar duplicação
+    const newMenu = menu.cloneNode(true);
+    menu.parentNode.replaceChild(newMenu, menu);
+
+    newMenu.querySelector('#rename-board-option').addEventListener('click', () => {
+        const board = campaign.pranchetas.find(b => b.id === boardId);
+        const newName = prompt('Digite o novo nome para a prancheta:', board.name);
+        if (newName && newName.trim() !== '') {
+            board.name = newName.trim();
+            updateCampaign(campaign, true);
+        }
+        hideMapContextMenu();
+    });
+
+    newMenu.querySelector('#delete-board-option').addEventListener('click', () => {
+        if (campaign.pranchetas.length <= 1) {
+            alert('Você não pode excluir a última prancheta.');
+            hideMapContextMenu();
+            return;
+        }
+        if (confirm('Tem certeza que deseja excluir esta prancheta? Esta ação não pode ser desfeita.')) {
+            campaign.pranchetas = campaign.pranchetas.filter(b => b.id !== boardId);
+            campaign.currentBoardIndex = 0; // Volta para a primeira prancheta
+            updateCampaign(campaign, true);
+        }
+        hideMapContextMenu();
+    });
+
+    // Esconde a opção de remover névoa, pois este menu é para a prancheta
+    newMenu.querySelector('#remove-fog-area').style.display = 'none';
+
+    // Adiciona um listener para fechar o menu se clicar fora
+    setTimeout(() => {
+        document.addEventListener('click', hideMapContextMenu, { once: true });
+    }, 0);
+}
+
+/**
+ * Exibe uma imagem (pista, documento) em um modal.
+ * @param {string} imageUrl - A URL da imagem a ser exibida.
         });
 
         galleryContainer.appendChild(thumb);
