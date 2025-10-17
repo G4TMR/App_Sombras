@@ -3726,6 +3726,7 @@ function initializeMasterView(campaign, socket) {
             name: 'Cena 1',
             imageUrl: null, tokens: [], fog: []
         }];
+        needsSave = true; // CORREÇÃO: Garante que a campanha seja salva após criar a prancheta inicial.
     }
     if (needsSave) {
         console.log("Migrando campanha antiga. Adicionando campos faltantes.");
@@ -3864,6 +3865,9 @@ function initializeMasterView(campaign, socket) {
 
         // Inicializa o mapa do mestre (MOVENDO PARA O FINAL PARA GARANTIR QUE TUDO ESTEJA PRONTO)
         initializeMasterMap(campaign, socket);
+
+        // Adiciona o listener para a tecla DELETE
+        setupBoardDeletionKeyListener(campaign);
     }
     renderBoardGallery(campaign, true); // Renderiza a galeria de pranchetas
 
@@ -4284,7 +4288,10 @@ function renderGalleryForContainer(campaign, isMasterView, galleryContainer) {
 
         thumb.addEventListener('click', () => {
             campaign.currentBoardIndex = index;
-            updateCampaign(campaign, true);
+            // CORREÇÃO: Atualiza a campanha para os outros jogadores E renderiza o mapa localmente para o mestre.
+            // A função updateCampaign por si só não redesenha a tela do mestre, apenas emite o evento.
+            updateCampaign(campaign, true); 
+            renderMapState(campaign, true);
         });
 
         if (isMasterView) {
@@ -4330,6 +4337,9 @@ function showBoardContextMenu(x, y, boardId, campaign) {
             campaign.pranchetas = campaign.pranchetas.filter(b => b.id !== boardId);
             campaign.currentBoardIndex = 0; // Volta para a primeira prancheta
             updateCampaign(campaign, true);
+            // CORREÇÃO: Renderiza o estado do mapa e a galeria após a exclusão.
+            renderMapState(campaign, true);
+            renderBoardGallery(campaign, true);
         }
         hideMapContextMenu();
     });
@@ -4341,6 +4351,33 @@ function showBoardContextMenu(x, y, boardId, campaign) {
     setTimeout(() => {
         document.addEventListener('click', hideMapContextMenu, { once: true });
     }, 0);
+}
+
+/**
+ * Adiciona um listener de teclado para excluir a prancheta ativa com a tecla DELETE.
+ * @param {object} campaign - O objeto da campanha.
+ */
+function setupBoardDeletionKeyListener(campaign) {
+    document.addEventListener('keydown', (e) => {
+        // Só executa se a tecla for DELETE e se o foco não estiver em um campo de texto.
+        if (e.key === 'Delete' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+            const currentBoardIndex = campaign.currentBoardIndex || 0;
+            const boardToDelete = campaign.pranchetas[currentBoardIndex];
+
+            if (campaign.pranchetas.length <= 1) {
+                alert('Você não pode excluir a última prancheta.');
+                return;
+            }
+
+            if (confirm(`Tem certeza que deseja excluir a prancheta "${boardToDelete.name}"?`)) {
+                campaign.pranchetas.splice(currentBoardIndex, 1);
+                campaign.currentBoardIndex = 0; // Reseta para a primeira prancheta
+                updateCampaign(campaign, true);
+                renderMapState(campaign, true);
+                renderBoardGallery(campaign, true);
+            }
+        }
+    });
 }
 
 /**
