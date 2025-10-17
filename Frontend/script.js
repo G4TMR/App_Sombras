@@ -3089,7 +3089,7 @@ function generateUniqueInviteCode() {
  * @param {string} inviteCode - O código de convite.
  */
 async function joinCampaignByCode(inviteCode, formElement) {    
-    const user = await checkAuthStatus();
+    const user = await checkAuthStatus(); // Esta função já existe e é adequada
     if (!user) {
         alert('Você precisa estar logado para entrar em uma campanha. Redirecionando...');
         window.location.href = `${API_BASE_URL}/auth/google`;
@@ -3097,8 +3097,9 @@ async function joinCampaignByCode(inviteCode, formElement) {
     }
     const submitButton = formElement.querySelector('button[type="submit"]');
     const originalButtonText = submitButton.innerHTML;
+    // Adiciona feedback visual de carregamento
     submitButton.disabled = true;
-    submitButton.innerHTML = '<div class="loader" style="width: 16px; height: 16px; border-width: 2px; margin: 0 auto;"></div>';
+    submitButton.innerHTML = '<div class="loader-small"></div>';
 
     try {
         const response = await api.post('/api/campaigns/join', { inviteCode });
@@ -3467,11 +3468,11 @@ function initializeMasterMap(campaign, socket) {
     removeFogBtn.addEventListener('click', (e) => {
         const fogIdToRemove = e.target.dataset.fogId;
         if (fogIdToRemove) {
-            // CORREÇÃO: Acessa o quadro de mapa atual para remover a névoa.
+            // CORREÇÃO: Acessa a prancheta atual para remover a névoa.
             const currentBoardIndex = campaign.currentBoardIndex || 0;
             const currentBoard = campaign.mapBoards[currentBoardIndex];
             currentBoard.fog = currentBoard.fog.filter(f => f.id !== fogIdToRemove);
-            updateCampaign(campaign, false); // Salva a campanha inteira com a névoa do quadro atualizada.
+            updateCampaign(campaign, false); // Salva a campanha inteira com a névoa da prancheta atualizada.
             renderFogOfWar(currentBoard, mapBoard, true); // Re-renderiza a névoa do quadro atual.
         }
         hideMapContextMenu();
@@ -3632,7 +3633,7 @@ function initializeMasterMap(campaign, socket) {
     const resetMapBtn = document.getElementById('reset-map-btn');
     resetMapBtn.addEventListener('click', () => {
         if (confirm('Tem certeza que deseja limpar esta prancheta (remover todos os tokens e toda a névoa)? A imagem de fundo será mantida.')) {
-            const currentBoardIndex = campaign.currentBoardIndex || 0;
+            const currentBoardIndex = campaign.currentBoardIndex || 0; // CORREÇÃO: Acessa a variável correta
             const currentBoard = campaign.pranchetas[currentBoardIndex];
             if (currentBoard) {
                 currentBoard.tokens = [];

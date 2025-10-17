@@ -2554,8 +2554,6 @@ body.map-fullscreen-active {
     overflow: hidden; /* Impede a rolagem da página de fundo */
 }
 
-.master-map-layout.fullscreen-mode {
-    /* A estrutura de grid já é a padrão, então não precisamos redefinir aqui */
 .map-layout-wrapper.fullscreen-mode {
     position: fixed;
     top: 0;
@@ -2576,11 +2574,11 @@ body.map-fullscreen-active .notification-sidebar {
     display: none;
 }
 
-.map-controls-panel h4 {
+.map-control-group h4 {
     font-size: 1.2rem; /* Fonte menor para os títulos */
     margin: 0.5rem 0 0.5rem 0;
     padding-bottom: 0.25rem;
-    border-bottom: 1px solid var(--color-surface-2);
+    color: var(--color-text-primary);
 }
 
 .map-controls-panel .info-text.small-text {
@@ -2591,7 +2589,7 @@ body.map-fullscreen-active .notification-sidebar {
 /* --- ESTILOS PARA A LISTA DE TOKENS ARRASTÁVEIS --- */
 .map-character-tokens {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
     gap: 0.75rem;
     max-height: 250px; /* Limita a altura e adiciona rolagem */
     overflow-y: auto;
@@ -2609,16 +2607,26 @@ body.map-fullscreen-active .notification-sidebar {
     cursor: grab;
     transition: transform 0.2s;
 }
-
 .token-list-item:hover {
     transform: scale(1.1);
 }
 
 .token-list-item img {
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid var(--color-surface-2);
+}
+
+.token-list-item span {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 
 .map-tool-section {
@@ -3275,6 +3283,19 @@ body.dev-mode #dev-mode-form { display: none; }
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.loader-small {
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--color-surface-2);
+    border-bottom-color: var(--color-text-primary);
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    margin: 0 auto;
+}
+
 
 
 /* =================================================================

@@ -86,29 +86,35 @@
                                     </button>
                                 </div>
                                 <div class="map-controls-panel">
-                                    <h4>Controles do Mapa</h4>
-                                    <h4>Adicionar Token</h4>
-                                    <p class="info-text small-text">Arraste um agente para o mapa para criar seu token.</p>
-                                    <div id="map-character-tokens" class="map-character-tokens"></div>
-                                    <div class="map-tool-section" id="draw-tool-section">
-                                        <div class="draw-controls-header">
-                                            <button id="toggle-draw-mode-btn" class="wizard-btn small-btn">Ocultar Área</button>
-                                            <div id="draw-tools-panel" class="draw-tools-panel" style="display: none;">
-                                                <button class="draw-tool-btn active" data-shape="square" title="Desenhar Quadrado">■</button>
-                                                <button class="draw-tool-btn" data-shape="circle" title="Desenhar Círculo">●</button>
-                                                <button class="draw-tool-btn" data-shape="brush" title="Pincel Livre">🖌️</button>
-                                            </div>
-                                        </div>
-                                        <p class="info-text small-text">Clique em "Ocultar Área" e use as ferramentas para desenhar no mapa.</p>
+                                    <h3 class="panel-title">Controles do Mapa</h3>
+                                    
+                                    <div class="map-control-group">
+                                        <h4>Adicionar Token</h4>
+                                        <p class="info-text small-text">Arraste um agente para o mapa para criar seu token.</p>
+                                        <div id="map-character-tokens" class="map-character-tokens"></div>
                                     </div>
-                                    <div class="map-config-collapsible">
-                                        <h4 class="collapsible-header">Configurações do Mapa &#9662;</h4>
-                                        <div class="collapsible-content" style="display: none;">
-                                            <div class="map-config-form">
-                                                <input type="file" id="map-upload-input" accept="image/*" style="display: none;">
-                                                <button class="wizard-btn small-btn" onclick="document.getElementById('map-upload-input').click()">Carregar Imagem de Fundo</button>
-                                                <button id="reset-map-btn" class="wizard-btn danger-btn small-btn">Limpar Prancheta</button>
+
+                                    <div class="map-control-group">
+                                        <h4>Névoa de Guerra</h4>
+                                        <div class="map-tool-section" id="draw-tool-section">
+                                            <div class="draw-controls-header">
+                                                <button id="toggle-draw-mode-btn" class="wizard-btn small-btn">Ocultar Área</button>
+                                                <div id="draw-tools-panel" class="draw-tools-panel" style="display: none;">
+                                                    <button class="draw-tool-btn active" data-shape="square" title="Desenhar Quadrado">■</button>
+                                                    <button class="draw-tool-btn" data-shape="circle" title="Desenhar Círculo">●</button>
+                                                    <button class="draw-tool-btn" data-shape="brush" title="Pincel Livre">🖌️</button>
+                                                </div>
                                             </div>
+                                            <p class="info-text small-text">Clique em "Ocultar Área" e use as ferramentas para desenhar no mapa. Clique com o botão direito em uma área para removê-la.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="map-control-group">
+                                        <h4>Configurações da Prancheta</h4>
+                                        <div class="map-config-form">
+                                            <input type="file" id="map-upload-input" accept="image/*" style="display: none;">
+                                            <button class="wizard-btn small-btn" onclick="document.getElementById('map-upload-input').click()">Carregar Imagem de Fundo</button>
+                                            <button id="reset-map-btn" class="wizard-btn danger-btn small-btn">Limpar Prancheta</button>
                                         </div>
                                     </div>
                                 </div>
