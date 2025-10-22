@@ -3267,12 +3267,12 @@ function renderCampaignPlayers(campaign) {
  * @param {HTMLElement} mapBoard - O elemento do tabuleiro do mapa.
  * @param {boolean} isMasterView - Se a visão é a do mestre.
  */
-function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPath = null) {
+function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = null) {
     // Limpa qualquer névoa anterior
     mapBoard.querySelectorAll('.fog-of-war-container').forEach(fog => fog.remove());
 
     // Se não houver áreas de névoa definidas, não há nada para renderizar.
-    if ((!boardData?.fog || boardData.fog.length === 0) && !temporaryPath) {
+    if ((!boardData?.fog || boardData.fog.length === 0) && !temporaryPathData) {
         return;
     }
 
@@ -3288,11 +3288,11 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPath = null)
     const mask = document.createElementNS(svgNS, 'mask');
     mask.id = 'fog-mask';
 
-    // 2. O fundo da máscara é PRETO. Por padrão, nada da névoa será visível.
+    // 2. O fundo da máscara é BRANCO. Por padrão, a máscara é transparente, então a névoa NÃO aparece.
     const maskBackground = document.createElementNS(svgNS, 'rect');
     maskBackground.setAttribute('width', '100%');
     maskBackground.setAttribute('height', '100%');
-    maskBackground.setAttribute('fill', 'white'); // CORREÇÃO: Fundo branco para revelar tudo por padrão
+    maskBackground.setAttribute('fill', 'white');
     mask.appendChild(maskBackground);
 
     // 3. As formas que desenhamos (quadrado, círculo, pincel) serão BRANCAS.
@@ -3311,7 +3311,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPath = null)
                 fogShape = document.createElementNS(svgNS, 'path');
                 fogShape.setAttribute('d', fogData.d);
                 // Estilos para o pincel na máscara
-                fogShape.setAttribute('stroke', fogData.shape === 'eraser' ? 'white' : 'black');
+                fogShape.setAttribute('stroke', fogData.shape === 'eraser' ? 'white' : 'black'); // Borracha apaga (branco), Pincel desenha (preto)
                 fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}%`);
                 fogShape.setAttribute('fill', 'none');
                 fogShape.setAttribute('stroke-linecap', 'round');
@@ -3327,7 +3327,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPath = null)
         }
 
         if (fogShape) {
-            // Para quadrado e círculo, o preenchimento deve ser preto para ocultar.
+            // Para quadrado e círculo, o preenchimento deve ser PRETO para ocultar.
             if (fogData.shape !== 'brush' && fogData.shape !== 'eraser') {
                 fogShape.setAttribute('fill', 'black');
             }
@@ -3337,12 +3337,14 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPath = null)
     });
 
     // Adiciona o caminho temporário (desenho em tempo real) à máscara, se existir
-    if (temporaryPath) {
-        const tempShape = temporaryPath.cloneNode(true);
+    if (temporaryPathData) {
+        const tempShape = document.createElementNS(svgNS, 'path');
+        tempShape.setAttribute('d', temporaryPathData.d);
         const currentShape = document.querySelector('.draw-tool-btn.active')?.dataset.shape;
         
-        tempShape.setAttribute('stroke', currentShape === 'eraser' ? 'white' : 'black');
-        tempShape.setAttribute('stroke-width', '5%'); // Usa a mesma espessura definida no salvamento
+        // Borracha (apaga a névoa) = traço branco na máscara. Pincel (desenha a névoa) = traço preto.
+        tempShape.setAttribute('stroke', currentShape === 'eraser' ? 'white' : 'black'); 
+        tempShape.setAttribute('stroke-width', `${temporaryPathData.strokeWidth}%`);
         tempShape.setAttribute('fill', 'none');
         tempShape.setAttribute('stroke-linecap', 'round');
         tempShape.setAttribute('stroke-linejoin', 'round');
@@ -3357,7 +3359,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPath = null)
     fogLayer.setAttribute('width', '100%');
     fogLayer.setAttribute('height', '100%');
     fogLayer.setAttribute('fill', 'rgba(0,0,0,0.9)');
-    // 5. Aplicamos a máscara. Onde a máscara for branca, a névoa é invisível. Onde for preta, a névoa aparece.
+    // 5. Aplicamos a máscara. Onde a máscara for BRANCA, a névoa fica INVISÍVEL. Onde for PRETA, a névoa APARECE.
     fogLayer.setAttribute('mask', 'url(#fog-mask)');
     svg.appendChild(fogLayer);
 
@@ -3561,7 +3563,10 @@ function initializeMasterMap(campaign, socket) {
             const svgNS = "http://www.w3.org/2000/svg";
             selectionRect = document.createElementNS(svgNS, 'path'); // Cria um elemento path
             selectionRect.setAttribute('d', `M ${(startX / rect.width) * 100} ${(startY / rect.height) * 100} `);
+            // Adiciona o elemento SVG ao DOM para que ele seja visível
+            mapBoard.appendChild(selectionRect);
         }
+        // Para quadrado/círculo, o 'div' é criado e posicionado
         selectionRect.className = 'draw-selection-rect'; // A classe agora estiliza tanto div quanto path
         mapBoard.appendChild(selectionRect);
         selectionRect.style.left = `${startX}px`; // Usa pixels para posicionar
@@ -3578,7 +3583,11 @@ function initializeMasterMap(campaign, socket) {
             const y = ((e.clientY - rect.top) / rect.height) * 100;
             // Adiciona o novo ponto ao atributo 'd' do caminho
             selectionRect.setAttribute('d', selectionRect.getAttribute('d') + `L ${x} ${y} `);
-            renderFogOfWar(campaign.mapBoards[campaign.currentBoardIndex || 0], mapBoard, true, selectionRect);
+            const temporaryPathData = {
+                d: selectionRect.getAttribute('d'),
+                strokeWidth: 5 // A mesma espessura que será salva
+            };
+            renderFogOfWar(campaign.mapBoards[campaign.currentBoardIndex || 0], mapBoard, true, temporaryPathData);
             return;
         }
 
