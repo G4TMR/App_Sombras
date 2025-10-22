@@ -3410,6 +3410,8 @@ function initializeMasterMap(campaign, socket) {
             prancheta.imageUrl = await readFileAsDataURL(file);
             await updateCampaign(campaign, true); // Salva e transmite para todos
             // CORREÇÃO: Re-renderiza o mapa para o mestre ver a nova imagem de fundo imediatamente.
+            // E também a galeria para atualizar o thumbnail.
+            renderBoardGallery(campaign, true);
             renderMapState(campaign, true);
         }
     });
@@ -3651,12 +3653,13 @@ function initializeMasterMap(campaign, socket) {
     // Resetar o mapa
     const resetMapBtn = document.getElementById('reset-map-btn');
     resetMapBtn.addEventListener('click', () => {
-        if (confirm('Tem certeza que deseja limpar esta prancheta (remover todos os tokens e toda a névoa)? A imagem de fundo será mantida.')) {
+        if (confirm('Tem certeza que deseja limpar esta prancheta? Todos os tokens, a névoa de guerra e a imagem de fundo serão removidos.')) {
             const currentBoardIndex = campaign.currentBoardIndex || 0; // CORREÇÃO: Acessa a variável correta
             const currentBoard = campaign.mapBoards[currentBoardIndex];
             if (currentBoard) {
                 currentBoard.tokens = [];
                 currentBoard.fog = [];
+                currentBoard.imageUrl = null; // CORREÇÃO: Remove também a imagem de fundo.
                 updateCampaign(campaign, true);
                 // CORREÇÃO: Re-renderiza o mapa para o mestre ver a limpeza imediatamente.
                 renderMapState(campaign, true);
