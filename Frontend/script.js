@@ -3292,7 +3292,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPath = null)
     const maskBackground = document.createElementNS(svgNS, 'rect');
     maskBackground.setAttribute('width', '100%');
     maskBackground.setAttribute('height', '100%');
-    maskBackground.setAttribute('fill', 'black');
+    maskBackground.setAttribute('fill', 'white'); // CORREÇÃO: Fundo branco para revelar tudo por padrão
     mask.appendChild(maskBackground);
 
     // 3. As formas que desenhamos (quadrado, círculo, pincel) serão BRANCAS.
@@ -3311,7 +3311,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPath = null)
                 fogShape = document.createElementNS(svgNS, 'path');
                 fogShape.setAttribute('d', fogData.d);
                 // Estilos para o pincel na máscara
-                fogShape.setAttribute('stroke', fogData.shape === 'eraser' ? 'black' : 'white');
+                fogShape.setAttribute('stroke', fogData.shape === 'eraser' ? 'white' : 'black');
                 fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}%`);
                 fogShape.setAttribute('fill', 'none');
                 fogShape.setAttribute('stroke-linecap', 'round');
@@ -3327,9 +3327,9 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPath = null)
         }
 
         if (fogShape) {
-            // Para quadrado e círculo, o preenchimento deve ser branco para ocultar.
+            // Para quadrado e círculo, o preenchimento deve ser preto para ocultar.
             if (fogData.shape !== 'brush' && fogData.shape !== 'eraser') {
-                fogShape.setAttribute('fill', 'white');
+                fogShape.setAttribute('fill', 'black');
             }
             fogShape.dataset.fogId = fogData.id;
             mask.appendChild(fogShape);
@@ -3341,7 +3341,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPath = null)
         const tempShape = temporaryPath.cloneNode(true);
         const currentShape = document.querySelector('.draw-tool-btn.active')?.dataset.shape;
         
-        tempShape.setAttribute('stroke', currentShape === 'eraser' ? 'black' : 'white');
+        tempShape.setAttribute('stroke', currentShape === 'eraser' ? 'white' : 'black');
         tempShape.setAttribute('stroke-width', '5%'); // Usa a mesma espessura definida no salvamento
         tempShape.setAttribute('fill', 'none');
         tempShape.setAttribute('stroke-linecap', 'round');
@@ -3357,7 +3357,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPath = null)
     fogLayer.setAttribute('width', '100%');
     fogLayer.setAttribute('height', '100%');
     fogLayer.setAttribute('fill', 'rgba(0,0,0,0.9)');
-    // 5. Aplicamos a máscara. A névoa só será visível onde a máscara for branca (ou seja, onde desenhamos).
+    // 5. Aplicamos a máscara. Onde a máscara for branca, a névoa é invisível. Onde for preta, a névoa aparece.
     fogLayer.setAttribute('mask', 'url(#fog-mask)');
     svg.appendChild(fogLayer);
 
@@ -3552,19 +3552,19 @@ function initializeMasterMap(campaign, socket) {
         isDrawing = true;
 
         const rect = mapBoard.getBoundingClientRect();
-        startX = (e.clientX - rect.left) / rect.width * 100; // Posição em %
-        startY = (e.clientY - rect.top) / rect.height * 100;
+        startX = e.clientX - rect.left; // Posição em pixels
+        startY = e.clientY - rect.top;
 
         selectionRect = document.createElement('div');
         // CORREÇÃO: Pincel e Borracha agora usam a mesma lógica de desenho em tempo real
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
             const svgNS = "http://www.w3.org/2000/svg";
             selectionRect = document.createElementNS(svgNS, 'path'); // Cria um elemento path
-            selectionRect.setAttribute('d', `M ${startX} ${startY} `);
+            selectionRect.setAttribute('d', `M ${(startX / rect.width) * 100} ${(startY / rect.height) * 100} `);
         }
         selectionRect.className = 'draw-selection-rect'; // A classe agora estiliza tanto div quanto path
         mapBoard.appendChild(selectionRect);
-        selectionRect.style.left = `${startX}px`;
+        selectionRect.style.left = `${startX}px`; // Usa pixels para posicionar
         selectionRect.style.top = `${startY}px`;
     });
 
@@ -3574,8 +3574,8 @@ function initializeMasterMap(campaign, socket) {
         // CORREÇÃO: Lógica unificada para Pincel e Borracha
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
             const rect = mapBoard.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width * 100;
-            const y = (e.clientY - rect.top) / rect.height * 100;
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
             // Adiciona o novo ponto ao atributo 'd' do caminho
             selectionRect.setAttribute('d', selectionRect.getAttribute('d') + `L ${x} ${y} `);
             renderFogOfWar(campaign.mapBoards[campaign.currentBoardIndex || 0], mapBoard, true, selectionRect);
@@ -3583,7 +3583,7 @@ function initializeMasterMap(campaign, socket) {
         }
 
         const rect = mapBoard.getBoundingClientRect();
-        const currentX = e.clientX - rect.left;
+        const currentX = e.clientX - rect.left; // Usa pixels
         const currentY = e.clientY - rect.top;
 
         const width = Math.abs(currentX - startX);
