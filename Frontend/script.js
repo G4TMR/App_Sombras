@@ -3267,12 +3267,12 @@ function renderCampaignPlayers(campaign) {
  * @param {HTMLElement} mapBoard - O elemento do tabuleiro do mapa.
  * @param {boolean} isMasterView - Se a visão é a do mestre.
  */
-function renderFogOfWar(boardData, mapBoard, isMasterView) {
+function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPath = null) {
     // Limpa qualquer névoa anterior
     mapBoard.querySelectorAll('.fog-of-war-container').forEach(fog => fog.remove());
 
     // Se não houver áreas de névoa definidas, não há nada para renderizar.
-    if (!boardData?.fog || boardData.fog.length === 0) {
+    if ((!boardData?.fog || boardData.fog.length === 0) && !temporaryPath) {
         return;
     }
 
@@ -3297,7 +3297,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView) {
 
     // 3. As formas que desenhamos (quadrado, círculo, pincel) serão BRANCAS.
     // Onde a máscara for branca, a névoa aparecerá.
-    boardData.fog.forEach(fogData => {
+    (boardData.fog || []).forEach(fogData => {
         let fogShape;
         switch (fogData.shape) {
             case 'circle':
@@ -3306,11 +3306,12 @@ function renderFogOfWar(boardData, mapBoard, isMasterView) {
                 fogShape.setAttribute('cy', `${fogData.y}%`);
                 fogShape.setAttribute('r', `${fogData.radius}%`);
                 break;
-            case 'path':
+            case 'brush': // Oculta
+            case 'eraser': // Revela
                 fogShape = document.createElementNS(svgNS, 'path');
                 fogShape.setAttribute('d', fogData.d);
                 // Estilos para o pincel na máscara
-                fogShape.setAttribute('stroke', 'white'); // O traço deve ser branco para aparecer na máscara
+                fogShape.setAttribute('stroke', fogData.shape === 'eraser' ? 'black' : 'white');
                 fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}%`);
                 fogShape.setAttribute('fill', 'none');
                 fogShape.setAttribute('stroke-linecap', 'round');
@@ -3326,14 +3327,27 @@ function renderFogOfWar(boardData, mapBoard, isMasterView) {
         }
 
         if (fogShape) {
-            // Para quadrado e círculo, o preenchimento deve ser branco.
-            if (fogData.shape !== 'path') {
+            // Para quadrado e círculo, o preenchimento deve ser branco para ocultar.
+            if (fogData.shape !== 'brush' && fogData.shape !== 'eraser') {
                 fogShape.setAttribute('fill', 'white');
             }
             fogShape.dataset.fogId = fogData.id;
             mask.appendChild(fogShape);
         }
     });
+
+    // Adiciona o caminho temporário (desenho em tempo real) à máscara, se existir
+    if (temporaryPath) {
+        const tempShape = temporaryPath.cloneNode(true);
+        const currentShape = document.querySelector('.draw-tool-btn.active')?.dataset.shape;
+        
+        tempShape.setAttribute('stroke', currentShape === 'eraser' ? 'black' : 'white');
+        tempShape.setAttribute('stroke-width', '5%'); // Usa a mesma espessura definida no salvamento
+        tempShape.setAttribute('fill', 'none');
+        tempShape.setAttribute('stroke-linecap', 'round');
+        tempShape.setAttribute('stroke-linejoin', 'round');
+        mask.appendChild(tempShape);
+    }
 
     defs.appendChild(mask);
     svg.appendChild(defs);
@@ -3564,7 +3578,7 @@ function initializeMasterMap(campaign, socket) {
             const y = (e.clientY - rect.top) / rect.height * 100;
             // Adiciona o novo ponto ao atributo 'd' do caminho
             selectionRect.setAttribute('d', selectionRect.getAttribute('d') + `L ${x} ${y} `);
-            renderFogOfWar(campaign.mapBoards[campaign.currentBoardIndex || 0], mapBoard, true, selectionRect); // Renderiza em tempo real
+            renderFogOfWar(campaign.mapBoards[campaign.currentBoardIndex || 0], mapBoard, true, selectionRect);
             return;
         }
 
