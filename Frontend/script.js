@@ -3401,6 +3401,16 @@ function initializeMasterMap(campaign, socket) {
     const mapPlaceholder = document.getElementById('map-upload-placeholder');
     mapBoard.classList.add('master-view'); // Adiciona classe para estilização
     const uploadInput = document.getElementById('map-upload-input');
+    uploadInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        // CORREÇÃO: Pega o índice da prancheta ATUALMENTE selecionada.
+        const currentBoardIndex = campaign.currentBoardIndex || 0;
+        const prancheta = campaign.mapBoards[currentBoardIndex];
+        if (file && prancheta) {
+            prancheta.imageUrl = await readFileAsDataURL(file);
+            await updateCampaign(campaign, true); // Salva e transmite para todos
+        }
+    });
     const tokenList = document.getElementById('map-character-tokens');
     const tokenContextMenu = document.getElementById('token-context-menu');
     const removeFogBtn = document.getElementById('remove-fog-area');
@@ -3706,20 +3716,6 @@ function initializeMasterView(campaign, socket) {
     const generateCodeBtn = document.getElementById('generate-invite-code-btn');
     const imageModalPreview = document.getElementById('campaign-image-modal-preview');
 
-    // Lógica de upload do mapa (MOVIDO PARA CÁ)
-    // Garante que o upload funcione mesmo fora do modo tela cheia.
-    const mapBoard = document.getElementById('map-board');
-    const uploadInput = document.getElementById('map-upload-input'); // O input de arquivo
-    uploadInput.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        // CORREÇÃO: Pega o índice da prancheta ATUALMENTE selecionada.
-        const currentBoardIndex = campaign.currentBoardIndex || 0;
-        const prancheta = campaign.mapBoards[currentBoardIndex];
-        if (file && prancheta) {
-            prancheta.imageUrl = await readFileAsDataURL(file);
-            await updateCampaign(campaign, true); // Salva e transmite para todos
-        }
-    });
     // Migração de dados para campanhas antigas
     let needsSave = false;
     if (!campaign.players) { campaign.players = []; }
