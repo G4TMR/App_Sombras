@@ -3646,6 +3646,8 @@ function initializeMasterMap(campaign, socket) {
                 currentBoard.tokens = [];
                 currentBoard.fog = [];
                 updateCampaign(campaign, true);
+                // CORREÇÃO: Re-renderiza o mapa para o mestre ver a limpeza imediatamente.
+                renderMapState(campaign, true);
             }
         }
     });
@@ -3707,11 +3709,12 @@ function initializeMasterView(campaign, socket) {
     // Lógica de upload do mapa (MOVIDO PARA CÁ)
     // Garante que o upload funcione mesmo fora do modo tela cheia.
     const mapBoard = document.getElementById('map-board');
-    const mapUploadInput = document.getElementById('map-upload-input'); // O input de arquivo
-    mapUploadInput.addEventListener('change', async (e) => {
+    const uploadInput = document.getElementById('map-upload-input'); // O input de arquivo
+    uploadInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
+        // CORREÇÃO: Pega o índice da prancheta ATUALMENTE selecionada.
         const currentBoardIndex = campaign.currentBoardIndex || 0;
-        const prancheta = campaign.pranchetas[currentBoardIndex];
+        const prancheta = campaign.mapBoards[currentBoardIndex];
         if (file && prancheta) {
             prancheta.imageUrl = await readFileAsDataURL(file);
             await updateCampaign(campaign, true); // Salva e transmite para todos
