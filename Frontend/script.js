@@ -3268,49 +3268,36 @@ function renderCampaignPlayers(campaign) {
  * @param {boolean} isMasterView - Se a visão é a do mestre.
  */
 function renderFogOfWar(boardData, mapBoard, isMasterView) {
-    // Limpa a névoa antiga
     mapBoard.querySelectorAll('.fog-of-war').forEach(fog => fog.remove());
 
-    if (boardData?.fog) {
-        // Cria um único contêiner SVG para toda a névoa, para melhor performance
+    if (boardData?.fog && boardData.fog.length > 0) {
         const svgNS = "http://www.w3.org/2000/svg";
         const svg = document.createElementNS(svgNS, "svg");
         svg.setAttribute('class', 'fog-of-war');
         svg.setAttribute('width', '100%');
         svg.setAttribute('height', '100%');
 
-        // Máscara para "cortar" as áreas visíveis da névoa
         const defs = document.createElementNS(svgNS, 'defs');
         const mask = document.createElementNS(svgNS, 'mask');
         mask.id = 'fog-mask';
-        
+
+        // CORREÇÃO: O fundo da máscara deve ser preto (oculto por padrão).
+        // As formas que desenhamos serão brancas, "cortando" buracos na névoa para revelar o mapa.
         const maskBackground = document.createElementNS(svgNS, 'rect');
         maskBackground.setAttribute('width', '100%');
         maskBackground.setAttribute('height', '100%');
-        maskBackground.setAttribute('fill', 'white');
+        maskBackground.setAttribute('fill', 'black'); // Oculta tudo por padrão
         mask.appendChild(maskBackground);
 
         boardData.fog.forEach(fogData => {
             let fogShape;
 
-            // Renderiza a forma correta
             switch (fogData.shape) {
                 case 'circle':
                     fogShape = document.createElementNS(svgNS, 'circle');
                     fogShape.setAttribute('cx', `${fogData.x}%`);
                     fogShape.setAttribute('cy', `${fogData.y}%`);
                     fogShape.setAttribute('r', `${fogData.radius}%`);
-                    break;
-                case 'polygon':
-                    fogShape = document.createElementNS(svgNS, 'polygon');
-                    const points = fogData.points.map(p => `${p.x}%,${p.y}%`).join(' ');
-                    fogShape.setAttribute('points', points);
-                    break;
-                case 'square':
-                // CORREÇÃO: Adiciona o case para 'path' (pincel livre)
-                case 'path':
-                    fogShape = document.createElementNS(svgNS, 'path');
-                    fogShape.setAttribute('d', fogData.d);
                     break;
                 default:
                     fogShape = document.createElementNS(svgNS, 'rect');
@@ -3322,14 +3309,8 @@ function renderFogOfWar(boardData, mapBoard, isMasterView) {
             }
 
             if (fogShape) {
-                // Estilos para o 'path' do pincel
-                if (fogData.shape === 'path') {
-                    fogShape.setAttribute('stroke', 'black'); // A cor que será removida da máscara
-                    fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}%`);
-                    fogShape.setAttribute('fill', 'none');
-                } else {
-                fogShape.setAttribute('fill', 'black'); // Áreas a serem removidas da máscara
-                }
+                // CORREÇÃO: Todas as formas que revelam o mapa devem ser brancas na máscara.
+                fogShape.setAttribute('fill', 'white');
                 fogShape.dataset.fogId = fogData.id; // Adiciona ID para permitir remoção
                 mask.appendChild(fogShape);
             }
@@ -3338,18 +3319,19 @@ function renderFogOfWar(boardData, mapBoard, isMasterView) {
         defs.appendChild(mask);
         svg.appendChild(defs);
 
-        // Retângulo preto que cobre tudo e é mascarado
+        // Retângulo branco que cobre tudo e é mascarado.
+        // Onde a máscara é preta, este retângulo fica invisível.
+        // Onde a máscara é branca (nossas formas), este retângulo aparece (a névoa).
         const fogRect = document.createElementNS(svgNS, 'rect');
         fogRect.setAttribute('width', '100%');
         fogRect.setAttribute('height', '100%');
-        fogRect.setAttribute('fill', 'rgba(0,0,0,0.9)');
+        fogRect.setAttribute('fill', 'rgba(0,0,0,0.9)'); // A cor da névoa
         fogRect.setAttribute('mask', 'url(#fog-mask)');
         svg.appendChild(fogRect);
 
         mapBoard.appendChild(svg);
 
         if (isMasterView) {
-            // Adiciona o listener de contexto ao SVG para remover a névoa
             svg.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 const fogId = e.target.dataset.fogId;
