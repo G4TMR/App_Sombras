@@ -3444,6 +3444,9 @@ function initializeMasterMap(campaign, socket) {
             const y = e.clientY - rect.top;
 
             const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
+            // CORREÇÃO: Garante que a prancheta atual tenha um array de tokens.
+            if (!currentBoard.tokens) currentBoard.tokens = [];
+
             const tokenData = {
                 id: `token_${charId}`,
                 characterId: charId,
@@ -3452,9 +3455,6 @@ function initializeMasterMap(campaign, socket) {
                 y: (y / rect.height) * 100,
                 locked: false,
             };
-
-            if (!campaign.mapData) campaign.mapData = { tokens: [] };
-            if (!campaign.mapData.tokens) campaign.mapData.tokens = [];
 
             // Remove token antigo se já existir
             currentBoard.tokens = currentBoard.tokens.filter(t => t.characterId !== charId);
@@ -3622,10 +3622,13 @@ function initializeMasterMap(campaign, socket) {
             }
 
             if (fogData) {
-                if (!campaign.mapData.fog) campaign.mapData.fog = [];
-                campaign.mapData.fog.push(fogData);
+                // CORREÇÃO: Salva a névoa na prancheta correta, não na estrutura antiga.
+                const currentBoardIndex = campaign.currentBoardIndex || 0;
+                const currentBoard = campaign.mapBoards[currentBoardIndex];
+                if (!currentBoard.fog) currentBoard.fog = [];
+                currentBoard.fog.push(fogData);
                 updateCampaign(campaign);
-                renderFogOfWar(campaign, mapBoard, true);
+                renderFogOfWar(currentBoard, mapBoard, true);
             }
 
             mapBoard.removeChild(selectionRect);
@@ -3638,7 +3641,7 @@ function initializeMasterMap(campaign, socket) {
     resetMapBtn.addEventListener('click', () => {
         if (confirm('Tem certeza que deseja limpar esta prancheta (remover todos os tokens e toda a névoa)? A imagem de fundo será mantida.')) {
             const currentBoardIndex = campaign.currentBoardIndex || 0; // CORREÇÃO: Acessa a variável correta
-            const currentBoard = campaign.pranchetas[currentBoardIndex];
+            const currentBoard = campaign.mapBoards[currentBoardIndex];
             if (currentBoard) {
                 currentBoard.tokens = [];
                 currentBoard.fog = [];
@@ -3716,17 +3719,17 @@ function initializeMasterView(campaign, socket) {
     });
     // Migração de dados para campanhas antigas
     let needsSave = false;
-    if (!campaign.players) { campaign.players = []; needsSave = true; }
-    if (!campaign.inviteCode) { campaign.inviteCode = generateUniqueInviteCode(); needsSave = true; }
+    if (!campaign.players) { campaign.players = []; }
+    if (!campaign.inviteCode) { campaign.inviteCode = generateUniqueInviteCode(); }
     // NOVA ESTRUTURA: Garante que a galeria de pranchetas exista
-    if (!campaign.pranchetas) {
+    if (!campaign.mapBoards) {
         // Se não existir, cria com UMA prancheta padrão
-        campaign.pranchetas = [{
+        campaign.mapBoards = [{
             id: `board_${Date.now()}`,
             name: 'Cena 1',
             imageUrl: null, tokens: [], fog: []
         }];
-        needsSave = true; // CORREÇÃO: Garante que a campanha seja salva após criar a prancheta inicial.
+        needsSave = true; 
     }
     if (needsSave) {
         console.log("Migrando campanha antiga. Adicionando campos faltantes.");
@@ -3877,10 +3880,10 @@ function initializeMasterView(campaign, socket) {
         addBoardBtn.addEventListener('click', () => {
             const newPrancheta = {
                 id: `board_${Date.now()}`,
-                name: `Imagem ${campaign.pranchetas.length + 1}`,
+                name: `Imagem ${campaign.mapBoards.length + 1}`,
                 imageUrl: null
             };
-            campaign.pranchetas.push(newPrancheta);
+            campaign.mapBoards.push(newPrancheta);
             updateCampaign(campaign, true);
             renderBoardGallery(campaign, true); // Re-renderiza a galeria para o mestre
         });
@@ -3894,7 +3897,7 @@ function initializeMasterView(campaign, socket) {
  */
 function renderMapState(campaign, isMasterView) {
     const currentBoardIndex = campaign.currentBoardIndex || 0;
-    const currentBoardData = campaign.pranchetas[currentBoardIndex];
+    const currentBoardData = campaign.mapBoards[currentBoardIndex];
 
     if (!currentBoardData) {
         console.warn(`Tentando renderizar o mapa, mas a prancheta no índice ${currentBoardIndex} não foi encontrada.`);
@@ -4269,7 +4272,7 @@ function renderBoardGallery(campaign, isMasterView) {
 function renderGalleryForContainer(campaign, isMasterView, galleryContainer) {
     galleryContainer.innerHTML = ''; // Limpa a galeria
 
-    campaign.pranchetas.forEach((board, index) => {
+    campaign.mapBoards.forEach((board, index) => {
         const thumb = document.createElement('div');
         thumb.className = 'board-thumbnail';
         thumb.title = board.name;
@@ -4292,13 +4295,15 @@ function renderGalleryForContainer(campaign, isMasterView, galleryContainer) {
             // A função updateCampaign por si só não redesenha a tela do mestre, apenas emite o evento.
             updateCampaign(campaign, true); 
             renderMapState(campaign, true);
+            // CORREÇÃO: Re-renderiza a galeria para atualizar o item ativo.
+            renderBoardGallery(campaign, true);
         });
 
         if (isMasterView) {
             thumb.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                showBoardContextMenu(e.clientX, e.clientY, board.id, campaign);
+                showBoardContextMenu(e.clientX, e.clientY, board.id, campaign); // CORREÇÃO: Passa as coordenadas do evento.
             });
         }
 
@@ -4318,7 +4323,7 @@ function showBoardContextMenu(x, y, boardId, campaign) {
     menu.parentNode.replaceChild(newMenu, menu);
 
     newMenu.querySelector('#rename-board-option').addEventListener('click', () => {
-        const board = campaign.pranchetas.find(b => b.id === boardId);
+        const board = campaign.mapBoards.find(b => b.id === boardId);
         const newName = prompt('Digite o novo nome para a prancheta:', board.name);
         if (newName && newName.trim() !== '') {
             board.name = newName.trim();
@@ -4328,13 +4333,13 @@ function showBoardContextMenu(x, y, boardId, campaign) {
     });
 
     newMenu.querySelector('#delete-board-option').addEventListener('click', () => {
-        if (campaign.pranchetas.length <= 1) {
+        if (campaign.mapBoards.length <= 1) {
             alert('Você não pode excluir a última prancheta.');
             hideMapContextMenu();
             return;
         }
         if (confirm('Tem certeza que deseja excluir esta prancheta? Esta ação não pode ser desfeita.')) {
-            campaign.pranchetas = campaign.pranchetas.filter(b => b.id !== boardId);
+            campaign.mapBoards = campaign.mapBoards.filter(b => b.id !== boardId);
             campaign.currentBoardIndex = 0; // Volta para a primeira prancheta
             updateCampaign(campaign, true);
             // CORREÇÃO: Renderiza o estado do mapa e a galeria após a exclusão.
@@ -4362,15 +4367,15 @@ function setupBoardDeletionKeyListener(campaign) {
         // Só executa se a tecla for DELETE e se o foco não estiver em um campo de texto.
         if (e.key === 'Delete' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
             const currentBoardIndex = campaign.currentBoardIndex || 0;
-            const boardToDelete = campaign.pranchetas[currentBoardIndex];
+            const boardToDelete = campaign.mapBoards[currentBoardIndex];
 
-            if (campaign.pranchetas.length <= 1) {
+            if (campaign.mapBoards.length <= 1) {
                 alert('Você não pode excluir a última prancheta.');
                 return;
             }
 
             if (confirm(`Tem certeza que deseja excluir a prancheta "${boardToDelete.name}"?`)) {
-                campaign.pranchetas.splice(currentBoardIndex, 1);
+                campaign.mapBoards.splice(currentBoardIndex, 1);
                 campaign.currentBoardIndex = 0; // Reseta para a primeira prancheta
                 updateCampaign(campaign, true);
                 renderMapState(campaign, true);
