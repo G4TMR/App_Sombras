@@ -3409,6 +3409,8 @@ function initializeMasterMap(campaign, socket) {
         if (file && prancheta) {
             prancheta.imageUrl = await readFileAsDataURL(file);
             await updateCampaign(campaign, true); // Salva e transmite para todos
+            // CORREÇÃO: Re-renderiza o mapa para o mestre ver a nova imagem de fundo imediatamente.
+            renderMapState(campaign, true);
         }
     });
     const tokenList = document.getElementById('map-character-tokens');
