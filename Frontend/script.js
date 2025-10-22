@@ -3424,7 +3424,7 @@ function initializeMasterMap(campaign, socket) {
     const tokenContextMenu = document.getElementById('token-context-menu');
     const removeFogBtn = document.getElementById('remove-fog-area');
 
-    let currentDrawShape = 'square'; // 'square', 'circle', 'brush'
+    let currentDrawShape = 'square'; // 'square', 'circle', 'brush', 'eraser'
     let isDrawingMode = false;
     let isDrawing = false;
     let startX, startY;
@@ -3538,13 +3538,14 @@ function initializeMasterMap(campaign, socket) {
         isDrawing = true;
 
         const rect = mapBoard.getBoundingClientRect();
-        startX = e.clientX - rect.left;
-        startY = e.clientY - rect.top;
+        startX = (e.clientX - rect.left) / rect.width * 100; // Posição em %
+        startY = (e.clientY - rect.top) / rect.height * 100;
 
         selectionRect = document.createElement('div');
-        if (currentDrawShape === 'brush') {
+        // CORREÇÃO: Pincel e Borracha agora usam a mesma lógica de desenho em tempo real
+        if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
             const svgNS = "http://www.w3.org/2000/svg";
-            selectionRect = document.createElementNS(svgNS, 'path');
+            selectionRect = document.createElementNS(svgNS, 'path'); // Cria um elemento path
             selectionRect.setAttribute('d', `M ${startX} ${startY} `);
         }
         selectionRect.className = 'draw-selection-rect'; // A classe agora estiliza tanto div quanto path
@@ -3556,13 +3557,14 @@ function initializeMasterMap(campaign, socket) {
     mapBoard.addEventListener('mousemove', (e) => {
         if (!isDrawing || !selectionRect) return;
 
-        // Se a ferramenta for o pincel, atualiza o caminho do SVG
-        if (currentDrawShape === 'brush') {
+        // CORREÇÃO: Lógica unificada para Pincel e Borracha
+        if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
             const rect = mapBoard.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const x = (e.clientX - rect.left) / rect.width * 100;
+            const y = (e.clientY - rect.top) / rect.height * 100;
             // Adiciona o novo ponto ao atributo 'd' do caminho
             selectionRect.setAttribute('d', selectionRect.getAttribute('d') + `L ${x} ${y} `);
+            renderFogOfWar(campaign.mapBoards[campaign.currentBoardIndex || 0], mapBoard, true, selectionRect); // Renderiza em tempo real
             return;
         }
 
@@ -3626,15 +3628,16 @@ function initializeMasterMap(campaign, socket) {
                         };
                     }
                     break;
-                case 'brush':
-                    // CORREÇÃO: Salva o caminho do pincel como um 'path', não como um polígono.
+                // CORREÇÃO: Lógica unificada para salvar Pincel e Borracha
+                case 'brush': 
+                case 'eraser':
                     const pathData = selectionRect.getAttribute('d');
                     if (pathData && pathData.trim().length > "M 0 0".length) { // Garante que não é só o ponto inicial
                         fogData = {
                             id: `fog_${Date.now()}`,
-                            shape: 'path',
+                            shape: currentDrawShape, // Salva como 'brush' ou 'eraser'
                             d: pathData, // Salva a string do caminho diretamente
-                            strokeWidth: 2 // Define a espessura do pincel (em porcentagem do mapa)
+                            strokeWidth: 5 // Define a espessura do pincel/borracha (em porcentagem do mapa)
                         };
                     }
                     break;
@@ -3647,7 +3650,7 @@ function initializeMasterMap(campaign, socket) {
                 if (!currentBoard.fog) currentBoard.fog = [];
                 currentBoard.fog.push(fogData);
                 updateCampaign(campaign);
-                renderFogOfWar(currentBoard, mapBoard, true);
+                renderFogOfWar(currentBoard, mapBoard, true); // Renderiza o estado final sem o desenho temporário
             }
 
             mapBoard.removeChild(selectionRect);
