@@ -3560,16 +3560,16 @@ function initializeMasterMap(campaign, socket) {
         startX = e.clientX - rect.left; // Posição em pixels
         startY = e.clientY - rect.top;
 
-        selectionRect = document.createElement('div');
-        selectionRect.className = 'draw-selection-rect';
-
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
             currentPathData = {
                 d: `M ${(startX / rect.width) * 100} ${(startY / rect.height) * 100} `,
                 strokeWidth: 5 // Define a espessura do traço em porcentagem
             };
             // Não adiciona nada ao DOM ainda, a renderização será feita no mousemove
+            selectionRect = null; // CORREÇÃO: Garante que o selectionRect não seja usado para pincel/borracha
         } else {
+            selectionRect = document.createElement('div');
+            selectionRect.className = 'draw-selection-rect';
             mapBoard.appendChild(selectionRect);
             selectionRect.style.left = `${startX}px`;
             selectionRect.style.top = `${startY}px`;
