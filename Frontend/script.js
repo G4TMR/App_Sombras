@@ -3288,15 +3288,15 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
     const mask = document.createElementNS(svgNS, 'mask');
     mask.id = 'fog-mask';
 
-    // CORREÇÃO: O fundo da máscara deve ser BRANCO. Onde a máscara é branca, a névoa fica VISÍVEL.
+    // O fundo da máscara deve ser PRETO. Onde a máscara é preta, a névoa fica INVISÍVEL (mapa visível).
     const maskBackground = document.createElementNS(svgNS, 'rect');
     maskBackground.setAttribute('width', '100%');
     maskBackground.setAttribute('height', '100%');
-    maskBackground.setAttribute('fill', 'white');
+    maskBackground.setAttribute('fill', 'black');
     mask.appendChild(maskBackground);
 
-    // As formas que desenhamos para REVELAR (borracha) devem ser PRETAS.
-    // Onde a máscara é preta, a névoa (camada preta) se torna INVISÍVEL.
+    // As formas que desenhamos para OCULTAR (pincel, quadrado, círculo) devem ser BRANCAS.
+    // Onde a máscara é branca, a névoa (camada preta) se torna VISÍVEL.
     (boardData.fog || []).forEach(fogData => {
         let fogShape;
         switch (fogData.shape) {
@@ -3310,8 +3310,8 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
             case 'eraser': // Revela
                 fogShape = document.createElementNS(svgNS, 'path');
                 fogShape.setAttribute('d', fogData.d);
-                // CORREÇÃO: Pincel (oculta) é branco. Borracha (revela) é preto.
-                fogShape.setAttribute('stroke', fogData.shape === 'brush' ? 'white' : 'black');
+                // Pincel (oculta) é branco. Borracha (revela) é preto.
+                fogShape.setAttribute('stroke', fogData.shape === 'eraser' ? 'black' : 'white');
                 fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}%`);
                 fogShape.setAttribute('fill', 'none');
                 fogShape.setAttribute('stroke-linecap', 'round');
@@ -3327,9 +3327,9 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
         }
 
         if (fogShape) {
-            // CORREÇÃO: Para quadrado e círculo (ocultar), o preenchimento é branco. Para borracha (revelar), o preenchimento é preto.
-            if (fogData.shape === 'square' || fogData.shape === 'circle' || fogData.shape === 'eraser') {
-                fogShape.setAttribute('fill', fogData.shape === 'eraser' ? 'black' : 'white');
+            // Para quadrado e círculo (ocultar), o preenchimento é branco.
+            if (fogData.shape === 'square' || fogData.shape === 'circle') {
+                fogShape.setAttribute('fill', 'white');
             }
             fogShape.dataset.fogId = fogData.id;
             mask.appendChild(fogShape);
@@ -3341,8 +3341,8 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
         const tempShape = document.createElementNS(svgNS, 'path');
         tempShape.setAttribute('d', temporaryPathData.d);
 
-        // CORREÇÃO: Pincel (oculta) é branco. Borracha (revela) é preto.
-        tempShape.setAttribute('stroke', temporaryPathShape === 'brush' ? 'white' : 'black');
+        // Pincel (oculta) é branco. Borracha (revela) é preto.
+        tempShape.setAttribute('stroke', temporaryPathShape === 'eraser' ? 'black' : 'white');
         tempShape.setAttribute('stroke-width', `${temporaryPathData.strokeWidth}%`);
         tempShape.setAttribute('fill', 'none');
         tempShape.setAttribute('stroke-linecap', 'round');
