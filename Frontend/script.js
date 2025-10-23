@@ -3420,10 +3420,10 @@ function initializeMasterMap(campaign, socket) {
     const mapBoard = document.getElementById('map-board');
     const mapPlaceholder = document.getElementById('map-upload-placeholder');
     mapBoard.classList.add('master-view'); // Adiciona classe para estilização
-    const uploadInput = document.getElementById('map-upload-input');
-    uploadInput.addEventListener('change', async (e) => {
+    const uploadInput = document.getElementById('map-upload-input'); // Mover para dentro da função
+    const uploadInputHandler = async (e) => {
         const file = e.target.files[0];
-        // CORREÇÃO: Pega o índice da prancheta ATUALMENTE selecionada.
+        // Pega o índice da prancheta ATUALMENTE selecionada.
         const currentBoardIndex = campaign.currentBoardIndex || 0;
         const prancheta = campaign.mapBoards[currentBoardIndex];
         if (file && prancheta) {
@@ -3434,10 +3434,13 @@ function initializeMasterMap(campaign, socket) {
             renderBoardGallery(campaign, true);
             renderMapState(campaign, true);
         }
-    });
+    };
+    uploadInput.addEventListener('change', uploadInputHandler);
+
     const tokenList = document.getElementById('map-character-tokens');
     const tokenContextMenu = document.getElementById('token-context-menu');
     const removeFogBtn = document.getElementById('remove-fog-area');
+    const socketListeners = {}; // Objeto para armazenar os listeners do socket
 
     let currentDrawShape = 'square'; // 'square', 'circle', 'brush', 'eraser'
     let isDrawingMode = false;
@@ -3446,6 +3449,22 @@ function initializeMasterMap(campaign, socket) {
     let selectionRect = null;
 
     let currentPathData = null; // Para o desenho em tempo real do pincel/borracha
+
+    // Função para limpar todos os listeners de eventos do mapa para evitar duplicação
+    function cleanupMapListeners() {
+        uploadInput.removeEventListener('change', uploadInputHandler);
+        mapBoard.removeEventListener('dragover', dragOverHandler);
+        mapBoard.removeEventListener('drop', dropHandler);
+        mapBoard.removeEventListener('mousedown', mouseDownHandler);
+        mapBoard.removeEventListener('mousemove', mouseMoveHandler);
+        mapBoard.removeEventListener('mouseup', mouseUpHandler);
+        document.removeEventListener('click', hideMapContextMenu);
+        removeFogBtn.removeEventListener('click', removeFogHandler);
+        // Limpa listeners do socket
+        if (socket && socket.off) {
+            socket.off('map-updated', socketListeners.mapUpdated);
+        }
+    }
 
     function populateTokenList() {
         // Popula a lista de tokens arrastáveis
@@ -3470,8 +3489,10 @@ function initializeMasterMap(campaign, socket) {
     }
 
     // Lógica para soltar tokens no mapa
-    mapBoard.addEventListener('dragover', (e) => e.preventDefault());
-    mapBoard.addEventListener('drop', (e) => {
+    const dragOverHandler = (e) => e.preventDefault();
+    mapBoard.addEventListener('dragover', dragOverHandler);
+
+    const dropHandler = (e) => {
         e.preventDefault();
         const charId = e.dataTransfer.getData('text/plain');
         const character = campaign.characters.find(c => c._id === charId);
@@ -3502,12 +3523,13 @@ function initializeMasterMap(campaign, socket) {
             // Limpa e recria todos os tokens para evitar duplicatas
             mapBoard.querySelectorAll('.map-token').forEach(t => t.remove());
             currentBoard.tokens.forEach(td => createTokenOnBoard(td, mapBoard, campaign));
-        }
-    });
+        }    
+    };
+    mapBoard.addEventListener('drop', dropHandler);
 
-    document.addEventListener('click', hideMapContextMenu);
+    document.addEventListener('click', hideMapContextMenu); // Este pode ficar, é global
 
-    removeFogBtn.addEventListener('click', (e) => {
+    const removeFogHandler = (e) => {
         const fogIdToRemove = e.target.dataset.fogId;
         if (fogIdToRemove) {
             // Acessa a prancheta atual para remover a névoa.
@@ -3518,7 +3540,8 @@ function initializeMasterMap(campaign, socket) {
             renderFogOfWar(currentBoard, mapBoard, true); // Re-renderiza a névoa do quadro atual.
         }
         hideMapContextMenu();
-    });
+    };
+    removeFogBtn.addEventListener('click', removeFogHandler);
 
     // Lógica para o novo botão de modo de desenho
     const toggleDrawModeBtn = document.getElementById('toggle-draw-mode-btn');
@@ -3548,149 +3571,175 @@ function initializeMasterMap(campaign, socket) {
     });
 
     // Eventos de desenho no mapa
-    mapBoard.addEventListener('mousedown', (e) => {
-        // Só desenha se o modo de desenho estiver ativo e for com o botão esquerdo
+    const mouseDownHandler = (e) => { // 1. MOUSE DOWN (Início do Desenho)
+        // Verifica se é um clique principal (botão esquerdo) e se a ferramenta de desenho está ativa
         if (!isDrawingMode || e.button !== 0) return;
 
-        // Previne o comportamento padrão (como arrastar a imagem de fundo)
         e.preventDefault();
+        
+        // Coordenadas de início (em pixels)
+        const rect = mapBoard.getBoundingClientRect();
+        startX = e.clientX - rect.left;
+        startY = e.clientY - rect.top;
+        
         isDrawing = true;
 
-        const rect = mapBoard.getBoundingClientRect();
-        startX = e.clientX - rect.left; // Posição em pixels
-        startY = e.clientY - rect.top;
-
+        // Se for Pincel ou Borracha, inicializa o caminho
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
             currentPathData = {
-                d: `M ${(startX / rect.width) * 100} ${(startY / rect.height) * 100} `,
-                strokeWidth: 5 // Define a espessura do traço em porcentagem
+                d: `M ${startX} ${startY}`, // MoveTo
+                strokeWidth: 20, // Define uma largura padrão para o pincel/borracha (em px, será convertido)
             };
-            // Não adiciona nada ao DOM ainda, a renderização será feita no mousemove
-            selectionRect = null;
-        } else {
+            // Renderiza o caminho temporário imediatamente
+            renderMapState(campaign, true, currentPathData, currentDrawShape);
+        }
+
+        // Para Quadrado e Círculo, cria a forma temporária (visual)
+        if (currentDrawShape === 'square' || currentDrawShape === 'circle') {
             selectionRect = document.createElement('div');
-            selectionRect.className = 'draw-selection-rect';
+            selectionRect.className = 'temp-selection-box';
+            selectionRect.style.position = 'absolute';
+            selectionRect.style.border = '2px dashed white';
+            selectionRect.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
             mapBoard.appendChild(selectionRect);
-            selectionRect.style.left = `${startX}px`;
-            selectionRect.style.top = `${startY}px`;
         }
-    });
-
-    mapBoard.addEventListener('mousemove', (e) => {
+    };
+    mapBoard.addEventListener('mousedown', mouseDownHandler);
+    const mouseMoveHandler = (e) => { // 2. MOUSE MOVE (Atualização do Desenho)
         if (!isDrawing) return;
-
-        // Lógica unificada para Pincel e Borracha
-        if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
-            const rect = mapBoard.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-            // Adiciona o novo ponto ao atributo 'd' do caminho
-            if (currentPathData) {
-                currentPathData.d += `L ${x} ${y} `;
-                // Renderiza a névoa com o caminho temporário para preview em tempo real
-                renderFogOfWar(campaign.mapBoards[campaign.currentBoardIndex || 0], mapBoard, true, currentPathData, currentDrawShape);
-            }
-            return;
-        }
-
+        
         const rect = mapBoard.getBoundingClientRect();
         const currentX = e.clientX - rect.left;
         const currentY = e.clientY - rect.top;
 
-        const width = Math.abs(currentX - startX);
-        const height = Math.abs(currentY - startY);
-        const left = Math.min(currentX, startX);
-        const top = Math.min(currentY, startY);
-
-        if (selectionRect) {
-            selectionRect.style.width = `${width}px`;
-            selectionRect.style.height = `${height}px`;
-            selectionRect.style.left = `${left}px`;
-            selectionRect.style.top = `${top}px`;
+        // --- LÓGICA DO PINCEL/BORRACHA ---
+        if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
+            // Adiciona o novo ponto no formato SVG Path Data
+            const xPercent = (currentX / rect.width) * 100;
+            const yPercent = (currentY / rect.height) * 100;
+            
+            // É melhor salvar em porcentagem imediatamente
+            currentPathData.d += ` L ${xPercent.toFixed(2)}% ${yPercent.toFixed(2)}%`;
+            
+            // Re-renderiza o estado do mapa para mostrar o desenho em tempo real
+            renderMapState(campaign, true, currentPathData, currentDrawShape);
+            
+        } 
+        
+        // --- LÓGICA DO CUBO/CÍRCULO (Usando Div Temporária para feedback visual) ---
+        else if (selectionRect) {
+            const x = Math.min(startX, currentX);
+            const y = Math.min(startY, currentY);
+            const width = Math.abs(startX - currentX);
+            const height = Math.abs(startY - currentY);
+            
+            if (currentDrawShape === 'square') {
+                selectionRect.style.left = `${x}px`;
+                selectionRect.style.top = `${y}px`;
+                selectionRect.style.width = `${width}px`;
+                selectionRect.style.height = `${height}px`;
+            } else if (currentDrawShape === 'circle') {
+                // Para o círculo, o raio é a distância máxima
+                const dx = currentX - startX;
+                const dy = currentY - startY;
+                const radius = Math.sqrt(dx * dx + dy * dy);
+                
+                // O círculo temporário é desenhado a partir do ponto inicial
+                selectionRect.style.left = `${startX - radius}px`;
+                selectionRect.style.top = `${startY - radius}px`;
+                selectionRect.style.width = `${radius * 2}px`;
+                selectionRect.style.height = `${radius * 2}px`;
+                selectionRect.style.borderRadius = '50%'; // Transforma a div em círculo
+            }
         }
+    };
+    mapBoard.addEventListener('mousemove', mouseMoveHandler);
 
-        // Se for círculo, força a ser um círculo e ajusta o estilo
-        if (currentDrawShape === 'circle') {
-            selectionRect.style.borderRadius = '50%';
-        } else {
-            selectionRect.style.borderRadius = '0';
-        }
-    });
+    const mouseUpHandler = (e) => { // 3. MOUSE UP (Finalização e Salvamento)
+        if (!isDrawing) return;
 
-    mapBoard.addEventListener('mouseup', (e) => {
-        if (!isDrawing || e.button !== 0) return;
         isDrawing = false;
+        
+        const rect = mapBoard.getBoundingClientRect();
+        const finalX = e.clientX - rect.left;
+        const finalY = e.clientY - rect.top;
+        
+        // CORREÇÃO: Pega a prancheta atual
+        const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
+        if (!currentBoard.fog) currentBoard.fog = [];
 
-        // Declara as variáveis de dimensão no escopo correto.
-        let rect, finalWidth, finalHeight;
-        if (selectionRect) { // Calcula apenas se selectionRect foi usado (quadrado/círculo)
-            rect = mapBoard.getBoundingClientRect();
-            finalWidth = parseFloat(selectionRect.style.width);
-            finalHeight = parseFloat(selectionRect.style.height);
+        // --- SALVAMENTO DA FORMA ---
+        let newFogData = null;
+        
+        // Pincel/Borracha
+        if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
+            if (currentPathData && currentPathData.d.length > 5) { // Verifica se houver movimento suficiente
+                // Transforma o 'd' de pixels para porcentagem (já feito em mousemove)
+                newFogData = {
+                    id: Date.now().toString(),
+                    shape: currentDrawShape,
+                    d: currentPathData.d,
+                    strokeWidth: (currentPathData.strokeWidth / rect.width) * 100, // Converte largura do pincel para %
+                };
+            }
+            currentPathData = null;
+            
+        } 
+        
+        // Cubo (Retângulo)
+        else if (currentDrawShape === 'square' && selectionRect) {
+            const x = Math.min(startX, finalX);
+            const y = Math.min(startY, finalY);
+            const width = Math.abs(startX - finalX);
+            const height = Math.abs(startY - finalY);
+
+            if (width > 5 && height > 5) { // Garante um tamanho mínimo
+                newFogData = {
+                    id: Date.now().toString(),
+                    shape: 'square',
+                    // Salva em porcentagem
+                    x: (x / rect.width) * 100, 
+                    y: (y / rect.height) * 100,
+                    width: (width / rect.width) * 100,
+                    height: (height / rect.height) * 100,
+                };
+            }
+        } 
+        
+        // Círculo
+        else if (currentDrawShape === 'circle' && selectionRect) {
+            const dx = finalX - startX;
+            const dy = finalY - startY;
+            const radius = Math.sqrt(dx * dx + dy * dy);
+            
+            if (radius > 5) { // Garante um raio mínimo
+                newFogData = {
+                    id: Date.now().toString(),
+                    shape: 'circle',
+                    // Salva em porcentagem
+                    x: (startX / rect.width) * 100, 
+                    y: (startY / rect.height) * 100,
+                    radius: (radius / rect.width) * 100, 
+                };
+            }
         }
 
-        try {
-            let fogData = null;
+        // 4. Salva no Array e Atualiza Campanha
+        if (newFogData) {
+            currentBoard.fog.push(newFogData);
+            updateCampaign(campaign, true); // Salva e transmite
+        }
 
-            // A lógica de desenho varia com a forma selecionada
-            switch (currentDrawShape) {
-                case 'square':
-                    // Usa as variáveis do escopo correto e verifica se selectionRect existe.
-                    if (selectionRect && finalWidth > 5 && finalHeight > 5) {
-                        fogData = {
-                            id: `fog_${Date.now()}`,
-                            shape: 'square',
-                            x: (parseFloat(selectionRect.style.left) / rect.width) * 100,
-                            y: (parseFloat(selectionRect.style.top) / rect.height) * 100,
-                            width: (finalWidth / rect.width) * 100,
-                            height: (finalHeight / rect.height) * 100,
-                        };
-                    }
-                    break;
-                case 'circle':
-                    // Usa as variáveis do escopo correto e verifica se selectionRect existe.
-                    if (selectionRect && finalWidth > 5 && finalHeight > 5) {
-                        const radiusX = (finalWidth / rect.width) * 50; // 50 = 100 / 2
-                        const radiusY = (finalHeight / rect.height) * 50;
-                        fogData = {
-                            id: `fog_${Date.now()}`,
-                            shape: 'circle',
-                            x: ((parseFloat(selectionRect.style.left) / rect.width) * 100) + radiusX,
-                            y: ((parseFloat(selectionRect.style.top) / rect.height) * 100) + radiusY,
-                            radius: (radiusX + radiusY) / 2,
-                        };
-                    }
-                    break;
-                case 'brush': 
-                case 'eraser':
-                    if (currentPathData && currentPathData.d.trim().length > "M 0 0".length) { // Garante que não é só o ponto inicial
-                        fogData = {
-                            id: `fog_${Date.now()}`,
-                            shape: currentDrawShape,
-                            d: currentPathData.d,
-                            strokeWidth: 5
-                        };
-                    }
-                    break;
-            }
-
-            if (fogData) {
-                const currentBoardIndex = campaign.currentBoardIndex || 0;
-                const currentBoard = campaign.mapBoards[currentBoardIndex];
-                if (!currentBoard.fog) currentBoard.fog = [];
-                currentBoard.fog.push(fogData);
-                updateCampaign(campaign);
-                renderFogOfWar(currentBoard, mapBoard, true); // Renderiza o estado final sem o desenho temporário
-            }
-        } finally {
-            // Limpa as variáveis de desenho
-            currentPathData = null;
-            if (selectionRect && selectionRect.parentNode) {
-                selectionRect.parentNode.removeChild(selectionRect);
-            }
+        // 5. Limpeza
+        if (selectionRect) {
+            selectionRect.remove();
             selectionRect = null;
         }
-    });
+        
+        // Finalmente, garante que o mapa seja re-renderizado
+        renderMapState(campaign, true);
+    };
+    mapBoard.addEventListener('mouseup', mouseUpHandler);
 
     // Resetar o mapa
     const resetMapBtn = document.getElementById('reset-map-btn');
@@ -3742,12 +3791,35 @@ function initializeMasterMap(campaign, socket) {
     populateTokenList(); // Popula a lista de tokens
 }
 
+/**
+ * Limpa os listeners de eventos do mapa para evitar duplicações.
+ * Esta função é um placeholder e precisa ser implementada com a lógica de remoção de listeners.
+ */
+function cleanupMapListeners() {
+    // Esta função deve ser preenchida com a lógica para remover todos os event listeners
+    // que são adicionados em initializeMasterMap. Por exemplo:
+    // const mapBoard = document.getElementById('map-board');
+    // mapBoard.removeEventListener('mousedown', ...);
+    // mapBoard.removeEventListener('mousemove', ...);
+    // etc.
+    console.log("Limpando listeners do mapa...");
+}
+
 /** 
  * Inicializa a visualização do Mestre para gerenciar a campanha.
  * @param {object} campaign - O objeto da campanha.
  */
 function initializeMasterView(campaign, socket) {
     window.socketInstance = socket; // Torna o socket acessível globalmente nesta página
+
+    // Listener para atualizações do socket
+    socket.on('map-updated', (updatedCampaignData) => {
+        console.log('Recebida atualização do mapa via socket:', updatedCampaignData);
+        // Atualiza o objeto da campanha local e re-renderiza a UI
+        Object.assign(campaign, updatedCampaignData);
+        renderMapState(campaign, true);
+        renderBoardGallery(campaign, true);
+    });
 
     // Elementos de exibição
     const titleDisplay = document.getElementById('campaign-title-display');
