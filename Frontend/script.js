@@ -4022,7 +4022,7 @@ function initializeMasterView(campaign, socket) {
  * @param {object} campaign - O objeto da campanha.
  * @param {boolean} isMasterView - Indica se a renderização é para a visão do mestre.
  */
-function renderMapState(campaign, isMasterView) {
+function renderMapState(campaign, isMasterView, temporaryPathData = null, temporaryPathShape = null) {
     const currentBoardIndex = campaign.currentBoardIndex || 0;
     const currentBoardData = campaign.mapBoards[currentBoardIndex];
 
@@ -4037,7 +4037,7 @@ function renderMapState(campaign, isMasterView) {
 
     renderMapBackground(mapBoard, mapPlaceholder, currentBoardData.imageUrl);
     renderMapTokens(mapBoard, currentBoardData.tokens, isMasterView, campaign);
-    renderFogOfWar(currentBoardData, mapBoard, isMasterView);
+    renderFogOfWar(currentBoardData, mapBoard, isMasterView, temporaryPathData, temporaryPathShape);
 }
 
 /**
