@@ -3576,13 +3576,16 @@ function initializeMasterMap(campaign, socket) {
 
     // Eventos de desenho no mapa
     const mouseDownHandler = (e) => { // 1. MOUSE DOWN (Início do Desenho)
-        // Verifica se é um clique principal (botão esquerdo) e se a ferramenta de desenho está ativa
+        // 1. Verifica se é um clique principal e se está no modo de desenho
         if (!isDrawingMode || e.button !== 0) return;
 
         e.preventDefault();
         
-        // Coordenadas de início (em pixels)
+        // 🟢 ESTAS LINHAS SÃO CRÍTICAS
+        // Calcula as dimensões e posição do mapa UMA VEZ
         const rect = mapBoard.getBoundingClientRect();
+        
+        // Calcula as coordenadas do clique RELATIVAS ao mapa (em PIXELS)
         startX = e.clientX - rect.left;
         startY = e.clientY - rect.top;
         
@@ -3590,8 +3593,6 @@ function initializeMasterMap(campaign, socket) {
 
         // Se for Pincel ou Borracha, inicializa o caminho
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
-            // Coordenadas em porcentagem (números de 0 a 100)
-            // A variável 'rect' já foi definida no escopo do mousedown.
             // Usamos startX e startY (em pixels) que foram calculados logo acima.
             const startXPercent = (startX / rect.width) * 100;
             const startYPercent = (startY / rect.height) * 100;
@@ -3695,10 +3696,8 @@ function initializeMasterMap(campaign, socket) {
                     strokeWidth: (currentPathData.strokeWidth / rect.width) * 100, 
                 };
             }
-            // Limpa os dados temporários do caminho, independentemente de ter sido salvo ou não.
-            // Isso evita que um clique sem arrastar deixe um 'currentPathData' órfão.
+            // 🟢 CORREÇÃO: Reseta o estado TEMPORÁRIO *depois* da tentativa de salvamento
             currentPathData = null;
-            
         } 
         
         // Cubo (Retângulo)
