@@ -3267,7 +3267,7 @@ function renderCampaignPlayers(campaign) {
  * @param {HTMLElement} mapBoard - O elemento do tabuleiro do mapa.
  * @param {boolean} isMasterView - Se a visão é a do mestre.
  */
-function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = null) {
+function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = null, temporaryPathShape = null) { // CORREÇÃO: Novo parâmetro temporaryPathShape
     // Limpa qualquer névoa anterior
     mapBoard.querySelectorAll('.fog-of-war-container').forEach(fog => fog.remove());
 
@@ -3340,10 +3340,9 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
     if (temporaryPathData) {
         const tempShape = document.createElementNS(svgNS, 'path');
         tempShape.setAttribute('d', temporaryPathData.d);
-        const currentShape = document.querySelector('.draw-tool-btn.active')?.dataset.shape;
         
         // Borracha (apaga a névoa) = traço branco na máscara. Pincel (desenha a névoa) = traço preto.
-        tempShape.setAttribute('stroke', currentShape === 'eraser' ? 'white' : 'black'); 
+        tempShape.setAttribute('stroke', temporaryPathShape === 'eraser' ? 'white' : 'black'); // CORREÇÃO: Usa temporaryPathShape
         tempShape.setAttribute('stroke-width', `${temporaryPathData.strokeWidth}%`);
         tempShape.setAttribute('fill', 'none');
         tempShape.setAttribute('stroke-linecap', 'round');
@@ -3644,10 +3643,7 @@ function initializeMasterMap(campaign, socket) {
                     }
                     break;
                 case 'circle':
-                    if (finalWidth > 5 && finalHeight > 5) {
-                        const rect = mapBoard.getBoundingClientRect();
-                        const finalWidth = parseFloat(selectionRect.style.width);
-                        const finalHeight = parseFloat(selectionRect.style.height);
+                    if (selectionRect && finalWidth > 5 && finalHeight > 5) {
                         const radiusX = (finalWidth / rect.width) * 50; // 50 = 100 / 2
                         const radiusY = (finalHeight / rect.height) * 50;
                         fogData = {
