@@ -3591,16 +3591,15 @@ function initializeMasterMap(campaign, socket) {
         // Se for Pincel ou Borracha, inicializa o caminho
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
             // Coordenadas em porcentagem (números de 0 a 100)
-            // CORREÇÃO: Garante que startX/startY (em pixels) já foram definidos
-            // a partir do evento 'e' antes de calcular a porcentagem.
-            const rect = mapBoard.getBoundingClientRect();
+            // A variável 'rect' já foi definida no escopo do mousedown.
+            // Usamos startX e startY (em pixels) que foram calculados logo acima.
             const startXPercent = (startX / rect.width) * 100;
             const startYPercent = (startY / rect.height) * 100;
 
             currentPathData = {
-                // CORREÇÃO: Remova o '%' da string do caminho 'd'.
+                // CORREÇÃO CRÍTICA: Inicializa a string 'd' (Path Data)
                 d: `M ${startXPercent.toFixed(2)} ${startYPercent.toFixed(2)}`,
-                // Define uma largura padrão
+                // CORREÇÃO CRÍTICA: Define a largura base (em pixels) AQUI.
                 strokeWidth: 20,
             };
             renderMapState(campaign, true, currentPathData, currentDrawShape);
@@ -3685,13 +3684,15 @@ function initializeMasterMap(campaign, socket) {
         
         // Pincel/Borracha
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
-            if (currentPathData && currentPathData.d.length > 15) { // Verifica se houver movimento suficiente
-                // Transforma o 'd' de pixels para porcentagem (já feito em mousemove)
+            // Garante que houve movimento suficiente e os dados existem
+            if (currentPathData && currentPathData.d.length > 5) { 
+                const rect = mapBoard.getBoundingClientRect();
                 newFogData = {
                     id: Date.now().toString(),
                     shape: currentDrawShape,
-                    d: currentPathData.d,
-                    strokeWidth: (currentPathData.strokeWidth / rect.width) * 100, // Converte largura do pincel para %
+                    d: currentPathData.d, // O 'd' (caminho) já está em porcentagem
+                    // Converte a largura de PIXEL para PORCENTAGEM (baseado na largura do mapa)
+                    strokeWidth: (currentPathData.strokeWidth / rect.width) * 100, 
                 };
             }
             // Limpa os dados temporários do caminho, independentemente de ter sido salvo ou não.
@@ -3741,10 +3742,7 @@ function initializeMasterMap(campaign, socket) {
         // 4. Salva no Array e Atualiza Campanha
         if (newFogData) {
             currentBoard.fog.push(newFogData);
-            // CORREÇÃO: A chamada para updateCampaign é crucial aqui.
-            // Ela salva o novo estado (com a área de névoa adicionada) permanentemente
-            // e transmite para outros jogadores. Sem isso, a alteração é perdida
-            // na próxima renderização.
+            // ISSO DEVE SER CHAMADO PARA SALVAR E TRANSMITIR
             updateCampaign(campaign, true); // Salva e transmite
         }
 
@@ -3755,8 +3753,7 @@ function initializeMasterMap(campaign, socket) {
         }
         
         // Finalmente, garante que o mapa seja re-renderizado
-        // Esta chamada agora irá desenhar o estado permanente, que inclui
-        // a nova forma de névoa que acabamos de salvar.
+        // Re-renderiza o estado final (agora deve incluir a alteração SALVA)
         renderMapState(campaign, true);
     };
     mapBoard.addEventListener('mouseup', mouseUpHandler);
@@ -4794,4 +4791,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-});ê 
+});
