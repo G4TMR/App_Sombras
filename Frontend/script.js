@@ -3446,24 +3446,28 @@ function initializeMasterMap(campaign, socket) {
     let startX, startY;
     let selectionRect = null;
 
+    let currentPathData = null; // Para o desenho em tempo real do pincel/borracha
+
     function populateTokenList() {
         // Popula a lista de tokens arrastáveis
         tokenList.innerHTML = '';
-        campaign.characters.forEach(char => {
-            const tokenListItem = document.createElement('div');
-            tokenListItem.className = 'token-list-item';
-            tokenListItem.draggable = true;
-            tokenListItem.dataset.characterId = char._id;
-            tokenListItem.innerHTML = `
-                <img src="${char.personalization.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzNkM2Q0ZiI+PC9yZWN0Pjwvc3ZnPg=='}" alt="${char.personalization.name}">
-                <span>${char.personalization.name}</span>
-            `;
-            tokenList.appendChild(tokenListItem);
+        if (campaign.characters) {
+            campaign.characters.forEach(char => {
+                const tokenListItem = document.createElement('div');
+                tokenListItem.className = 'token-list-item';
+                tokenListItem.draggable = true;
+                tokenListItem.dataset.characterId = char._id;
+                tokenListItem.innerHTML = `
+                    <img src="${char.personalization.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzNkM2Q0ZiI+PC9yZWN0Pjwvc3ZnPg=='}" alt="${char.personalization.name}">
+                    <span>${char.personalization.name}</span>
+                `;
+                tokenList.appendChild(tokenListItem);
 
-            tokenListItem.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', char._id);
+                tokenListItem.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', char._id);
+                });
             });
-        });
+        }
     }
 
     // Lógica para soltar tokens no mapa
@@ -3558,23 +3562,23 @@ function initializeMasterMap(campaign, socket) {
         startY = e.clientY - rect.top;
 
         selectionRect = document.createElement('div');
-        // CORREÇÃO: Pincel e Borracha agora usam a mesma lógica de desenho em tempo real
+        selectionRect.className = 'draw-selection-rect';
+
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
-            const svgNS = "http://www.w3.org/2000/svg";
-            selectionRect = document.createElementNS(svgNS, 'path'); // Cria um elemento path
-            selectionRect.setAttribute('d', `M ${(startX / rect.width) * 100} ${(startY / rect.height) * 100} `);
-            // Adiciona o elemento SVG ao DOM para que ele seja visível
+            currentPathData = {
+                d: `M ${(startX / rect.width) * 100} ${(startY / rect.height) * 100} `,
+                strokeWidth: 5 // Define a espessura do traço em porcentagem
+            };
+            // Não adiciona nada ao DOM ainda, a renderização será feita no mousemove
+        } else {
             mapBoard.appendChild(selectionRect);
+            selectionRect.style.left = `${startX}px`;
+            selectionRect.style.top = `${startY}px`;
         }
-        // Para quadrado/círculo, o 'div' é criado e posicionado
-        selectionRect.className = 'draw-selection-rect'; // A classe agora estiliza tanto div quanto path
-        mapBoard.appendChild(selectionRect);
-        selectionRect.style.left = `${startX}px`; // Usa pixels para posicionar
-        selectionRect.style.top = `${startY}px`;
     });
 
     mapBoard.addEventListener('mousemove', (e) => {
-        if (!isDrawing || !selectionRect) return;
+        if (!isDrawing) return;
 
         // CORREÇÃO: Lógica unificada para Pincel e Borracha
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
@@ -3582,17 +3586,16 @@ function initializeMasterMap(campaign, socket) {
             const x = ((e.clientX - rect.left) / rect.width) * 100;
             const y = ((e.clientY - rect.top) / rect.height) * 100;
             // Adiciona o novo ponto ao atributo 'd' do caminho
-            selectionRect.setAttribute('d', selectionRect.getAttribute('d') + `L ${x} ${y} `);
-            const temporaryPathData = {
-                d: selectionRect.getAttribute('d'),
-                strokeWidth: 5 // A mesma espessura que será salva
-            };
-            renderFogOfWar(campaign.mapBoards[campaign.currentBoardIndex || 0], mapBoard, true, temporaryPathData);
+            if (currentPathData) {
+                currentPathData.d += `L ${x} ${y} `;
+                // Renderiza a névoa com o caminho temporário para preview em tempo real
+                renderFogOfWar(campaign.mapBoards[campaign.currentBoardIndex || 0], mapBoard, true, currentPathData);
+            }
             return;
         }
 
         const rect = mapBoard.getBoundingClientRect();
-        const currentX = e.clientX - rect.left; // Usa pixels
+        const currentX = e.clientX - rect.left;
         const currentY = e.clientY - rect.top;
 
         const width = Math.abs(currentX - startX);
@@ -3600,10 +3603,12 @@ function initializeMasterMap(campaign, socket) {
         const left = Math.min(currentX, startX);
         const top = Math.min(currentY, startY);
 
-        selectionRect.style.width = `${width}px`;
-        selectionRect.style.height = `${height}px`;
-        selectionRect.style.left = `${left}px`;
-        selectionRect.style.top = `${top}px`;
+        if (selectionRect) {
+            selectionRect.style.width = `${width}px`;
+            selectionRect.style.height = `${height}px`;
+            selectionRect.style.left = `${left}px`;
+            selectionRect.style.top = `${top}px`;
+        }
 
         // Se for círculo, força a ser um círculo e ajusta o estilo
         if (currentDrawShape === 'circle') {
@@ -3616,11 +3621,8 @@ function initializeMasterMap(campaign, socket) {
     mapBoard.addEventListener('mouseup', (e) => {
         if (!isDrawing || e.button !== 0) return;
         isDrawing = false;
-        if (selectionRect) {
-            const rect = mapBoard.getBoundingClientRect();
-            const finalWidth = parseFloat(selectionRect.style.width);
-            const finalHeight = parseFloat(selectionRect.style.height);
 
+        try {
             let fogData = null;
 
             // A lógica de desenho varia com a forma selecionada
@@ -3628,6 +3630,9 @@ function initializeMasterMap(campaign, socket) {
                 case 'square':
                     // Só adiciona a névoa se ela tiver um tamanho mínimo
                     if (finalWidth > 5 && finalHeight > 5) {
+                        const rect = mapBoard.getBoundingClientRect();
+                        const finalWidth = parseFloat(selectionRect.style.width);
+                        const finalHeight = parseFloat(selectionRect.style.height);
                         fogData = {
                             id: `fog_${Date.now()}`,
                             shape: 'square', // Adiciona a forma aos dados
@@ -3640,6 +3645,9 @@ function initializeMasterMap(campaign, socket) {
                     break;
                 case 'circle':
                     if (finalWidth > 5 && finalHeight > 5) {
+                        const rect = mapBoard.getBoundingClientRect();
+                        const finalWidth = parseFloat(selectionRect.style.width);
+                        const finalHeight = parseFloat(selectionRect.style.height);
                         const radiusX = (finalWidth / rect.width) * 50; // 50 = 100 / 2
                         const radiusY = (finalHeight / rect.height) * 50;
                         fogData = {
@@ -3654,12 +3662,11 @@ function initializeMasterMap(campaign, socket) {
                 // CORREÇÃO: Lógica unificada para salvar Pincel e Borracha
                 case 'brush': 
                 case 'eraser':
-                    const pathData = selectionRect.getAttribute('d');
-                    if (pathData && pathData.trim().length > "M 0 0".length) { // Garante que não é só o ponto inicial
+                    if (currentPathData && currentPathData.d.trim().length > "M 0 0".length) { // Garante que não é só o ponto inicial
                         fogData = {
                             id: `fog_${Date.now()}`,
                             shape: currentDrawShape, // Salva como 'brush' ou 'eraser'
-                            d: pathData, // Salva a string do caminho diretamente
+                            d: currentPathData.d, // Salva a string do caminho diretamente
                             strokeWidth: 5 // Define a espessura do pincel/borracha (em porcentagem do mapa)
                         };
                     }
@@ -3675,7 +3682,12 @@ function initializeMasterMap(campaign, socket) {
                 updateCampaign(campaign);
                 renderFogOfWar(currentBoard, mapBoard, true); // Renderiza o estado final sem o desenho temporário
             }
-
+        } finally {
+            // Limpa as variáveis de desenho
+            currentPathData = null;
+            if (selectionRect && selectionRect.parentNode) {
+                selectionRect.parentNode.removeChild(selectionRect);
+            }
             mapBoard.removeChild(selectionRect);
             selectionRect = null;
         }
