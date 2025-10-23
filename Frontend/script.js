@@ -3688,8 +3688,6 @@ function initializeMasterMap(campaign, socket) {
             if (selectionRect && selectionRect.parentNode) {
                 selectionRect.parentNode.removeChild(selectionRect);
             }
-            // CORREÇÃO: A linha abaixo causava erro para pincel/borracha. A verificação acima já cobre todos os casos.
-            // mapBoard.removeChild(selectionRect); 
             selectionRect = null;
         }
     });
