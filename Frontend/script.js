@@ -3267,7 +3267,7 @@ function renderCampaignPlayers(campaign) {
  * @param {HTMLElement} mapBoard - O elemento do tabuleiro do mapa.
  * @param {boolean} isMasterView - Se a visão é a do mestre.
  */
-function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = null, temporaryPathShape = null) { // CORREÇÃO: Novo parâmetro temporaryPathShape
+function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = null, temporaryPathShape = null) {
     // Limpa qualquer névoa anterior
     mapBoard.querySelectorAll('.fog-of-war-container').forEach(fog => fog.remove());
 
@@ -3288,14 +3288,14 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
     const mask = document.createElementNS(svgNS, 'mask');
     mask.id = 'fog-mask';
 
-    // CORREÇÃO FINAL: O fundo da máscara deve ser PRETO. Onde a máscara é preta, a névoa fica INVISÍVEL (mapa visível).
+    // O fundo da máscara deve ser PRETO. Onde a máscara é preta, a névoa fica INVISÍVEL (mapa visível).
     const maskBackground = document.createElementNS(svgNS, 'rect');
     maskBackground.setAttribute('width', '100%');
     maskBackground.setAttribute('height', '100%');
     maskBackground.setAttribute('fill', 'black');
     mask.appendChild(maskBackground);
 
-    // CORREÇÃO FINAL: As formas que desenhamos para OCULTAR (quadrado, círculo, pincel) devem ser BRANCAS.
+    // As formas que desenhamos para OCULTAR (quadrado, círculo, pincel) devem ser BRANCAS.
     // Onde a máscara é branca, a névoa (camada preta) se torna VISÍVEL.
     (boardData.fog || []).forEach(fogData => {
         let fogShape;
@@ -3310,7 +3310,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
             case 'eraser': // Revela
                 fogShape = document.createElementNS(svgNS, 'path');
                 fogShape.setAttribute('d', fogData.d);
-                // CORREÇÃO FINAL: Pincel (oculta) é branco. Borracha (revela) é preto. A condição estava invertida.
+                // Pincel (oculta) é branco. Borracha (revela) é preto.
                 fogShape.setAttribute('stroke', fogData.shape === 'eraser' ? 'black' : 'white');
                 fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}%`);
                 fogShape.setAttribute('fill', 'none');
@@ -3327,7 +3327,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
         }
 
         if (fogShape) {
-            // CORREÇÃO FINAL: Para quadrado e círculo, o preenchimento deve ser BRANCO para ocultar.
+            // Para quadrado e círculo, o preenchimento deve ser BRANCO para ocultar.
             if (fogData.shape === 'square' || fogData.shape === 'circle') {
                 fogShape.setAttribute('fill', 'white');
             }
@@ -3340,8 +3340,8 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
     if (temporaryPathData) {
         const tempShape = document.createElementNS(svgNS, 'path');
         tempShape.setAttribute('d', temporaryPathData.d);
-        
-        // CORREÇÃO FINAL: Pincel (oculta) é branco. Borracha (revela) é preto. A condição estava invertida.
+
+        // Pincel (oculta) é branco. Borracha (revela) é preto.
         tempShape.setAttribute('stroke', temporaryPathShape === 'eraser' ? 'black' : 'white');
         tempShape.setAttribute('stroke-width', `${temporaryPathData.strokeWidth}%`);
         tempShape.setAttribute('fill', 'none');
@@ -3368,7 +3368,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
     if (isMasterView) {
         svg.addEventListener('contextmenu', (e) => {
             e.preventDefault();
-            // CORREÇÃO: O clique pode ser no retângulo de fundo, não na forma.
+            // O clique pode ser no retângulo de fundo, não na forma.
             // Precisamos encontrar a forma mais próxima sob o cursor.
             // A forma mais simples é verificar se o clique foi em um elemento com 'data-fog-id'.
             const clickedShape = e.target;
@@ -3398,7 +3398,7 @@ function showMapContextMenu(x, y, contextData) {
     const renameBoardOption = document.getElementById('rename-board-option');
     const deleteBoardOption = document.getElementById('delete-board-option');
 
-    // CORREÇÃO: Mostra a opção de remover névoa se um fogId for passado.
+    // Mostra a opção de remover névoa se um fogId for passado.
     removeFogOption.style.display = fogId ? 'block' : 'none';
     removeFogOption.dataset.fogId = fogId;
 }
@@ -3510,7 +3510,7 @@ function initializeMasterMap(campaign, socket) {
     removeFogBtn.addEventListener('click', (e) => {
         const fogIdToRemove = e.target.dataset.fogId;
         if (fogIdToRemove) {
-            // CORREÇÃO: Acessa a prancheta atual para remover a névoa.
+            // Acessa a prancheta atual para remover a névoa.
             const currentBoardIndex = campaign.currentBoardIndex || 0;
             const currentBoard = campaign.mapBoards[currentBoardIndex];
             currentBoard.fog = currentBoard.fog.filter(f => f.id !== fogIdToRemove);
@@ -3521,7 +3521,7 @@ function initializeMasterMap(campaign, socket) {
     });
 
     // Lógica para o novo botão de modo de desenho
-    const toggleDrawModeBtn = document.getElementById('toggle-draw-mode-btn'); // Corrigido
+    const toggleDrawModeBtn = document.getElementById('toggle-draw-mode-btn');
     const drawToolsPanel = document.getElementById('draw-tools-panel');
     const drawToolBtns = document.querySelectorAll('.draw-tool-btn');
 
@@ -3566,7 +3566,7 @@ function initializeMasterMap(campaign, socket) {
                 strokeWidth: 5 // Define a espessura do traço em porcentagem
             };
             // Não adiciona nada ao DOM ainda, a renderização será feita no mousemove
-            selectionRect = null; // CORREÇÃO: Garante que o selectionRect não seja usado para pincel/borracha
+            selectionRect = null;
         } else {
             selectionRect = document.createElement('div');
             selectionRect.className = 'draw-selection-rect';
@@ -3579,7 +3579,7 @@ function initializeMasterMap(campaign, socket) {
     mapBoard.addEventListener('mousemove', (e) => {
         if (!isDrawing) return;
 
-        // CORREÇÃO: Lógica unificada para Pincel e Borracha
+        // Lógica unificada para Pincel e Borracha
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
             const rect = mapBoard.getBoundingClientRect();
             const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -3621,7 +3621,7 @@ function initializeMasterMap(campaign, socket) {
         if (!isDrawing || e.button !== 0) return;
         isDrawing = false;
 
-        // CORREÇÃO: Declara as variáveis de dimensão no escopo correto.
+        // Declara as variáveis de dimensão no escopo correto.
         let rect, finalWidth, finalHeight;
         if (selectionRect) { // Calcula apenas se selectionRect foi usado (quadrado/círculo)
             rect = mapBoard.getBoundingClientRect();
@@ -3635,7 +3635,7 @@ function initializeMasterMap(campaign, socket) {
             // A lógica de desenho varia com a forma selecionada
             switch (currentDrawShape) {
                 case 'square':
-                    // CORREÇÃO: Usa as variáveis do escopo correto e verifica se selectionRect existe.
+                    // Usa as variáveis do escopo correto e verifica se selectionRect existe.
                     if (selectionRect && finalWidth > 5 && finalHeight > 5) {
                         fogData = {
                             id: `fog_${Date.now()}`,
@@ -3648,7 +3648,7 @@ function initializeMasterMap(campaign, socket) {
                     }
                     break;
                 case 'circle':
-                    // CORREÇÃO: Usa as variáveis do escopo correto e verifica se selectionRect existe.
+                    // Usa as variáveis do escopo correto e verifica se selectionRect existe.
                     if (selectionRect && finalWidth > 5 && finalHeight > 5) {
                         const radiusX = (finalWidth / rect.width) * 50; // 50 = 100 / 2
                         const radiusY = (finalHeight / rect.height) * 50;
@@ -3696,14 +3696,14 @@ function initializeMasterMap(campaign, socket) {
     const resetMapBtn = document.getElementById('reset-map-btn');
     resetMapBtn.addEventListener('click', () => {
         if (confirm('Tem certeza que deseja limpar esta prancheta? Todos os tokens, a névoa de guerra e a imagem de fundo serão removidos.')) {
-            const currentBoardIndex = campaign.currentBoardIndex || 0; // CORREÇÃO: Acessa a variável correta
+            const currentBoardIndex = campaign.currentBoardIndex || 0;
             const currentBoard = campaign.mapBoards[currentBoardIndex];
             if (currentBoard) {
                 currentBoard.tokens = [];
                 currentBoard.fog = [];
-                currentBoard.imageUrl = null; // CORREÇÃO: Remove também a imagem de fundo.
+                currentBoard.imageUrl = null;
                 updateCampaign(campaign, true);
-                // CORREÇÃO: Re-renderiza o mapa para o mestre ver a limpeza imediatamente.
+                // Re-renderiza o mapa para o mestre ver a limpeza imediatamente.
                 renderMapState(campaign, true);
             }
         }
@@ -4337,11 +4337,11 @@ function renderGalleryForContainer(campaign, isMasterView, galleryContainer) {
 
         thumb.addEventListener('click', () => {
             campaign.currentBoardIndex = index;
-            // CORREÇÃO: Atualiza a campanha para os outros jogadores E renderiza o mapa localmente para o mestre.
+            // Atualiza a campanha para os outros jogadores E renderiza o mapa localmente para o mestre.
             // A função updateCampaign por si só não redesenha a tela do mestre, apenas emite o evento.
             updateCampaign(campaign, true); 
             renderMapState(campaign, true);
-            // CORREÇÃO: Re-renderiza a galeria para atualizar o item ativo.
+            // Re-renderiza a galeria para atualizar o item ativo.
             renderBoardGallery(campaign, true);
         });
 
@@ -4349,7 +4349,7 @@ function renderGalleryForContainer(campaign, isMasterView, galleryContainer) {
             thumb.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                showBoardContextMenu(e.clientX, e.clientY, board.id, campaign); // CORREÇÃO: Passa as coordenadas do evento.
+                showBoardContextMenu(e.clientX, e.clientY, board.id, campaign);
             });
         }
 
@@ -4388,7 +4388,7 @@ function showBoardContextMenu(x, y, boardId, campaign) {
             campaign.mapBoards = campaign.mapBoards.filter(b => b.id !== boardId);
             campaign.currentBoardIndex = 0; // Volta para a primeira prancheta
             updateCampaign(campaign, true);
-            // CORREÇÃO: Renderiza o estado do mapa e a galeria após a exclusão.
+            // Renderiza o estado do mapa e a galeria após a exclusão.
             renderMapState(campaign, true);
             renderBoardGallery(campaign, true);
         }
