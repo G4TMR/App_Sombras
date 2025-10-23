@@ -3315,6 +3315,8 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
                 fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}%`);
                 fogShape.setAttribute('fill', 'none');
                 fogShape.setAttribute('stroke-linecap', 'round');
+                // ADICIONADO: Garante que a espessura da linha seja consistente.
+                fogShape.setAttribute('vector-effect', 'non-scaling-stroke');
                 fogShape.setAttribute('stroke-linejoin', 'round');
                 break;
             default: // 'square'
@@ -3347,6 +3349,8 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
         tempShape.setAttribute('fill', 'none');
         tempShape.setAttribute('stroke-linecap', 'round');
         tempShape.setAttribute('stroke-linejoin', 'round');
+    // ADICIONADO: Garante que a espessura da linha seja consistente.
+    tempShape.setAttribute('vector-effect', 'non-scaling-stroke');
         mask.appendChild(tempShape);
     }
 
@@ -3586,11 +3590,16 @@ function initializeMasterMap(campaign, socket) {
 
         // Se for Pincel ou Borracha, inicializa o caminho
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
+            // Coordenadas em porcentagem (números de 0 a 100)
+            const startXPercent = (startX / rect.width) * 100;
+            const startYPercent = (startY / rect.height) * 100;
+
             currentPathData = {
-                d: `M ${startX} ${startY}`, // MoveTo
-                strokeWidth: 20, // Define uma largura padrão para o pincel/borracha (em px, será convertido)
+                // CORREÇÃO: Remova o '%' da string do caminho 'd'.
+                d: `M ${startXPercent.toFixed(2)} ${startYPercent.toFixed(2)}`,
+                // Define uma largura padrão
+                strokeWidth: 20,
             };
-            // Renderiza o caminho temporário imediatamente
             renderMapState(campaign, true, currentPathData, currentDrawShape);
         }
 
@@ -3613,13 +3622,13 @@ function initializeMasterMap(campaign, socket) {
         const currentY = e.clientY - rect.top;
 
         // --- LÓGICA DO PINCEL/BORRACHA ---
-        if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
+        if ((currentDrawShape === 'brush' || currentDrawShape === 'eraser') && currentPathData) {
             // Adiciona o novo ponto no formato SVG Path Data
             const xPercent = (currentX / rect.width) * 100;
             const yPercent = (currentY / rect.height) * 100;
             
-            // É melhor salvar em porcentagem imediatamente
-            currentPathData.d += ` L ${xPercent.toFixed(2)}% ${yPercent.toFixed(2)}%`;
+            // CORREÇÃO: Remova o '%' da string do caminho 'd'.
+            currentPathData.d += ` L ${xPercent.toFixed(2)} ${yPercent.toFixed(2)}`;
             
             // Re-renderiza o estado do mapa para mostrar o desenho em tempo real
             renderMapState(campaign, true, currentPathData, currentDrawShape);
@@ -3673,7 +3682,7 @@ function initializeMasterMap(campaign, socket) {
         
         // Pincel/Borracha
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
-            if (currentPathData && currentPathData.d.length > 5) { // Verifica se houver movimento suficiente
+            if (currentPathData && currentPathData.d.length > 15) { // Verifica se houver movimento suficiente
                 // Transforma o 'd' de pixels para porcentagem (já feito em mousemove)
                 newFogData = {
                     id: Date.now().toString(),
