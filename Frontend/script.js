@@ -3288,15 +3288,15 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
     const mask = document.createElementNS(svgNS, 'mask');
     mask.id = 'fog-mask';
 
-    // 2. O fundo da máscara é BRANCO. Por padrão, a máscara é transparente, então a névoa NÃO aparece.
+    // CORREÇÃO: O fundo da máscara deve ser BRANCO. Onde a máscara é branca, a névoa (camada preta) fica INVISÍVEL.
     const maskBackground = document.createElementNS(svgNS, 'rect');
     maskBackground.setAttribute('width', '100%');
     maskBackground.setAttribute('height', '100%');
     maskBackground.setAttribute('fill', 'white');
     mask.appendChild(maskBackground);
 
-    // 3. As formas que desenhamos (quadrado, círculo, pincel) serão BRANCAS.
-    // Onde a máscara for branca, a névoa aparecerá.
+    // CORREÇÃO: As formas que desenhamos para OCULTAR (quadrado, círculo, pincel) devem ser PRETAS.
+    // Onde a máscara é preta, a névoa (camada preta) se torna VISÍVEL.
     (boardData.fog || []).forEach(fogData => {
         let fogShape;
         switch (fogData.shape) {
@@ -3310,8 +3310,8 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
             case 'eraser': // Revela
                 fogShape = document.createElementNS(svgNS, 'path');
                 fogShape.setAttribute('d', fogData.d);
-                // Estilos para o pincel na máscara
-                fogShape.setAttribute('stroke', fogData.shape === 'eraser' ? 'white' : 'black'); // Borracha apaga (branco), Pincel desenha (preto)
+                // CORREÇÃO: Pincel desenha névoa (preto), Borracha apaga (branco).
+                fogShape.setAttribute('stroke', fogData.shape === 'eraser' ? 'white' : 'black');
                 fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}%`);
                 fogShape.setAttribute('fill', 'none');
                 fogShape.setAttribute('stroke-linecap', 'round');
@@ -3327,8 +3327,8 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
         }
 
         if (fogShape) {
-            // Para quadrado e círculo, o preenchimento deve ser PRETO para ocultar.
-            if (fogData.shape !== 'brush' && fogData.shape !== 'eraser') {
+            // CORREÇÃO: Para quadrado e círculo, o preenchimento deve ser PRETO para ocultar.
+            if (fogData.shape === 'square' || fogData.shape === 'circle') {
                 fogShape.setAttribute('fill', 'black');
             }
             fogShape.dataset.fogId = fogData.id;
@@ -3341,8 +3341,8 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
         const tempShape = document.createElementNS(svgNS, 'path');
         tempShape.setAttribute('d', temporaryPathData.d);
         
-        // Borracha (apaga a névoa) = traço branco na máscara. Pincel (desenha a névoa) = traço preto.
-        tempShape.setAttribute('stroke', temporaryPathShape === 'eraser' ? 'white' : 'black'); // CORREÇÃO: Usa temporaryPathShape
+        // CORREÇÃO: Pincel (desenha névoa) = traço preto. Borracha (apaga a névoa) = traço branco.
+        tempShape.setAttribute('stroke', temporaryPathShape === 'eraser' ? 'white' : 'black');
         tempShape.setAttribute('stroke-width', `${temporaryPathData.strokeWidth}%`);
         tempShape.setAttribute('fill', 'none');
         tempShape.setAttribute('stroke-linecap', 'round');
@@ -3357,8 +3357,8 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
     const fogLayer = document.createElementNS(svgNS, 'rect');
     fogLayer.setAttribute('width', '100%');
     fogLayer.setAttribute('height', '100%');
-    fogLayer.setAttribute('fill', 'rgba(0,0,0,0.9)');
-    // 5. Aplicamos a máscara. Onde a máscara for BRANCA, a névoa fica INVISÍVEL. Onde for PRETA, a névoa APARECE.
+    fogLayer.setAttribute('fill', 'rgba(0, 0, 0, 0.9)'); // A cor da névoa
+    // 5. Aplicamos a máscara. Onde a máscara for PRETA, a névoa (fogLayer) APARECE. Onde for BRANCA, a névoa fica INVISÍVEL.
     fogLayer.setAttribute('mask', 'url(#fog-mask)');
     svg.appendChild(fogLayer);
 
