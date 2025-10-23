@@ -3591,6 +3591,9 @@ function initializeMasterMap(campaign, socket) {
         // Se for Pincel ou Borracha, inicializa o caminho
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
             // Coordenadas em porcentagem (números de 0 a 100)
+            // CORREÇÃO: Garante que startX/startY (em pixels) já foram definidos
+            // a partir do evento 'e' antes de calcular a porcentagem.
+            const rect = mapBoard.getBoundingClientRect();
             const startXPercent = (startX / rect.width) * 100;
             const startYPercent = (startY / rect.height) * 100;
 
@@ -3691,6 +3694,8 @@ function initializeMasterMap(campaign, socket) {
                     strokeWidth: (currentPathData.strokeWidth / rect.width) * 100, // Converte largura do pincel para %
                 };
             }
+            // Limpa os dados temporários do caminho, independentemente de ter sido salvo ou não.
+            // Isso evita que um clique sem arrastar deixe um 'currentPathData' órfão.
             currentPathData = null;
             
         } 
@@ -3736,6 +3741,10 @@ function initializeMasterMap(campaign, socket) {
         // 4. Salva no Array e Atualiza Campanha
         if (newFogData) {
             currentBoard.fog.push(newFogData);
+            // CORREÇÃO: A chamada para updateCampaign é crucial aqui.
+            // Ela salva o novo estado (com a área de névoa adicionada) permanentemente
+            // e transmite para outros jogadores. Sem isso, a alteração é perdida
+            // na próxima renderização.
             updateCampaign(campaign, true); // Salva e transmite
         }
 
@@ -3746,6 +3755,8 @@ function initializeMasterMap(campaign, socket) {
         }
         
         // Finalmente, garante que o mapa seja re-renderizado
+        // Esta chamada agora irá desenhar o estado permanente, que inclui
+        // a nova forma de névoa que acabamos de salvar.
         renderMapState(campaign, true);
     };
     mapBoard.addEventListener('mouseup', mouseUpHandler);
@@ -4783,4 +4794,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-});
+});ê 
