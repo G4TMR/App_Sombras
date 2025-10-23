@@ -3588,7 +3588,7 @@ function initializeMasterMap(campaign, socket) {
             if (currentPathData) {
                 currentPathData.d += `L ${x} ${y} `;
                 // Renderiza a névoa com o caminho temporário para preview em tempo real
-                renderFogOfWar(campaign.mapBoards[campaign.currentBoardIndex || 0], mapBoard, true, currentPathData);
+                renderFogOfWar(campaign.mapBoards[campaign.currentBoardIndex || 0], mapBoard, true, currentPathData, currentDrawShape);
             }
             return;
         }
@@ -3621,20 +3621,25 @@ function initializeMasterMap(campaign, socket) {
         if (!isDrawing || e.button !== 0) return;
         isDrawing = false;
 
+        // CORREÇÃO: Declara as variáveis de dimensão no escopo correto.
+        let rect, finalWidth, finalHeight;
+        if (selectionRect) { // Calcula apenas se selectionRect foi usado (quadrado/círculo)
+            rect = mapBoard.getBoundingClientRect();
+            finalWidth = parseFloat(selectionRect.style.width);
+            finalHeight = parseFloat(selectionRect.style.height);
+        }
+
         try {
             let fogData = null;
 
             // A lógica de desenho varia com a forma selecionada
             switch (currentDrawShape) {
                 case 'square':
-                    // Só adiciona a névoa se ela tiver um tamanho mínimo
-                    if (finalWidth > 5 && finalHeight > 5) {
-                        const rect = mapBoard.getBoundingClientRect();
-                        const finalWidth = parseFloat(selectionRect.style.width);
-                        const finalHeight = parseFloat(selectionRect.style.height);
+                    // CORREÇÃO: Usa as variáveis do escopo correto e verifica se selectionRect existe.
+                    if (selectionRect && finalWidth > 5 && finalHeight > 5) {
                         fogData = {
                             id: `fog_${Date.now()}`,
-                            shape: 'square', // Adiciona a forma aos dados
+                            shape: 'square',
                             x: (parseFloat(selectionRect.style.left) / rect.width) * 100,
                             y: (parseFloat(selectionRect.style.top) / rect.height) * 100,
                             width: (finalWidth / rect.width) * 100,
@@ -3643,6 +3648,7 @@ function initializeMasterMap(campaign, socket) {
                     }
                     break;
                 case 'circle':
+                    // CORREÇÃO: Usa as variáveis do escopo correto e verifica se selectionRect existe.
                     if (selectionRect && finalWidth > 5 && finalHeight > 5) {
                         const radiusX = (finalWidth / rect.width) * 50; // 50 = 100 / 2
                         const radiusY = (finalHeight / rect.height) * 50;
@@ -3651,26 +3657,24 @@ function initializeMasterMap(campaign, socket) {
                             shape: 'circle',
                             x: ((parseFloat(selectionRect.style.left) / rect.width) * 100) + radiusX,
                             y: ((parseFloat(selectionRect.style.top) / rect.height) * 100) + radiusY,
-                            radius: (radiusX + radiusY) / 2, // Média dos raios para uma forma mais consistente
+                            radius: (radiusX + radiusY) / 2,
                         };
                     }
                     break;
-                // CORREÇÃO: Lógica unificada para salvar Pincel e Borracha
                 case 'brush': 
                 case 'eraser':
                     if (currentPathData && currentPathData.d.trim().length > "M 0 0".length) { // Garante que não é só o ponto inicial
                         fogData = {
                             id: `fog_${Date.now()}`,
-                            shape: currentDrawShape, // Salva como 'brush' ou 'eraser'
-                            d: currentPathData.d, // Salva a string do caminho diretamente
-                            strokeWidth: 5 // Define a espessura do pincel/borracha (em porcentagem do mapa)
+                            shape: currentDrawShape,
+                            d: currentPathData.d,
+                            strokeWidth: 5
                         };
                     }
                     break;
             }
 
             if (fogData) {
-                // CORREÇÃO: Salva a névoa na prancheta correta, não na estrutura antiga.
                 const currentBoardIndex = campaign.currentBoardIndex || 0;
                 const currentBoard = campaign.mapBoards[currentBoardIndex];
                 if (!currentBoard.fog) currentBoard.fog = [];
@@ -3684,7 +3688,8 @@ function initializeMasterMap(campaign, socket) {
             if (selectionRect && selectionRect.parentNode) {
                 selectionRect.parentNode.removeChild(selectionRect);
             }
-            mapBoard.removeChild(selectionRect);
+            // CORREÇÃO: A linha abaixo causava erro para pincel/borracha. A verificação acima já cobre todos os casos.
+            // mapBoard.removeChild(selectionRect); 
             selectionRect = null;
         }
     });
