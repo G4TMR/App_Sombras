@@ -559,8 +559,9 @@ io.on('connection', (socket) => {
     // Evento para receber atualizações do mapa de um cliente
     socket.on('map-update', async ({ campaignId, updatedCampaignData }) => {
         try {
-            // A rota PUT já salvou os dados. A função aqui é retransmitir a versão salva.
-            socket.to(campaignId).emit('map-updated', { updatedCampaignData });
+            // A rota PUT já salvou os dados. A função aqui é retransmitir a versão salva para TODOS na sala.
+            // Usar `io.in(sala)` em vez de `socket.to(sala)` garante que o remetente também receba a confirmação.
+            io.in(campaignId).emit('map-updated', { updatedCampaignData });
         } catch (error) {
             console.error('Erro ao processar atualização do mapa via socket:', error);
         }

@@ -3860,12 +3860,12 @@ function initializeMasterView(campaign, socket) {
     window.socketInstance = socket; // Torna o socket acessível globalmente nesta página
 
     // Listener para atualizações do socket
-    socket.on('map-updated', (updatedCampaignData) => {
-        console.log('Recebida atualização do mapa via socket:', updatedCampaignData);
+    socket.on('map-updated', ({ updatedCampaignData }) => {
+        console.log('Recebida atualização do mapa via socket, atualizando UI.');
         // Atualiza o objeto da campanha local e re-renderiza a UI
         Object.assign(campaign, updatedCampaignData);
-        renderMapState(campaign, true);
-        renderBoardGallery(campaign, true);
+        renderMapState(campaign, true, null, null); // Renderiza o estado final, sem dados temporários
+        renderBoardGallery(campaign, true); // Atualiza a galeria de pranchetas
     });
 
     // Elementos de exibição
@@ -3890,15 +3890,8 @@ function initializeMasterView(campaign, socket) {
     if (!campaign.mapBoards) {
         // Se não existir, cria com UMA prancheta padrão
         campaign.mapBoards = [{
-            id: `board_${Date.now()}`,
-            name: 'Cena 1',
-            imageUrl: null, tokens: [], fog: []
+            id: `board_${Date.now()}`, name: 'Cena 1', imageUrl: null, tokens: [], fog: []
         }];
-        needsSave = true; 
-    }
-    if (needsSave) {
-        console.log("Migrando campanha antiga. Adicionando campos faltantes.");
-        updateCampaign(campaign); // Salva a campanha com os novos campos
     }
 
     // Renderiza a lista de jogadores
