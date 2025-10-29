@@ -3600,7 +3600,7 @@ function initializeMasterMap(campaign, socket) {
                 // CORREÇÃO CRÍTICA: Inicializa a string 'd' (Path Data)
                 d: `M ${startX} ${startY}`, // INICIA COM PIXELS
                 // CORREÇÃO CRÍTICA: Define a largura base (em pixels) AQUI.
-                strokeWidth: 20,
+                strokeWidth: 10, // AJUSTE: Diminuído de 20 para 10
             };
             renderMapState(campaign, true, currentPathData, currentDrawShape);
         }
@@ -3631,6 +3631,11 @@ function initializeMasterMap(campaign, socket) {
             
             // Re-renderiza o estado do mapa para mostrar o desenho em tempo real
             renderMapState(campaign, true, currentPathData, currentDrawShape);
+
+            // NOVO: Transmite a atualização em tempo real para os jogadores
+            if (window.socketInstance && window.socketInstance.connected) {
+                window.socketInstance.emit('map-update', { campaignId: campaign._id, updatedCampaignData: campaign });
+            }
             
         } 
         
