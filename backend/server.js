@@ -557,12 +557,13 @@ io.on('connection', (socket) => {
     });
 
     // Evento para receber atualizações do mapa de um cliente
-    socket.on('map-update', async ({ campaignId, updatedCampaignData }) => {
+    socket.on('map-update', async ({ campaignId, updatedCampaignData, temporaryPathData, temporaryPathShape }) => {
         try {
             // Opcional: Salvar no banco de dados aqui se necessário, mas a rota PUT já faz isso.
             // A principal função aqui é retransmitir.
             // Transmite a atualização para todos os outros na mesma sala de campanha
-            socket.to(campaignId).emit('map-updated', updatedCampaignData);
+            // Inclui os dados temporários para o desenho em tempo real
+            socket.to(campaignId).emit('map-updated', { updatedCampaignData, temporaryPathData, temporaryPathShape });
         } catch (error) {
             console.error('Erro ao processar atualização do mapa via socket:', error);
         }

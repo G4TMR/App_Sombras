@@ -3634,7 +3634,12 @@ function initializeMasterMap(campaign, socket) {
 
             // NOVO: Transmite a atualização em tempo real para os jogadores
             if (window.socketInstance && window.socketInstance.connected) {
-                window.socketInstance.emit('map-update', { campaignId: campaign._id, updatedCampaignData: campaign });
+                window.socketInstance.emit('map-update', { 
+                    campaignId: campaign._id, 
+                    updatedCampaignData: campaign,
+                    temporaryPathData: currentPathData, // Envia o caminho temporário
+                    temporaryPathShape: currentDrawShape // Envia a forma temporária
+                });
             }
             
         } 
