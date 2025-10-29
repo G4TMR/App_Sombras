@@ -3306,7 +3306,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
                 fogShape.setAttribute('d', fogData.d);
                 // Pincel (oculta) é branco. Borracha (revela) é preto.
                 fogShape.setAttribute('stroke', fogData.shape === 'eraser' ? 'black' : 'white');
-                fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}%`); // CORREÇÃO: Garante que a unidade '%' esteja aqui para dados salvos.
+                fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}%`);
                 fogShape.setAttribute('fill', 'none');
                 fogShape.setAttribute('stroke-linecap', 'round');
                 // ADICIONADO: Garante que a espessura da linha seja consistente.
@@ -3340,7 +3340,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
         const tempShape = document.createElementNS(svgNS, 'path');
         tempShape.setAttribute('d', temporaryPathData.d);
         tempShape.setAttribute('stroke', temporaryPathShape === 'eraser' ? 'black' : 'white');
-        tempShape.setAttribute('stroke-width', `${temporaryPathData.strokeWidth}`); // Usa pixels
+        tempShape.setAttribute('stroke-width', `${temporaryPathData.strokeWidth}`);
         tempShape.setAttribute('fill', 'none');
         tempShape.setAttribute('stroke-linecap', 'round');
         tempShape.setAttribute('stroke-linejoin', 'round');
@@ -3691,7 +3691,7 @@ function initializeMasterMap(campaign, socket) {
                 for (let i = 0; i < points.length; i += 2) {
                     const px = points[i];
                     const py = points[i + 1];
-                    dInPercent += ` ${((px / rect.width) * 100).toFixed(2)} ${((py / rect.height) * 100).toFixed(2)}`;
+                    dInPercent += ` ${((px / rect.width) * 100).toFixed(2)} ${((py / rect.height) * 100).toFixed(2)}`; // CORREÇÃO: Não adicionar '%' aqui
                     if (i === 0) dInPercent += ' L';
                 }
 
