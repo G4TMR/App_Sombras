@@ -557,16 +557,19 @@ io.on('connection', (socket) => {
     });
 
     // Evento para receber atualizações do mapa de um cliente
-    socket.on('map-update', async ({ campaignId, updatedCampaignData, temporaryData }) => {
+    socket.on('map-update', async ({ campaignId, updatedCampaignData }) => {
         try {
-            // A rota PUT já salvou os dados. A função aqui é apenas retransmitir
-            // a versão mais recente da campanha para os outros jogadores na sala.
-            
-            // Transmite a atualização para todos os outros na mesma sala de campanha
-            socket.to(campaignId).emit('map-updated', { updatedCampaignData, temporaryData });
+            // A rota PUT já salvou os dados. A função aqui é retransmitir a versão salva.
+            socket.to(campaignId).emit('map-updated', { updatedCampaignData });
         } catch (error) {
             console.error('Erro ao processar atualização do mapa via socket:', error);
         }
+    });
+
+    // NOVO: Evento específico para o desenho em tempo real (sem salvar no banco)
+    socket.on('map-drawing-live', ({ campaignId, temporaryPathData, temporaryPathShape }) => {
+        // Apenas retransmite os dados do desenho temporário para os outros na sala
+        socket.to(campaignId).emit('map-drawing-updated', { temporaryPathData, temporaryPathShape });
     });
 
     socket.on('disconnect', () => {
