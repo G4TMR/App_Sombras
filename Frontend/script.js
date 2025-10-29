@@ -3585,9 +3585,9 @@ function initializeMasterMap(campaign, socket) {
         // Calcula as dimensões e posição do mapa UMA VEZ
         const rect = mapBoard.getBoundingClientRect();
         
-        // Calcula as coordenadas do clique RELATIVAS ao mapa (em PIXELS)
-        startX = e.clientX - rect.left;
-        startY = e.clientY - rect.top;
+        // CORREÇÃO: Calcula as coordenadas do clique RELATIVAS ao mapa, considerando a rolagem da página.
+        startX = e.pageX - rect.left - window.scrollX;
+        startY = e.pageY - rect.top - window.scrollY;
         
         isDrawing = true;
 
@@ -3621,8 +3621,8 @@ function initializeMasterMap(campaign, socket) {
         if (!isDrawing) return;
         
         const rect = mapBoard.getBoundingClientRect();
-        const currentX = e.clientX - rect.left;
-        const currentY = e.clientY - rect.top;
+        const currentX = e.pageX - rect.left - window.scrollX;
+        const currentY = e.pageY - rect.top - window.scrollY;
 
         // --- LÓGICA DO PINCEL/BORRACHA ---
         if ((currentDrawShape === 'brush' || currentDrawShape === 'eraser') && currentPathData) {
@@ -3673,8 +3673,8 @@ function initializeMasterMap(campaign, socket) {
         isDrawing = false;
         
         const rect = mapBoard.getBoundingClientRect();
-        const finalX = e.clientX - rect.left;
-        const finalY = e.clientY - rect.top;
+        const finalX = e.pageX - rect.left - window.scrollX;
+        const finalY = e.pageY - rect.top - window.scrollY;
         
         // CORREÇÃO: Pega a prancheta atual
         const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
@@ -4615,10 +4615,8 @@ async function checkAuthStatus() {
 
     const authContainer = document.createElement('div'); // Cria um novo
     authContainer.className = 'auth-container';
-    // Define o botão de login como padrão inicial
-    authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
     nav.appendChild(authContainer); // Adiciona ao menu
-
+    
     try {
         const response = await api.get('/auth/user');
         const user = response.data;
@@ -4630,11 +4628,13 @@ async function checkAuthStatus() {
             return user;
         }
         // Se a API retornar sucesso mas sem usuário, força o estado de deslogado
+        authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
         currentUserId = null;
         return null;
     } catch (error) {
         // Se a API falhar (ex: 401, erro de rede), o botão de login já está na tela.
         console.log('Nenhuma sessão de usuário ativa encontrada. O botão de login será exibido.');
+        // Em caso de erro, garante que o botão de login seja exibido
         return null;
     }
 }
