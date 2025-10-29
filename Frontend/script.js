@@ -3585,9 +3585,9 @@ function initializeMasterMap(campaign, socket) {
         // Calcula as dimensões e posição do mapa UMA VEZ
         const rect = mapBoard.getBoundingClientRect();
         
-        // CORREÇÃO: Calcula as coordenadas do clique RELATIVAS ao mapa, considerando a rolagem da página.
-        startX = e.pageX - rect.left - window.scrollX;
-        startY = e.pageY - rect.top - window.scrollY;
+        // CORREÇÃO DEFINITIVA: Usa clientX/Y que é relativo ao viewport, assim como getBoundingClientRect.
+        startX = e.clientX - rect.left;
+        startY = e.clientY - rect.top;
         
         isDrawing = true;
 
@@ -3621,8 +3621,8 @@ function initializeMasterMap(campaign, socket) {
         if (!isDrawing) return;
         
         const rect = mapBoard.getBoundingClientRect();
-        const currentX = e.pageX - rect.left - window.scrollX;
-        const currentY = e.pageY - rect.top - window.scrollY;
+        const currentX = e.clientX - rect.left;
+        const currentY = e.clientY - rect.top;
 
         // --- LÓGICA DO PINCEL/BORRACHA ---
         if ((currentDrawShape === 'brush' || currentDrawShape === 'eraser') && currentPathData) {
@@ -3673,8 +3673,8 @@ function initializeMasterMap(campaign, socket) {
         isDrawing = false;
         
         const rect = mapBoard.getBoundingClientRect();
-        const finalX = e.pageX - rect.left - window.scrollX;
-        const finalY = e.pageY - rect.top - window.scrollY;
+        const finalX = e.clientX - rect.left;
+        const finalY = e.clientY - rect.top;
         
         // CORREÇÃO: Pega a prancheta atual
         const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
