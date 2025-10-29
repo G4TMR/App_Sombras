@@ -3601,10 +3601,10 @@ function initializeMasterMap(campaign, socket) {
                 // CORREÇÃO CRÍTICA: Inicializa a string 'd' (Path Data)
                 d: `M ${startXPercent.toFixed(2)} ${startYPercent.toFixed(2)}`,
                 // CORREÇÃO CRÍTICA: Define a largura base (em pixels) AQUI.
-                strokeWidth: 20,
+            strokeWidth: 20, // A largura em pixels será convertida para % ao salvar
             };
-            renderMapState(campaign, true, currentPathData, currentDrawShape);
         }
+    renderMapState(campaign, true, currentPathData, currentDrawShape);
 
         // Para Quadrado e Círculo, cria a forma temporária (visual)
         if (currentDrawShape === 'square' || currentDrawShape === 'circle') {
@@ -3689,10 +3689,10 @@ function initializeMasterMap(campaign, socket) {
             if (currentPathData && currentPathData.d.length > 5) { 
                 const rect = mapBoard.getBoundingClientRect();
                 newFogData = {
-                    id: Date.now().toString(),
+                    id: `fog_${Date.now()}`,
                     shape: currentDrawShape,
                     d: currentPathData.d, // O 'd' (caminho) já está em porcentagem
-                    // Converte a largura de PIXEL para PORCENTAGEM (baseado na largura do mapa)
+                    // Converte a largura de PIXEL para PORCENTAGEM (baseado na LARGURA do mapa)
                     strokeWidth: (currentPathData.strokeWidth / rect.width) * 100, 
                 };
             }
@@ -3709,7 +3709,7 @@ function initializeMasterMap(campaign, socket) {
 
             if (width > 5 && height > 5) { // Garante um tamanho mínimo
                 newFogData = {
-                    id: Date.now().toString(),
+                    id: `fog_${Date.now()}`,
                     shape: 'square',
                     // Salva em porcentagem
                     x: (x / rect.width) * 100, 
@@ -3728,7 +3728,7 @@ function initializeMasterMap(campaign, socket) {
             
             if (radius > 5) { // Garante um raio mínimo
                 newFogData = {
-                    id: Date.now().toString(),
+                    id: `fog_${Date.now()}`,
                     shape: 'circle',
                     // Salva em porcentagem
                     x: (startX / rect.width) * 100, 
@@ -3742,7 +3742,7 @@ function initializeMasterMap(campaign, socket) {
         if (newFogData) {
             currentBoard.fog.push(newFogData);
             // ISSO DEVE SER CHAMADO PARA SALVAR E TRANSMITIR
-            updateCampaign(campaign, true); // Salva e transmite
+            updateCampaign(campaign); // Salva e transmite
         }
 
         // 5. Limpeza
@@ -3753,7 +3753,7 @@ function initializeMasterMap(campaign, socket) {
         
         // Finalmente, garante que o mapa seja re-renderizado
         // Re-renderiza o estado final (agora deve incluir a alteração SALVA)
-        renderMapState(campaign, true);
+        renderMapState(campaign, true, null, null);
     };
     mapBoard.addEventListener('mouseup', mouseUpHandler);
 
