@@ -3306,7 +3306,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
                 fogShape.setAttribute('d', fogData.d);
                 // Pincel (oculta) é branco. Borracha (revela) é preto.
                 fogShape.setAttribute('stroke', fogData.shape === 'eraser' ? 'black' : 'white');
-                fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}%`);
+                fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}%`); // CORREÇÃO: Garante que a unidade '%' esteja aqui para dados salvos.
                 fogShape.setAttribute('fill', 'none');
                 fogShape.setAttribute('stroke-linecap', 'round');
                 // ADICIONADO: Garante que a espessura da linha seja consistente.
