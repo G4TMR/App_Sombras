@@ -2870,35 +2870,28 @@ async function getCampaignById(campaignId) {
  * Atualiza uma campanha existente no localStorage.
  * @param {object} updatedCampaign - O objeto da campanha com os dados atualizados.
  */
-async function updateCampaign(updatedCampaign, showIndicator = false) {
-    // Função interna para transmitir a atualização via socket
-    function broadcastUpdate(socket, campaignData) {
-        if (socket && socket.connected) {
-            socket.emit('map-update', { campaignId: campaignData._id || campaignData.id, updatedCampaignData: campaignData });
-        }
-    }
-
+async function updateCampaign(updatedCampaign, temporaryData = null) {
     const socket = window.socketInstance; // Pega a instância global do socket
     const campaignIdForApi = updatedCampaign._id || updatedCampaign.id;
     if (!campaignIdForApi) {
         console.error("ID da campanha não encontrado para atualização.");
         return;
     }
-
-    if (showIndicator) {
-        const saveIndicator = document.getElementById('save-status-indicator');
-        if (saveIndicator) {
-            saveIndicator.textContent = 'Salvo!';
-            saveIndicator.classList.add('show');
-            setTimeout(() => saveIndicator.classList.remove('show'), 2000);
-        }
-    }
-
+    
     // 2. Tenta atualizar no servidor se estiver online
     try {
         // Usa o ID correto na URL da requisição PUT.
-        await api.put(`/api/campaigns/${campaignIdForApi}`, updatedCampaign);
-        broadcastUpdate(socket, updatedCampaign); // Transmite a atualização após salvar
+        const response = await api.put(`/api/campaigns/${campaignIdForApi}`, updatedCampaign);
+        const savedCampaign = response.data;
+
+        // Transmite a campanha ATUALIZADA E SALVA para os outros jogadores
+        if (socket && socket.connected) {
+            socket.emit('map-update', { 
+                campaignId: campaignIdForApi, 
+                updatedCampaignData: savedCampaign, // Envia a versão que veio do banco
+                temporaryData: temporaryData // Envia dados temporários se houver (para desenho em tempo real)
+            });
+        }
     } catch (error) {
         console.error("Erro ao atualizar campanha:", error);
         alert("Ocorreu um erro ao atualizar a campanha.");
@@ -3632,15 +3625,11 @@ function initializeMasterMap(campaign, socket) {
             // Re-renderiza o estado do mapa para mostrar o desenho em tempo real
             renderMapState(campaign, true, currentPathData, currentDrawShape);
 
-            // NOVO: Transmite a atualização em tempo real para os jogadores
-            if (window.socketInstance && window.socketInstance.connected) {
-                window.socketInstance.emit('map-update', { 
-                    campaignId: campaign._id, 
-                    updatedCampaignData: campaign,
-                    temporaryPathData: currentPathData, // Envia o caminho temporário
-                    temporaryPathShape: currentDrawShape // Envia a forma temporária
-                });
-            }
+            // Transmite o desenho temporário sem salvar no banco
+            updateCampaign(campaign, { 
+                path: currentPathData, 
+                shape: currentDrawShape 
+            });
             
         } 
         
@@ -3757,7 +3746,7 @@ function initializeMasterMap(campaign, socket) {
         if (newFogData) {
             currentBoard.fog.push(newFogData);
             // ISSO DEVE SER CHAMADO PARA SALVAR E TRANSMITIR
-            updateCampaign(campaign); // Salva e transmite
+            updateCampaign(campaign, null); // Salva e transmite a versão final sem dados temporários
         }
 
         // 5. Limpeza
@@ -4305,7 +4294,7 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true, i
                 const tokenToUpdate = currentBoard.tokens.find(t => t.id === tokenData.id);
                 if (tokenToUpdate) {
                     tokenToUpdate.x = parseFloat(tokenElement.style.left);
-                    tokenToUpdate.y = parseFloat(tokenElement.style.top);
+                    tokenToUpdate.y = parseFloat(tokenElement.style.top);                    
                     updateCampaign(campaign);
                 }
             }
@@ -4350,7 +4339,7 @@ function showTokenContextMenu(x, y, tokenData, campaign) {
 
     newLockOption.addEventListener('click', () => {
         tokenData.locked = !tokenData.locked;
-        updateCampaign(campaign); // Salva e transmite a mudança
+        updateCampaign(campaign, null); // Salva e transmite a mudança
         renderMapState(campaign, true, campaign.currentBoardIndex); // Re-renderiza o mapa,
         hideMapContextMenu();
     });
@@ -4441,8 +4430,8 @@ function renderGalleryForContainer(campaign, isMasterView, galleryContainer) {
         thumb.addEventListener('click', () => {
             campaign.currentBoardIndex = index;
             // Atualiza a campanha para os outros jogadores E renderiza o mapa localmente para o mestre.
-            // A função updateCampaign por si só não redesenha a tela do mestre, apenas emite o evento.
-            updateCampaign(campaign, true); 
+            // A função updateCampaign agora salva e transmite.
+            updateCampaign(campaign, null); 
             renderMapState(campaign, true);
             // Re-renderiza a galeria para atualizar o item ativo.
             renderBoardGallery(campaign, true);
@@ -4476,7 +4465,7 @@ function showBoardContextMenu(x, y, boardId, campaign) {
         const newName = prompt('Digite o novo nome para a prancheta:', board.name);
         if (newName && newName.trim() !== '') {
             board.name = newName.trim();
-            updateCampaign(campaign, true);
+            updateCampaign(campaign, null);
         }
         hideMapContextMenu();
     });
@@ -4490,7 +4479,7 @@ function showBoardContextMenu(x, y, boardId, campaign) {
         if (confirm('Tem certeza que deseja excluir esta prancheta? Esta ação não pode ser desfeita.')) {
             campaign.mapBoards = campaign.mapBoards.filter(b => b.id !== boardId);
             campaign.currentBoardIndex = 0; // Volta para a primeira prancheta
-            updateCampaign(campaign, true);
+            updateCampaign(campaign, null);
             // Renderiza o estado do mapa e a galeria após a exclusão.
             renderMapState(campaign, true);
             renderBoardGallery(campaign, true);
@@ -4526,7 +4515,7 @@ function setupBoardDeletionKeyListener(campaign) {
             if (confirm(`Tem certeza que deseja excluir a prancheta "${boardToDelete.name}"?`)) {
                 campaign.mapBoards.splice(currentBoardIndex, 1);
                 campaign.currentBoardIndex = 0; // Reseta para a primeira prancheta
-                updateCampaign(campaign, true);
+                updateCampaign(campaign, null);
                 renderMapState(campaign, true);
                 renderBoardGallery(campaign, true);
             }
