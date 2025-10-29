@@ -3833,6 +3833,30 @@ function cleanupMapListeners() {
  * @param {object} campaign - O objeto da campanha.
  */
 function initializeMasterView(campaign, socket) {
+    // CORREÇÃO CRÍTICA: Migração de dados para campanhas antigas e criação para novas.
+    if (!campaign.mapBoards || !Array.isArray(campaign.mapBoards) || campaign.mapBoards.length === 0) {
+        let needsSave = false;
+        // Verifica se existem dados de mapa no formato antigo (antes da implementação das pranchetas)
+        if (campaign.imageUrl || campaign.tokens || campaign.fog) {
+            console.warn("Detectada campanha em formato antigo. Migrando dados do mapa para a nova estrutura de pranchetas.");
+            campaign.mapBoards = [{
+                id: `board_${Date.now()}`,
+                name: 'Cena Principal', // Nome padrão para a prancheta migrada
+                imageUrl: campaign.imageUrl || null,
+                tokens: campaign.tokens || [],
+                fog: campaign.fog || []
+            }];
+            // Remove os dados antigos da raiz da campanha para evitar inconsistências
+            delete campaign.imageUrl;
+            delete campaign.tokens;
+            delete campaign.fog;
+            needsSave = true;
+        }
+        if (needsSave) {
+            // Salva a campanha com a nova estrutura migrada
+            updateCampaign(campaign);
+        }
+    }
     window.socketInstance = socket; // Torna o socket acessível globalmente nesta página
 
     // Listener para atualizações do socket
