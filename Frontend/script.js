@@ -3293,12 +3293,14 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
         let fogShape;
         switch (fogData.shape) {
             case 'circle':
-                fogShape = document.createElementNS(svgNS, 'circle');
-                fogShape.setAttribute('cx', `${fogData.x}%`);
-                fogShape.setAttribute('cy', `${fogData.y}%`);
-                fogShape.setAttribute('r', `${fogData.radius}%`);
+                if (typeof fogData.x !== 'undefined') { // Proteção contra dados inválidos
+                    fogShape = document.createElementNS(svgNS, 'circle');
+                    fogShape.setAttribute('cx', `${fogData.x}%`);
+                    fogShape.setAttribute('cy', `${fogData.y}%`);
+                    fogShape.setAttribute('r', `${fogData.radius}%`);
+                }
                 break;
-            case 'brush': // Oculta
+            case 'brush':
             case 'eraser': // Revela
                 fogShape = document.createElementNS(svgNS, 'path');
                 fogShape.setAttribute('d', fogData.d);
@@ -3312,11 +3314,13 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
                 fogShape.setAttribute('stroke-linejoin', 'round');
                 break;
             default: // 'square'
-                fogShape = document.createElementNS(svgNS, 'rect');
-                fogShape.setAttribute('x', `${fogData.x}%`);
-                fogShape.setAttribute('y', `${fogData.y}%`);
-                fogShape.setAttribute('width', `${fogData.width}%`);
-                fogShape.setAttribute('height', `${fogData.height}%`);
+                if (typeof fogData.x !== 'undefined') { // Proteção contra dados inválidos
+                    fogShape = document.createElementNS(svgNS, 'rect');
+                    fogShape.setAttribute('x', `${fogData.x}%`);
+                    fogShape.setAttribute('y', `${fogData.y}%`);
+                    fogShape.setAttribute('width', `${fogData.width}%`);
+                    fogShape.setAttribute('height', `${fogData.height}%`);
+                }
                 break;
         }
 
@@ -3332,12 +3336,11 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
 
     // Adiciona o caminho temporário (desenho em tempo real) à máscara, se existir
     if (temporaryPathData) {
+        // CORREÇÃO: O caminho temporário é em PIXELS, não porcentagens.
         const tempShape = document.createElementNS(svgNS, 'path');
         tempShape.setAttribute('d', temporaryPathData.d);
-
-        // Pincel (oculta) é branco. Borracha (revela) é preto.
         tempShape.setAttribute('stroke', temporaryPathShape === 'eraser' ? 'black' : 'white');
-        tempShape.setAttribute('stroke-width', `${temporaryPathData.strokeWidth}%`);
+        tempShape.setAttribute('stroke-width', `${temporaryPathData.strokeWidth}`); // Usa pixels
         tempShape.setAttribute('fill', 'none');
         tempShape.setAttribute('stroke-linecap', 'round');
         tempShape.setAttribute('stroke-linejoin', 'round');
