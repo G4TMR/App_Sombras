@@ -3585,7 +3585,7 @@ function initializeMasterMap(campaign, socket) {
         // Calcula as dimensões e posição do mapa UMA VEZ
         const rect = mapBoard.getBoundingClientRect();
         
-        // CORREÇÃO DEFINITIVA: Usa clientX/Y que é relativo ao viewport, assim como getBoundingClientRect.
+        // CORREÇÃO FINAL: Usa clientX/Y que é relativo ao viewport, assim como getBoundingClientRect.
         startX = e.clientX - rect.left;
         startY = e.clientY - rect.top;
         
@@ -3595,16 +3595,15 @@ function initializeMasterMap(campaign, socket) {
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
             // Usamos startX e startY (em pixels) que foram calculados logo acima.
             const startXPercent = (startX / rect.width) * 100;
-            const startYPercent = (startY / rect.height) * 100;
 
             currentPathData = {
                 // CORREÇÃO CRÍTICA: Inicializa a string 'd' (Path Data)
-                d: `M ${startXPercent.toFixed(2)} ${startYPercent.toFixed(2)}`,
+                d: `M ${startX} ${startY}`, // INICIA COM PIXELS
                 // CORREÇÃO CRÍTICA: Define a largura base (em pixels) AQUI.
-            strokeWidth: 20, // A largura em pixels será convertida para % ao salvar
+                strokeWidth: 20,
             };
+            renderMapState(campaign, true, currentPathData, currentDrawShape);
         }
-    renderMapState(campaign, true, currentPathData, currentDrawShape);
 
         // Para Quadrado e Círculo, cria a forma temporária (visual)
         if (currentDrawShape === 'square' || currentDrawShape === 'circle') {
@@ -3627,11 +3626,8 @@ function initializeMasterMap(campaign, socket) {
         // --- LÓGICA DO PINCEL/BORRACHA ---
         if ((currentDrawShape === 'brush' || currentDrawShape === 'eraser') && currentPathData) {
             // Adiciona o novo ponto no formato SVG Path Data
-            const xPercent = (currentX / rect.width) * 100;
-            const yPercent = (currentY / rect.height) * 100;
-            
-            // CORREÇÃO: Remova o '%' da string do caminho 'd'.
-            currentPathData.d += ` L ${xPercent.toFixed(2)} ${yPercent.toFixed(2)}`;
+            // CORREÇÃO FINAL: O caminho temporário é construído com PIXELS.
+            currentPathData.d += ` L ${currentX} ${currentY}`;
             
             // Re-renderiza o estado do mapa para mostrar o desenho em tempo real
             renderMapState(campaign, true, currentPathData, currentDrawShape);
@@ -3687,11 +3683,20 @@ function initializeMasterMap(campaign, socket) {
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
             // Garante que houve movimento suficiente e os dados existem
             if (currentPathData && currentPathData.d.length > 5) { 
-                const rect = mapBoard.getBoundingClientRect();
+                // CORREÇÃO FINAL: Converte o caminho de PIXELS para PORCENTAGEM antes de salvar.
+                const points = currentPathData.d.match(/[\d\.]+/g).map(Number);
+                let dInPercent = 'M';
+                for (let i = 0; i < points.length; i += 2) {
+                    const px = points[i];
+                    const py = points[i + 1];
+                    dInPercent += ` ${((px / rect.width) * 100).toFixed(2)} ${((py / rect.height) * 100).toFixed(2)}`;
+                    if (i === 0) dInPercent += ' L';
+                }
+
                 newFogData = {
                     id: `fog_${Date.now()}`,
                     shape: currentDrawShape,
-                    d: currentPathData.d, // O 'd' (caminho) já está em porcentagem
+                    d: dInPercent.trim(), // Salva o caminho convertido para porcentagem
                     // Converte a largura de PIXEL para PORCENTAGEM (baseado na LARGURA do mapa)
                     strokeWidth: (currentPathData.strokeWidth / rect.width) * 100, 
                 };
