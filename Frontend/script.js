@@ -3691,7 +3691,7 @@ function initializeMasterMap(campaign, socket) {
                 for (let i = 0; i < points.length; i += 2) {
                     const px = points[i];
                     const py = points[i + 1];
-                    dInPercent += ` ${((px / rect.width) * 100).toFixed(2)} ${((py / rect.height) * 100).toFixed(2)}`; // CORREÇÃO: Não adicionar '%' aqui
+                    dInPercent += ` ${((px / rect.width) * 100).toFixed(2)} ${((py / rect.height) * 100).toFixed(2)}`;
                     if (i === 0) dInPercent += ' L';
                 }
 
