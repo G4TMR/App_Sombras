@@ -2871,30 +2871,21 @@ async function getCampaignById(campaignId) {
  * @param {object} updatedCampaign - O objeto da campanha com os dados atualizados.
  */
 async function updateCampaign(updatedCampaign, broadcastChanges = true) {
-    const socket = window.socketInstance; // Pega a instância global do socket
+    const socket = window.socketInstance;
     const campaignIdForApi = updatedCampaign._id || updatedCampaign.id;
     if (!campaignIdForApi) {
         console.error("ID da campanha não encontrado para atualização.");
         return;
     }
 
-    // 2. Tenta atualizar no servidor se estiver online
-    try {
-        // Usa o ID correto na URL da requisição PUT.
-        const response = await api.put(`/api/campaigns/${campaignIdForApi}`, updatedCampaign);
-        const savedCampaign = response.data; // Esta é a versão mais atualizada, vinda do banco.
-
-        // Transmite a campanha ATUALIZADA E SALVA para os outros jogadores, EXCETO para o remetente.
-        if (broadcastChanges && socket && socket.connected) {
-            // Usamos 'broadcast' para evitar que o mestre receba a própria atualização de volta.
-            socket.emit('map-update', {
-                campaignId: campaignIdForApi, // O ID da sala para o servidor
-                updatedCampaignData: savedCampaign // Os dados atualizados para os outros clientes
-            });
-        }
-    } catch (error) {
-        console.error("Erro ao atualizar campanha:", error);
-        alert("Ocorreu um erro ao atualizar a campanha.");
+    // A única responsabilidade do cliente agora é emitir um evento para o servidor.
+    // O servidor será responsável por salvar no banco e notificar os outros clientes.
+    if (broadcastChanges && socket && socket.connected) {
+        console.log("Enviando atualização de mapa para o servidor...");
+        socket.emit('update-map-data', {
+            campaignId: campaignIdForApi,
+            updatedCampaignData: updatedCampaign
+        });
     }
 }
 

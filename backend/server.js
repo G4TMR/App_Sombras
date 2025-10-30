@@ -556,21 +556,33 @@ io.on('connection', (socket) => {
         console.log(`Usuário ${socket.id} entrou na sala da campanha ${campaignId}`);
     });
 
-    // Evento para receber atualizações do mapa de um cliente
-    socket.on('map-update', async ({ campaignId, updatedCampaignData }) => {
+    // NOVO: Evento para receber dados do mapa, SALVAR no banco, e retransmitir para os OUTROS.
+    socket.on('update-map-data', async ({ campaignId, updatedCampaignData }) => {
         try {
-            // A rota PUT já salvou os dados. A função aqui é retransmitir a versão salva para TODOS na sala.
-            // Usar `io.in(sala)` em vez de `socket.to(sala)` garante que o remetente também receba a confirmação.
-            io.in(campaignId).emit('map-updated', { updatedCampaignData });
+            // 1. Encontra e atualiza a campanha no banco de dados.
+            // O 'ownerId' não é necessário aqui, pois a permissão é implícita pelo usuário estar na sala.
+            // A validação de permissão real acontece na rota HTTP, mas para sockets, a entrada na sala já é uma forma de autorização.
+            const savedCampaign = await Campaign.findByIdAndUpdate(
+                campaignId,
+                updatedCampaignData,
+                { new: true } // Retorna o documento atualizado
+            ).populate('players', 'displayName email').populate('characters'); // Popula os dados necessários
+
+            if (savedCampaign) {
+                // 2. Retransmite a versão SALVA E ATUALIZADA para todos os outros na sala.
+                // Usar `socket.to(sala)` envia para todos, EXCETO para o socket que originou o evento.
+                socket.to(campaignId).emit('map-updated', { updatedCampaignData: savedCampaign });
+                console.log(`Campanha ${campaignId} atualizada e transmitida para a sala.`);
+            }
         } catch (error) {
             console.error('Erro ao processar atualização do mapa via socket:', error);
+            // Opcional: notificar o cliente de origem sobre o erro.
+            socket.emit('map-update-error', { message: 'Falha ao salvar os dados do mapa.' });
         }
     });
 
-    // NOVO: Evento específico para o desenho em tempo real (sem salvar no banco)
     socket.on('map-drawing-live', ({ campaignId, temporaryPathData, temporaryPathShape }) => {
-        // Apenas retransmite os dados do desenho temporário para os outros na sala
-        socket.to(campaignId).emit('map-drawing-updated', { temporaryPathData, temporaryPathShape });
+        socket.to(campaignId).emit('map-drawing-live', { temporaryPathData, temporaryPathShape });
     });
 
     socket.on('disconnect', () => {
