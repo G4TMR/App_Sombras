@@ -4125,6 +4125,16 @@ function initializePlayerMap(campaign) {
  * @param {object} campaign - O objeto da campanha.
  */
 async function initializePlayerView(campaign, socket) {
+    // Listener para atualizações do mapa vindas do mestre
+    socket.on('map-updated', ({ updatedCampaignData }) => {
+        console.log('Jogador: Recebida atualização do mapa via socket.');
+        Object.assign(campaign, updatedCampaignData);
+        renderMapState(campaign, false); // Re-renderiza o mapa do jogador
+        renderBoardGallery(campaign, false); // Re-renderiza a galeria de pranchetas do jogador
+    });
+    socket.on('map-drawing-live', ({ temporaryPathData, temporaryPathShape }) => {
+        renderMapState(campaign, false, temporaryPathData, temporaryPathShape);
+    });
     window.socketInstance = socket; // Torna o socket acessível globalmente nesta página
     // Garante que o ID do usuário está carregado
     const user = await checkAuthStatus();
