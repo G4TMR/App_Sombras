@@ -2870,25 +2870,26 @@ async function getCampaignById(campaignId) {
  * Atualiza uma campanha existente no localStorage.
  * @param {object} updatedCampaign - O objeto da campanha com os dados atualizados.
  */
-async function updateCampaign(updatedCampaign) {
+async function updateCampaign(updatedCampaign, broadcastChanges = true) {
     const socket = window.socketInstance; // Pega a instância global do socket
     const campaignIdForApi = updatedCampaign._id || updatedCampaign.id;
     if (!campaignIdForApi) {
         console.error("ID da campanha não encontrado para atualização.");
         return;
     }
-    
+
     // 2. Tenta atualizar no servidor se estiver online
     try {
         // Usa o ID correto na URL da requisição PUT.
         const response = await api.put(`/api/campaigns/${campaignIdForApi}`, updatedCampaign);
-        const savedCampaign = response.data;
+        const savedCampaign = response.data; // Esta é a versão mais atualizada, vinda do banco.
 
-        // Transmite a campanha ATUALIZADA E SALVA para os outros jogadores
-        if (socket && socket.connected) {
-            socket.emit('map-update', { 
-                campaignId: campaignIdForApi,
-                updatedCampaignData: savedCampaign // Envia a versão que veio do banco
+        // Transmite a campanha ATUALIZADA E SALVA para os outros jogadores, EXCETO para o remetente.
+        if (broadcastChanges && socket && socket.connected) {
+            // Usamos 'broadcast' para evitar que o mestre receba a própria atualização de volta.
+            socket.emit('map-update', {
+                campaignId: campaignIdForApi, // O ID da sala para o servidor
+                updatedCampaignData: savedCampaign // Os dados atualizados para os outros clientes
             });
         }
     } catch (error) {
@@ -3858,16 +3859,6 @@ function initializeMasterView(campaign, socket) {
         }
     }
     window.socketInstance = socket; // Torna o socket acessível globalmente nesta página
-
-    // Listener para atualizações do socket
-    socket.on('map-updated', ({ updatedCampaignData }) => {
-        console.log('Recebida atualização do mapa via socket, atualizando UI.');
-        // Atualiza o objeto da campanha local e re-renderiza a UI
-        Object.assign(campaign, updatedCampaignData);
-        renderMapState(campaign, true, null, null); // Renderiza o estado final, sem dados temporários
-        renderBoardGallery(campaign, true); // Atualiza a galeria de pranchetas
-    });
-
     // Elementos de exibição
     const titleDisplay = document.getElementById('campaign-title-display');
     const synopsisDisplay = document.getElementById('campaign-synopsis-display');
