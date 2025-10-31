@@ -73,62 +73,60 @@
                     </div>
         
                     <div class="tab-content" id="mapa">
-                        <!-- Layout Unificado do Mapa para o Mestre -->
-                        <div class="map-layout-wrapper" id="map-layout-wrapper">
-                            <!-- 1. Visão do Mapa (Sempre visível) -->
-                            <div class="master-map-layout" id="master-map-layout">
-                                <div id="map-board" class="map-board" style="min-height: 70vh;">
+                        <!-- Layout Profissional do Mapa para o Mestre -->
+                        <div class="professional-map-layout" id="map-layout-wrapper">
+                            <!-- 1. Barra Lateral de Ferramentas (Esquerda) -->
+                            <aside class="map-sidebar">
+                                <div class="sidebar-section">
+                                    <h3 class="sidebar-section-title">Ferramentas</h3>
+                                    <div class="map-tool-section" id="draw-tool-section">
+                                        <div class="draw-controls-header">
+                                            <button id="toggle-draw-mode-btn" class="wizard-btn small-btn">Ocultar Área</button>
+                                            <div id="draw-tools-panel" class="draw-tools-panel" style="display: none;">
+                                                <button class="draw-tool-btn active" data-shape="square" title="Desenhar Quadrado">■</button>
+                                                <button class="draw-tool-btn" data-shape="circle" title="Desenhar Círculo">●</button>
+                                                <button class="draw-tool-btn" data-shape="brush" title="Pincel Livre">🖌️</button>
+                                                <button class="draw-tool-btn" data-shape="eraser" title="Borracha">🧼</button>
+                                            </div>
+                                        </div>
+                                        <p class="info-text small-text">Clique em "Ocultar Área" e use as ferramentas para desenhar. Clique com o botão direito em uma área para removê-la.</p>
+                                    </div>
+                                </div>
+                                <div class="sidebar-section">
+                                    <h3 class="sidebar-section-title">Tokens</h3>
+                                    <p class="info-text small-text">Arraste um agente para o mapa para criar seu token.</p>
+                                    <div id="map-character-tokens" class="map-character-tokens"></div>
+                                </div>
+                                <div class="sidebar-section">
+                                    <h3 class="sidebar-section-title">Configurações</h3>
+                                    <div class="map-config-form">
+                                        <input type="file" id="map-upload-input" accept="image/*" style="display: none;">
+                                        <button class="wizard-btn small-btn" onclick="document.getElementById('map-upload-input').click()">Carregar Fundo</button>
+                                        <button id="reset-map-btn" class="wizard-btn danger-btn small-btn">Limpar Prancheta</button>
+                                    </div>
+                                </div>
+                            </aside>
+
+                            <!-- 2. Área Principal do Mapa (Centro) -->
+                            <div class="map-main-area">
+                                <div id="map-board" class="map-board">
                                     <div id="map-upload-placeholder" class="map-upload-placeholder">
                                         <p>Nenhum mapa carregado.</p>
-                                        <p>Use os controles para carregar uma imagem de fundo.</p>
+                                        <p>Use os controles na barra lateral para carregar uma imagem de fundo.</p>
                                     </div>
                                     <button id="map-fullscreen-btn" class="map-fullscreen-button" title="Tela Cheia">
                                         <svg id="fullscreen-enter-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 2h-2v3h-3v2h5v-5zm-3-4V5h3v2h-3z"/></svg>
                                         <svg id="fullscreen-exit-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
                                     </button>
                                 </div>
-                                <div class="map-controls-panel">
-                                    <h3 class="panel-title">Controles do Mapa</h3>
-                                    
-                                    <div class="map-control-group">
-                                        <h4>Adicionar Token</h4>
-                                        <p class="info-text small-text">Arraste um agente para o mapa para criar seu token.</p>
-                                        <div id="map-character-tokens" class="map-character-tokens"></div>
-                                    </div>
-
-                                    <div class="map-control-group">
-                                        <h4>Névoa de Guerra</h4>
-                                        <div class="map-tool-section" id="draw-tool-section">
-                                            <div class="draw-controls-header">
-                                                <button id="toggle-draw-mode-btn" class="wizard-btn small-btn">Ocultar Área</button>
-                                                <div id="draw-tools-panel" class="draw-tools-panel" style="display: none;">
-                                                    <button class="draw-tool-btn active" data-shape="square" title="Desenhar Quadrado">■</button>
-                                                    <button class="draw-tool-btn" data-shape="circle" title="Desenhar Círculo">●</button>
-                                                    <button class="draw-tool-btn" data-shape="brush" title="Pincel Livre">🖌️</button>
-                                                    <button class="draw-tool-btn" data-shape="eraser" title="Borracha">🧼</button>
-                                                </div>
-                                            </div>
-                                            <p class="info-text small-text">Clique em "Ocultar Área" e use as ferramentas para desenhar no mapa. Clique com o botão direito em uma área para removê-la.</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="map-control-group">
-                                        <h4>Configurações da Prancheta</h4>
-                                        <div class="map-config-form">
-                                            <input type="file" id="map-upload-input" accept="image/*" style="display: none;">
-                                            <button class="wizard-btn small-btn" onclick="document.getElementById('map-upload-input').click()">Carregar Fundo</button>
-                                            <button id="reset-map-btn" class="wizard-btn danger-btn small-btn">Limpar</button>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
 
-                            <!-- 2. Carrossel de Pranchetas -->
-                            <div class="board-carousel-container">
+                            <!-- 3. Carrossel de Pranchetas (Inferior) -->
+                            <div class="map-boards-carousel">
                                 <div id="board-gallery" class="board-gallery">
                                     <!-- A galeria de pranchetas será populada aqui -->
                                 </div>
-                                <button id="add-map-board-btn" class="wizard-btn small-btn add-board-carousel-btn" title="Adicionar Nova Prancheta">+</button>
+                                <button id="add-map-board-btn" class="add-board-btn" title="Adicionar Nova Prancheta">+</button>
                             </div>
                         </div>
 
@@ -146,7 +144,6 @@
                             <div id="delete-token-option" class="context-menu-option">Remover Token</div>
                         </div>
                     </div>
-        
                     <div class="campaign-actions-footer">
                         <span id="save-status-indicator" class="save-status"></span>
                         <button id="delete-campaign-btn" class="wizard-btn danger-btn">Excluir Campanha</button>
