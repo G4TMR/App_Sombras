@@ -3296,12 +3296,30 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
             case 'brush':
             case 'eraser': // Revela
                 fogShape = document.createElementNS(svgNS, 'path');
-                fogShape.setAttribute('d', fogData.d);
+
+                // 🔒 CORREÇÃO: garante que o atributo 'd' contenha apenas números válidos
+                let pathD = fogData.d;
+
+                // Caso existam porcentagens ou valores inválidos antigos, tenta converter
+                if (/%/.test(pathD)) {
+                    try {
+                        const rect = mapBoard.getBoundingClientRect();
+                        pathD = pathD.replace(/([\d.]+)%/g, (m, num) => {
+                            // converte % → pixels (assumindo 100% do width como referência)
+                            return (parseFloat(num) / 100) * rect.width;
+                        });
+                        console.warn("⚠️ Corrigido caminho em % para px:", pathD);
+                    } catch (err) {
+                        console.error("Erro ao corrigir path antigo:", err, fogData);
+                        return; // evita quebrar o SVG inteiro
+                    }
+                }
+
+                fogShape.setAttribute('d', pathD);
                 fogShape.setAttribute('stroke', fogData.shape === 'eraser' ? 'black' : 'white');
                 fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}`);
                 fogShape.setAttribute('fill', 'none');
                 fogShape.setAttribute('stroke-linecap', 'round');
-                // ADICIONADO: Garante que a espessura da linha seja consistente.
                 fogShape.setAttribute('vector-effect', 'non-scaling-stroke');
                 fogShape.setAttribute('stroke-linejoin', 'round');
                 break;
