@@ -3283,22 +3283,22 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
     // Onde a máscara é branca, a névoa (camada preta) se torna VISÍVEL.
     (boardData.fog || []).forEach(fogData => {
         let fogShape;
+        const rect = mapBoard.getBoundingClientRect();
         switch (fogData.shape) {
             case 'circle':
                 if (typeof fogData.x !== 'undefined') { // Proteção contra dados inválidos
                     fogShape = document.createElementNS(svgNS, 'circle');
-                    fogShape.setAttribute('cx', `${fogData.x}%`);
-                    fogShape.setAttribute('cy', `${fogData.y}%`);
-                    fogShape.setAttribute('r', `${fogData.radius}%`);
+                    fogShape.setAttribute('cx', `${(fogData.x / 100) * rect.width}`);
+                    fogShape.setAttribute('cy', `${(fogData.y / 100) * rect.height}`);
+                    fogShape.setAttribute('r', `${(fogData.radius / 100) * rect.width}`);
                 }
                 break;
             case 'brush':
             case 'eraser': // Revela
                 fogShape = document.createElementNS(svgNS, 'path');
                 fogShape.setAttribute('d', fogData.d);
-                // Pincel (oculta) é branco. Borracha (revela) é preto.
                 fogShape.setAttribute('stroke', fogData.shape === 'eraser' ? 'black' : 'white');
-                fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}%`);
+                fogShape.setAttribute('stroke-width', `${fogData.strokeWidth}`);
                 fogShape.setAttribute('fill', 'none');
                 fogShape.setAttribute('stroke-linecap', 'round');
                 // ADICIONADO: Garante que a espessura da linha seja consistente.
@@ -3308,10 +3308,10 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
             default: // 'square'
                 if (typeof fogData.x !== 'undefined') { // Proteção contra dados inválidos
                     fogShape = document.createElementNS(svgNS, 'rect');
-                    fogShape.setAttribute('x', `${fogData.x}%`);
-                    fogShape.setAttribute('y', `${fogData.y}%`);
-                    fogShape.setAttribute('width', `${fogData.width}%`);
-                    fogShape.setAttribute('height', `${fogData.height}%`);
+                    fogShape.setAttribute('x', `${(fogData.x / 100) * rect.width}`);
+                    fogShape.setAttribute('y', `${(fogData.y / 100) * rect.height}`);
+                    fogShape.setAttribute('width', `${(fogData.width / 100) * rect.width}`);
+                    fogShape.setAttribute('height', `${(fogData.height / 100) * rect.height}`);
                 }
                 break;
         }
@@ -3677,22 +3677,17 @@ function initializeMasterMap(campaign, socket) {
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
             // Garante que houve movimento suficiente e os dados existem
             if (currentPathData && currentPathData.d.length > 5) { 
-                // CORREÇÃO FINAL: Converte o caminho de PIXELS para PORCENTAGEM antes de salvar.
-                const points = currentPathData.d.match(/[\d\.]+/g).map(Number);
-                let dInPercent = 'M';
-                for (let i = 0; i < points.length; i += 2) {
-                    const px = points[i];
-                    const py = points[i + 1];
-                    dInPercent += ` ${((px / rect.width) * 100).toFixed(2)} ${((py / rect.height) * 100).toFixed(2)}`;
-                    if (i === 0) dInPercent += ' L';
+                // MODIFICAÇÃO: Salva o caminho 'd' com valores em pixels inteiros, como solicitado.
+                const points = currentPathData.d.match(/[\d\.]+/g).map(p => Math.round(parseFloat(p)));
+                let dInPixels = `M ${points[0]} ${points[1]}`;
+                for (let i = 2; i < points.length; i += 2) {
+                    dInPixels += ` L ${points[i]} ${points[i+1]}`;
                 }
-
                 newFogData = {
                     id: `fog_${Date.now()}`,
                     shape: currentDrawShape,
-                    d: dInPercent.trim(), // Salva o caminho convertido para porcentagem
-                    // Converte a largura de PIXEL para PORCENTAGEM (baseado na LARGURA do mapa)
-                    strokeWidth: (currentPathData.strokeWidth / rect.width) * 100, 
+                    d: dInPixels, // Salva o caminho em pixels
+                    strokeWidth: currentPathData.strokeWidth, // Salva a largura do traço em pixels
                 };
             }
             // 🟢 CORREÇÃO: Reseta o estado TEMPORÁRIO *depois* da tentativa de salvamento
