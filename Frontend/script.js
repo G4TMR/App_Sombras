@@ -4135,8 +4135,6 @@ function renderMapTokens(mapBoard, tokens, isMasterView, campaign) {
 function initializePlayerMap(campaign) {
     const mapBoard = document.getElementById('player-map-board');
     mapBoard.classList.add('player-view'); // Adiciona classe para estilização
-
-    renderMapState(campaign, false); // Renderiza o estado inicial
 }
 
 /**
