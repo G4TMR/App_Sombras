@@ -2543,10 +2543,14 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     min-height: 0; /* Adicionado para corrigir bug de overflow no Firefox/Grid */
     backdrop-filter: blur(5px);
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem; /* Espaçamento geral entre seções */
-    padding: 0.75rem; /* Padding geral menor */
+    display: flex; /* Mantém flexbox */
+    flex-direction: column; /* Mantém a direção da coluna */
+    gap: 0.25rem; /* Reduz o espaço entre os grupos de controle */
+    padding: 0.5rem; /* Reduz o preenchimento geral */
+}
+
+.map-controls-panel .panel-title {
+    margin-bottom: 0.5rem; /* Reduz a margem inferior do título principal */
 }
 
 /* --- MODO TELA CHEIA DO MAPA --- */
@@ -2575,10 +2579,10 @@ body.map-fullscreen-active .notification-sidebar {
 }
 
 .map-control-group h4 {
-    font-size: 1.2rem; /* Fonte menor para os títulos */
-    margin: 0.5rem 0 0.5rem 0;
-    padding-bottom: 0.25rem;
+    font-size: 1.1rem; /* Fonte ainda menor para os títulos */
+    margin: 0.75rem 0 0.25rem 0; /* Ajusta as margens para compactar */
     color: var(--color-text-primary);
+    padding-bottom: 0; /* Remove o padding inferior */
 }
 
 .map-controls-panel .info-text.small-text {
@@ -3641,20 +3645,21 @@ body.dev-mode #dev-mode-form { display: none; }
     border: 1px solid var(--color-surface-2);
     border-radius: 8px;
     padding: 0.75rem;
-    margin-top: 1rem;
+    margin-top: 0.5rem; /* Reduz a margem superior */
 }
 
 .board-gallery {
     flex-grow: 1;
     display: flex;
     gap: 0.75rem;
-    overflow-x: auto;
+    overflow-x: auto; /* Permite rolagem horizontal */
     padding: 0.5rem;
+    min-width: 0; /* Essencial para o flexbox não estourar o layout */
 }
 
 .board-thumbnail {
     flex-shrink: 0;
-    width: 130px;
+    width: 110px; /* Diminui a largura da miniatura */
     border: 2px solid var(--color-surface-2);
     border-radius: 6px;
     overflow: hidden;
@@ -3675,9 +3680,16 @@ body.dev-mode #dev-mode-form { display: none; }
 
 .board-thumbnail-img {
     width: 100%;
-    height: 70px;
+    height: 60px; /* Diminui a altura da imagem na miniatura */
     background-size: cover;
     background-position: center;
+}
+
+.add-board-carousel-btn {
+    flex-shrink: 0; /* Impede que o botão seja espremido */
+    width: 40px; /* Define uma largura fixa */
+    height: 40px; /* Define uma altura fixa */
+    padding: 0; /* Remove o padding para o ícone '+' ficar centralizado */
 }
 
 .map-fullscreen-button:hover {
