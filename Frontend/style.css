@@ -3453,6 +3453,26 @@ body.dev-mode #dev-mode-form { display: none; }
         text-align: center; /* Centraliza o texto do título */
     }
 
+    /* --- GERENCIAR CAMPANHA (MOBILE) --- */
+    .campaign-layout {
+        grid-template-columns: 1fr; /* Força uma única coluna */
+    }
+
+    .notification-sidebar {
+        position: static; /* Remove o 'sticky' no mobile */
+        height: auto;
+        margin-top: 2rem;
+    }
+
+    .master-map-layout {
+        grid-template-columns: 1fr; /* Empilha o mapa e os controles */
+        grid-template-rows: auto auto; /* Define duas linhas automáticas */
+    }
+
+    .map-controls-panel {
+        max-height: 60vh; /* Limita a altura e permite rolagem interna */
+    }
+
     /* --- PÁGINA DE CAMPANHAS (MOBILE) --- */
     .create-campaign-btn {
         /* Remove a largura forçada para um tamanho mais natural */
