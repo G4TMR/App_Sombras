@@ -4064,6 +4064,15 @@ function initializeMasterView(campaign, socket) {
  * @param {boolean} isMasterView - Indica se a renderização é para a visão do mestre.
  */
 function renderMapState(campaign, isMasterView, temporaryPathData = null, temporaryPathShape = null) {
+    // 🔒 CORREÇÃO DE SEGURANÇA: Garante que a estrutura de pranchetas exista.
+    // Se uma campanha antiga ou recém-criada não tiver `mapBoards`, cria uma padrão para evitar erros.
+    if (!campaign.mapBoards || !Array.isArray(campaign.mapBoards) || campaign.mapBoards.length === 0) {
+        campaign.mapBoards = [{
+            id: `board_${Date.now()}`, name: 'Cena 1', imageUrl: null, tokens: [], fog: []
+        }];
+        campaign.currentBoardIndex = 0;
+    }
+
     const currentBoardIndex = campaign.currentBoardIndex || 0;
     const currentBoardData = campaign.mapBoards[currentBoardIndex];
 
