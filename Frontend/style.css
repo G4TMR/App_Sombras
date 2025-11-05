@@ -331,9 +331,16 @@ body[data-page="patente"] { --page-color: #6f42c1; }
 
 .draw-controls-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* Alinha os itens no topo */
     gap: 0.5rem;
     margin-bottom: 0.5rem;
+}
+
+.draw-controls-header .wizard-btn {
+    padding: 0.4rem 0.8rem; /* Botão "Sair" menor */
+    font-size: 0.9rem;
+    height: 36px; /* Alinha altura com o painel de ferramentas */
+    flex-shrink: 0; /* Impede que o botão encolha */
 }
 
 .map-tool-section {
@@ -358,11 +365,11 @@ body[data-page="patente"] { --page-color: #6f42c1; }
 .draw-tool-btn {
     background-color: transparent;
     border: 2px solid transparent;
-    color: var(--color-text-secondary);
+    color: var(--color-text-secondary); /* Cor do ícone */
     border-radius: 6px;
-    width: 36px;
-    height: 36px;
-    font-size: 1.2rem;
+    width: 30px; /* Ícone menor */
+    height: 30px; /* Ícone menor */
+    font-size: 1rem; /* Tamanho da fonte do ícone menor */
     cursor: pointer;
     transition: all 0.2s ease;
 }
