@@ -3466,6 +3466,9 @@ function initializeMasterMap(campaign, socket) {
         mapBoard.removeEventListener('drop', dropHandler);
         mapBoard.removeEventListener('mousedown', mouseDownHandler);
         mapBoard.removeEventListener('mousemove', mouseMoveHandler);
+        mapBoard.removeEventListener('touchstart', mouseDownHandler); // Limpa evento de toque
+        mapBoard.removeEventListener('touchmove', mouseMoveHandler); // Limpa evento de toque
+        mapBoard.removeEventListener('touchend', mouseUpHandler); // Limpa evento de toque
         mapBoard.removeEventListener('mouseup', mouseUpHandler);
         document.removeEventListener('click', hideMapContextMenu);
         removeFogBtn.removeEventListener('click', removeFogHandler);
@@ -3560,8 +3563,8 @@ function initializeMasterMap(campaign, socket) {
     toggleDrawModeBtn.addEventListener('click', () => {
         isDrawingMode = !isDrawingMode;
         mapBoard.style.cursor = isDrawingMode ? 'crosshair' : 'default';
-        toggleDrawModeBtn.classList.toggle('active', isDrawingMode);
-        toggleDrawModeBtn.textContent = isDrawingMode ? 'Sair do Modo Ocultar' : 'Ocultar Área';
+        toggleDrawModeBtn.classList.toggle('active', isDrawingMode); // A classe 'active' pode mudar o estilo
+        toggleDrawModeBtn.textContent = isDrawingMode ? 'Sair' : 'Ocultar Área';
         drawToolsPanel.style.display = isDrawingMode ? 'flex' : 'none';
     });
 
@@ -3582,17 +3585,21 @@ function initializeMasterMap(campaign, socket) {
     // Eventos de desenho no mapa
     const mouseDownHandler = (e) => { // 1. MOUSE DOWN (Início do Desenho)
         // 1. Verifica se é um clique principal e se está no modo de desenho
-        if (!isDrawingMode || e.button !== 0) return;
+        // Modificado para aceitar eventos de toque (que não têm 'button')
+        if (!isDrawingMode || (e.type === 'mousedown' && e.button !== 0)) return;
 
         e.preventDefault();
         
         // 🟢 ESTAS LINHAS SÃO CRÍTICAS
         // Calcula as dimensões e posição do mapa UMA VEZ
         const rect = mapBoard.getBoundingClientRect();
+
+        // Unifica a obtenção de coordenadas para mouse e toque
+        const startCoords = e.type === 'touchstart' ? e.touches[0] : e;
         
         // CORREÇÃO FINAL: Usa clientX/Y que é relativo ao viewport, assim como getBoundingClientRect.
-        startX = e.clientX - rect.left;
-        startY = e.clientY - rect.top;
+        startX = startCoords.clientX - rect.left;
+        startY = startCoords.clientY - rect.top;
         
         isDrawing = true;
 
@@ -3621,12 +3628,16 @@ function initializeMasterMap(campaign, socket) {
         }
     };
     mapBoard.addEventListener('mousedown', mouseDownHandler);
+    mapBoard.addEventListener('touchstart', mouseDownHandler, { passive: false }); // Adiciona listener de toque
+
     const mouseMoveHandler = (e) => { // 2. MOUSE MOVE (Atualização do Desenho)
         if (!isDrawing) return;
         
         const rect = mapBoard.getBoundingClientRect();
-        const currentX = e.clientX - rect.left;
-        const currentY = e.clientY - rect.top;
+        // Unifica a obtenção de coordenadas para mouse e toque
+        const moveCoords = e.type === 'touchmove' ? e.touches[0] : e;
+        const currentX = moveCoords.clientX - rect.left;
+        const currentY = moveCoords.clientY - rect.top;
 
         // --- LÓGICA DO PINCEL/BORRACHA ---
         if ((currentDrawShape === 'brush' || currentDrawShape === 'eraser') && currentPathData) {
@@ -3674,15 +3685,18 @@ function initializeMasterMap(campaign, socket) {
         }
     };
     mapBoard.addEventListener('mousemove', mouseMoveHandler);
+    mapBoard.addEventListener('touchmove', mouseMoveHandler, { passive: false }); // Adiciona listener de toque
 
     const mouseUpHandler = (e) => { // 3. MOUSE UP (Finalização e Salvamento)
         if (!isDrawing) return;
 
         isDrawing = false;
         
+        // Unifica a obtenção de coordenadas para mouse e toque
+        const endCoords = e.type === 'touchend' ? e.changedTouches[0] : e;
         const rect = mapBoard.getBoundingClientRect();
-        const finalX = e.clientX - rect.left;
-        const finalY = e.clientY - rect.top;
+        const finalX = endCoords.clientX - rect.left;
+        const finalY = endCoords.clientY - rect.top;
         
         // CORREÇÃO: Pega a prancheta atual
         const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
@@ -3768,6 +3782,7 @@ function initializeMasterMap(campaign, socket) {
         renderMapState(campaign, true, null, null);
     };
     mapBoard.addEventListener('mouseup', mouseUpHandler);
+    mapBoard.addEventListener('touchend', mouseUpHandler); // Adiciona listener de toque
 
     // Resetar o mapa
     const resetMapBtn = document.getElementById('reset-map-btn');
@@ -4237,7 +4252,7 @@ async function initializePlayerView(campaign, socket) {
 
             // Re-renderiza o mapa do jogador quando a aba do mapa é clicada
             if (tabId === 'player-map') {
-                renderMapState(campaign, false);
+                renderMapState(campaign, false); // Mantém a re-renderização para garantir atualizações
             }
         });
     });
