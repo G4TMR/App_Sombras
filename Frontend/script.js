@@ -4263,7 +4263,6 @@ async function initializePlayerView(campaign, socket) {
             }
         });
     });
-    renderMapState(campaign, false);
 }
 
 /**
