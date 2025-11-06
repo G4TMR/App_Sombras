@@ -560,11 +560,13 @@ io.on('connection', (socket) => {
     socket.on('update-map-data', async ({ campaignId, updatedCampaignData }) => {
         try {
             // 1. Encontra e atualiza a campanha no banco de dados.
-            // O 'ownerId' não é necessário aqui, pois a permissão é implícita pelo usuário estar na sala.
-            // A validação de permissão real acontece na rota HTTP, mas para sockets, a entrada na sala já é uma forma de autorização.
+            // A validação de permissão real acontece na rota HTTP. Para sockets, a entrada na sala já é uma forma de autorização.
+            // Usamos findByIdAndUpdate para mesclar as alterações em vez de substituir o documento inteiro.
+            // O operador $set garante que apenas os campos em updatedCampaignData sejam alterados.
             const savedCampaign = await Campaign.findByIdAndUpdate(
                 campaignId,
-                updatedCampaignData,
+                // IMPORTANTE: Usar $set para atualizar apenas os campos fornecidos.
+                { $set: updatedCampaignData },
                 { new: true } // Retorna o documento atualizado
             ).populate('players', 'displayName email').populate('characters'); // Popula os dados necessários
 
@@ -579,10 +581,6 @@ io.on('connection', (socket) => {
             // Opcional: notificar o cliente de origem sobre o erro.
             socket.emit('map-update-error', { message: 'Falha ao salvar os dados do mapa.' });
         }
-    });
-
-    socket.on('map-drawing-live', ({ campaignId, temporaryPathData, temporaryPathShape }) => {
-        socket.to(campaignId).emit('map-drawing-live', { temporaryPathData, temporaryPathShape });
     });
 
     socket.on('disconnect', () => {

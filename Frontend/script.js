@@ -3283,7 +3283,10 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
     // Onde a máscara é branca, a névoa (camada preta) se torna VISÍVEL.
     (boardData.fog || []).forEach(fogData => {
         let fogShape;
+        // 🔒 CORREÇÃO CRÍTICA: As coordenadas são salvas em %, então precisamos convertê-las
+        // para pixels baseados no tamanho ATUAL do contêiner do mapa para desenhar o SVG.
         const rect = mapBoard.getBoundingClientRect();
+
         switch (fogData.shape) {
             case 'circle':
                 if (typeof fogData.x !== 'undefined') { // Proteção contra dados inválidos
@@ -3296,24 +3299,7 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
             case 'brush':
             case 'eraser': // Revela
                 fogShape = document.createElementNS(svgNS, 'path');
-
-                // 🔒 CORREÇÃO: garante que o atributo 'd' contenha apenas números válidos
-                let pathD = fogData.d;
-
-                // Caso existam porcentagens ou valores inválidos antigos, tenta converter
-                if (/%/.test(pathD)) {
-                    try {
-                        const rect = mapBoard.getBoundingClientRect();
-                        pathD = pathD.replace(/([\d.]+)%/g, (m, num) => {
-                            // converte % → pixels (assumindo 100% do width como referência)
-                            return (parseFloat(num) / 100) * rect.width;
-                        });
-                        console.warn("⚠️ Corrigido caminho em % para px:", pathD);
-                    } catch (err) {
-                        console.error("Erro ao corrigir path antigo:", err, fogData);
-                        return; // evita quebrar o SVG inteiro
-                    }
-                }
+                const pathD = fogData.d; // O 'd' já está em pixels, não precisa converter.
 
                 fogShape.setAttribute('d', pathD);
                 fogShape.setAttribute('stroke', fogData.shape === 'eraser' ? 'black' : 'white');
@@ -3366,7 +3352,10 @@ function renderFogOfWar(boardData, mapBoard, isMasterView, temporaryPathData = n
     const fogLayer = document.createElementNS(svgNS, 'rect');
     fogLayer.setAttribute('width', '100%');
     fogLayer.setAttribute('height', '100%');
-    fogLayer.setAttribute('fill', 'rgba(0, 0, 0, 0.9)');
+    // 🔒 CORREÇÃO: Névoa totalmente opaca para jogadores, semi-transparente para o mestre.
+    const fogFillColor = isMasterView ? 'rgba(0, 0, 0, 0.7)' : 'black';
+    fogLayer.setAttribute('fill', fogFillColor);
+
     // 5. Aplicamos a máscara. Onde a máscara for BRANCA, a névoa (fogLayer) APARECE. Onde for PRETA, a névoa fica INVISÍVEL.
     fogLayer.setAttribute('mask', 'url(#fog-mask)');
     svg.appendChild(fogLayer);
@@ -3642,18 +3631,7 @@ function initializeMasterMap(campaign, socket) {
         // --- LÓGICA DO PINCEL/BORRACHA ---
         if ((currentDrawShape === 'brush' || currentDrawShape === 'eraser') && currentPathData) {
             // Adiciona o novo ponto no formato SVG Path Data
-            // CORREÇÃO FINAL: O caminho temporário é construído com PIXELS.
             currentPathData.d += ` L ${currentX} ${currentY}`;
-            
-            // Re-renderiza o estado do mapa para mostrar o desenho em tempo real
-            renderMapState(campaign, true, currentPathData, currentDrawShape);
-
-            // NOVO: Apenas emite o evento de desenho em tempo real, SEM salvar no banco
-            if (window.socketInstance && window.socketInstance.connected) {
-                window.socketInstance.emit('map-drawing-live', {
-                    campaignId: campaign._id, temporaryPathData: currentPathData, temporaryPathShape: currentDrawShape
-            });
-            }
             
         } 
         
@@ -3708,17 +3686,11 @@ function initializeMasterMap(campaign, socket) {
         // Pincel/Borracha
         if (currentDrawShape === 'brush' || currentDrawShape === 'eraser') {
             // Garante que houve movimento suficiente e os dados existem
-            if (currentPathData && currentPathData.d.length > 5) { 
-                // MODIFICAÇÃO: Salva o caminho 'd' com valores em pixels inteiros, como solicitado.
-                const points = currentPathData.d.match(/[\d\.]+/g).map(p => Math.round(parseFloat(p)));
-                let dInPixels = `M ${points[0]} ${points[1]}`;
-                for (let i = 2; i < points.length; i += 2) {
-                    dInPixels += ` L ${points[i]} ${points[i+1]}`;
-                }
+            if (currentPathData && currentPathData.d.length > 5) {
                 newFogData = {
                     id: `fog_${Date.now()}`,
                     shape: currentDrawShape,
-                    d: dInPixels, // Salva o caminho em pixels
+                    d: currentPathData.d, // Salva o caminho em pixels, como já estava sendo construído
                     strokeWidth: currentPathData.strokeWidth, // Salva a largura do traço em pixels
                 };
             }
@@ -4081,8 +4053,8 @@ function renderMapState(campaign, isMasterView, temporaryPathData = null, tempor
         return;
     }
 
-    const mapBoardId = isMasterView ? 'map-board' : 'player-map-board';
-    const mapBoard = document.getElementById(mapBoardId);
+    const mapBoardId = isMasterView ? 'map-board' : 'player-map-board'; // Define o ID correto
+    const mapBoard = document.getElementById(mapBoardId); // Usa o ID correto para buscar o elemento
     const mapPlaceholder = mapBoard.querySelector('.map-upload-placeholder');
 
     renderMapBackground(mapBoard, mapPlaceholder, currentBoardData.imageUrl);
