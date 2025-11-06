@@ -4132,9 +4132,15 @@ function renderMapTokens(mapBoard, tokens, isMasterView, campaign) {
  * Inicializa a visualização do mapa para o jogador.
  * @param {object} campaign - O objeto da campanha.
  */
-function initializePlayerMap(campaign) {
+function initializePlayerMap(campaign, socket) {
     const mapBoard = document.getElementById('player-map-board');
     mapBoard.classList.add('player-view'); // Adiciona classe para estilização
+
+    // Renderiza o estado inicial do mapa e da galeria para o jogador
+    renderMapState(campaign, false);
+    renderBoardGallery(campaign, false);
+
+    // (Opcional) Adicionar listeners específicos do jogador aqui, se necessário no futuro.
 }
 
 /**
@@ -4154,7 +4160,7 @@ async function initializePlayerView(campaign, socket) {
     });
     window.socketInstance = socket; // Torna o socket acessível globalmente nesta página
     // Garante que o ID do usuário está carregado
-    const user = await checkAuthStatus();
+    const user = await checkAuthStatus(); // A função já define currentUserId
     if (!user) {
         console.warn("Usuário não logado, algumas funcionalidades podem ser limitadas.");
     }
@@ -4245,7 +4251,7 @@ async function initializePlayerView(campaign, socket) {
     }
 
     // Inicializa o mapa do jogador
-    initializePlayerMap(campaign);
+    initializePlayerMap(campaign, socket);
 
     // Configura as abas do jogador
     const playerTabLinks = document.querySelectorAll('#player-view-container .tab-link');
