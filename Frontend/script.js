@@ -3413,7 +3413,7 @@ function hideMapContextMenu() {
  * Inicializa a funcionalidade do mapa interativo para o mestre.
  * @param {object} campaign - O objeto da campanha.
  */
-function initializeMasterMap(campaign, socket) {
+function initializeMasterMap(campaign, socket, renderOnLoad = true) {
     window.socketInstance = socket; // Torna o socket acessível globalmente
     const mapBoard = document.getElementById('map-board');
     const mapPlaceholder = document.getElementById('map-upload-placeholder');
@@ -3802,7 +3802,9 @@ function initializeMasterMap(campaign, socket) {
         // Esta função pode ser expandida com mais lógica de drag and drop se necessário
     }
 
-    renderMapState(campaign, true); // Renderiza o estado inicial do mapa para o mestre
+    if (renderOnLoad) {
+        renderMapState(campaign, true); // Renderiza o estado inicial do mapa para o mestre
+    }
     populateTokenList(); // Popula a lista de tokens
 }
 
@@ -3974,15 +3976,16 @@ function initializeMasterView(campaign, socket) {
         tabLinks.forEach(link => {
             link.addEventListener('click', () => {
                 const tabId = link.dataset.tab;
-
-                // Se a aba do mapa for clicada, força a re-renderização do estado do mapa
-                if (tabId === 'mapa') {
-                    renderMapState(campaign, true);
-                }
-
+ 
                 tabLinks.forEach(l => l.classList.remove('active'));
                 link.classList.add('active');
                 tabContents.forEach(c => c.id === tabId ? c.classList.add('active') : c.classList.remove('active'));
+
+                // CORREÇÃO: Renderiza o mapa DEPOIS que a aba se torna visível.
+                // Isso garante que o contêiner do mapa tenha dimensões corretas para os cálculos.
+                if (tabId === 'mapa') {
+                    renderMapState(campaign, true);
+                }
 
                 // Oculta o cabeçalho da campanha quando a aba do mapa estiver ativa
                 if (campaignHeader) {
@@ -4007,7 +4010,9 @@ function initializeMasterView(campaign, socket) {
         }
 
         // Inicializa o mapa do mestre (MOVENDO PARA O FINAL PARA GARANTIR QUE TUDO ESTEJA PRONTO)
-        initializeMasterMap(campaign, socket);
+        // Não chama renderMapState aqui, pois a aba do mapa começa oculta.
+        // A renderização ocorrerá quando o usuário clicar na aba "Mapa".
+        initializeMasterMap(campaign, socket, false); // Passa 'false' para não renderizar inicialmente
 
         // Adiciona o listener para a tecla DELETE
         setupBoardDeletionKeyListener(campaign);
@@ -4026,6 +4031,7 @@ function initializeMasterView(campaign, socket) {
             campaign.mapBoards.push(newPrancheta);
             updateCampaign(campaign, true);
             renderBoardGallery(campaign, true); // Re-renderiza a galeria para o mestre
+            renderMapState(campaign, true); // Renderiza o novo mapa vazio
         });
     }
 }
@@ -4234,13 +4240,15 @@ async function initializePlayerView(campaign, socket) {
     playerTabLinks.forEach(link => {
         link.addEventListener('click', () => {
             const tabId = link.dataset.tab;
+
             playerTabLinks.forEach(l => l.classList.remove('active'));
             link.classList.add('active');
             playerTabContents.forEach(c => c.id === tabId ? c.classList.add('active') : c.classList.remove('active'));
 
-            // Re-renderiza o mapa do jogador quando a aba do mapa é clicada
+            // CORREÇÃO: Renderiza o mapa do jogador DEPOIS que a aba se torna visível.
+            // Isso garante que os cálculos de posição da névoa e dos tokens sejam corretos.
             if (tabId === 'player-map') {
-                renderMapState(campaign, false); // Mantém a re-renderização para garantir atualizações
+                renderMapState(campaign, false);
             }
         });
     });
