@@ -3581,14 +3581,14 @@ function initializeMasterMap(campaign, socket, renderOnLoad = true) {
         
         // 🟢 ESTAS LINHAS SÃO CRÍTICAS
         // Calcula as dimensões e posição do mapa UMA VEZ
-        const rect = mapBoard.getBoundingClientRect();
+        const rect = mapBoard.getBoundingClientRect(); // Posição do mapa relativa à janela de visualização
 
         // Unifica a obtenção de coordenadas para mouse e toque
         const startCoords = e.type === 'touchstart' ? e.touches[0] : e;
         
-        // CORREÇÃO FINAL: Usa clientX/Y que é relativo ao viewport, assim como getBoundingClientRect.
-        startX = startCoords.clientX - rect.left;
-        startY = startCoords.clientY - rect.top;
+        // CORREÇÃO DE PRECISÃO: Adiciona a posição de rolagem da página para obter a coordenada absoluta.
+        startX = startCoords.clientX - rect.left + mapBoard.scrollLeft;
+        startY = startCoords.clientY - rect.top + mapBoard.scrollTop;
         
         isDrawing = true;
 
@@ -3609,10 +3609,10 @@ function initializeMasterMap(campaign, socket, renderOnLoad = true) {
         // Para Quadrado e Círculo, cria a forma temporária (visual)
         if (currentDrawShape === 'square' || currentDrawShape === 'circle') {
             selectionRect = document.createElement('div');
-            selectionRect.className = 'temp-selection-box';
+            selectionRect.className = 'draw-selection-rect'; // Usa a classe já estilizada
             selectionRect.style.position = 'absolute';
-            selectionRect.style.border = '2px dashed white';
-            selectionRect.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+            selectionRect.style.left = `${startX}px`;
+            selectionRect.style.top = `${startY}px`;
             mapBoard.appendChild(selectionRect);
         }
     };
@@ -3625,8 +3625,9 @@ function initializeMasterMap(campaign, socket, renderOnLoad = true) {
         const rect = mapBoard.getBoundingClientRect();
         // Unifica a obtenção de coordenadas para mouse e toque
         const moveCoords = e.type === 'touchmove' ? e.touches[0] : e;
-        const currentX = moveCoords.clientX - rect.left;
-        const currentY = moveCoords.clientY - rect.top;
+        // CORREÇÃO DE PRECISÃO: Adiciona a posição de rolagem da página.
+        const currentX = moveCoords.clientX - rect.left + mapBoard.scrollLeft;
+        const currentY = moveCoords.clientY - rect.top + mapBoard.scrollTop;
 
         // --- LÓGICA DO PINCEL/BORRACHA ---
         if ((currentDrawShape === 'brush' || currentDrawShape === 'eraser') && currentPathData) {
@@ -3673,8 +3674,9 @@ function initializeMasterMap(campaign, socket, renderOnLoad = true) {
         // Unifica a obtenção de coordenadas para mouse e toque
         const endCoords = e.type === 'touchend' ? e.changedTouches[0] : e;
         const rect = mapBoard.getBoundingClientRect();
-        const finalX = endCoords.clientX - rect.left;
-        const finalY = endCoords.clientY - rect.top;
+        // CORREÇÃO DE PRECISÃO: Adiciona a posição de rolagem da página.
+        const finalX = endCoords.clientX - rect.left + mapBoard.scrollLeft;
+        const finalY = endCoords.clientY - rect.top + mapBoard.scrollTop;
         
         // CORREÇÃO: Pega a prancheta atual
         const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
