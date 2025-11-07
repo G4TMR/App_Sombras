@@ -2542,6 +2542,12 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     min-height: 50vh; /* Garante uma altura mínima, mas permite encolher */
 }
 
+/* Aumenta a altura mínima do mapa especificamente na visão do jogador */
+.map-container.player-view .map-board {
+    min-height: 70vh;
+}
+
+
 .map-controls-panel {
     background-color: rgba(24, 24, 24, 0.8);
     padding: 1rem;
