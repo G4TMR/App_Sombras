@@ -4339,7 +4339,7 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isMasterView, isChara
             document.addEventListener('mouseup', onMouseUp);
             tokenElement.addEventListener('touchmove', onMouseMove, { passive: false }); // Use tokenElement for touchmove
             tokenElement.addEventListener('touchend', onMouseUp); // Use tokenElement for touchend
-        });
+        };
         tokenElement.addEventListener('mousedown', startDrag);
         tokenElement.addEventListener('touchstart', startDrag, { passive: false });
     } else {
@@ -4724,6 +4724,9 @@ function checkAndApplyDevMode() {
 let header; // Variável global para o header element
 // Inicialização do Script quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', async () => {
+    // Garante que o modo de tela cheia do mapa seja desativado ao carregar qualquer página.
+    document.body.classList.remove('map-fullscreen-active');
+
     await loadHeader();
 
     checkAndApplyDevMode(); // Verifica o modo dev logo no início
