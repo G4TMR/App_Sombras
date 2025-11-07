@@ -4091,11 +4091,14 @@ function renderMapTokens(mapBoard, tokens, isMasterView, campaign) {
 
     if (tokens && tokens.length > 0) {
         tokens.forEach(tokenData => {
-            const isOwner = getObjectIdAsString(campaign.ownerId) === currentUserId;
-            // Para a visão do jogador, o token só é arrastável se ele for o dono do personagem
-            // Para a visão do mestre, todos os tokens são arrastáveis
-            const isDraggable = isMasterView || isOwner;
-            createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable, isOwner);
+            // Find the actual character object from the campaign's character list
+            const character = campaign.characters.find(c => c._id.toString() === tokenData.characterId.toString());
+            let isCharacterOwner = false;
+            if (character && currentUserId) {
+                isCharacterOwner = character.owner.toString() === currentUserId.toString();
+            }
+            // Pass isMasterView and isCharacterOwner to createTokenOnBoard
+            createTokenOnBoard(tokenData, mapBoard, campaign, isMasterView, isCharacterOwner);
         });
     }
 }
@@ -4265,9 +4268,9 @@ function addAgentToCampaignUI(character) {
  * @param {HTMLElement} mapBoard - O elemento do tabuleiro do mapa.
  * @param {object} campaign - O objeto da campanha.
  * @param {boolean} isDraggable - Se o token pode ser arrastado (visão do mestre).
- * @param {boolean} isOwner - Se o usuário atual é o dono do personagem do token.
+ * @param {boolean} isCharacterOwner - Se o usuário logado é o dono do personagem do token.
  */
-function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true, isOwner = false) {
+function createTokenOnBoard(tokenData, mapBoard, campaign, isMasterView, isCharacterOwner) {
     if (!tokenData || typeof tokenData.x === 'undefined' || typeof tokenData.y === 'undefined') return;
     let tokenElement = document.getElementById(tokenData.id);
     if (!tokenElement) {
@@ -4284,13 +4287,18 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true, i
     // Adiciona a classe 'locked' se o token estiver bloqueado
     tokenElement.classList.toggle('locked', tokenData.locked);
 
-    const canMove = isDraggable && !tokenData.locked && (isOwner || getObjectIdAsString(campaign.ownerId) === currentUserId);
+    // A token can be moved if:
+    // 1. It's the master's view AND the token is not locked.
+    // 2. OR it's a player's view AND the current user owns the character AND the token is not locked.
+    const canMove = (!tokenData.locked && (isMasterView || isCharacterOwner));
 
     if (canMove) {
         tokenElement.style.cursor = 'grab';
-        tokenElement.addEventListener('mousedown', (e) => {
+        const startDrag = (e) => {
             e.preventDefault();
 
+            // Impede o arrasto se o token estiver bloqueado (re-check para segurança)
+            const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
             // Impede o arrasto se o token estiver bloqueado
             const currentTokenData = campaign.mapBoards[campaign.currentBoardIndex || 0].tokens.find(t => t.id === tokenData.id);
             if (currentTokenData?.locked) return;
@@ -4298,7 +4306,8 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true, i
             const rect = mapBoard.getBoundingClientRect();
             let offsetX = e.clientX - tokenElement.getBoundingClientRect().left;
             let offsetY = e.clientY - tokenElement.getBoundingClientRect().top;
-
+            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
             function onMouseMove(moveEvent) {
                 tokenElement.style.cursor = 'grabbing';
                 let newX = moveEvent.clientX - rect.left - offsetX;
@@ -4310,10 +4319,13 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true, i
             }
 
             function onMouseUp() {
+                document.removeEventListener('touchmove', onMouseMove);
+                document.removeEventListener('touchend', onMouseUp);
                 tokenElement.style.cursor = 'grab';
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
                 
+                // Save and broadcast changes
                 const currentBoard = campaign.mapBoards[campaign.currentBoardIndex || 0];
                 const tokenToUpdate = currentBoard.tokens.find(t => t.id === tokenData.id);
                 if (tokenToUpdate) {
@@ -4325,7 +4337,11 @@ function createTokenOnBoard(tokenData, mapBoard, campaign, isDraggable = true, i
 
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
+            tokenElement.addEventListener('touchmove', onMouseMove, { passive: false }); // Use tokenElement for touchmove
+            tokenElement.addEventListener('touchend', onMouseUp); // Use tokenElement for touchend
         });
+        tokenElement.addEventListener('mousedown', startDrag);
+        tokenElement.addEventListener('touchstart', startDrag, { passive: false });
     } else {
         tokenElement.style.cursor = tokenData.locked ? 'not-allowed' : 'default';
     }
