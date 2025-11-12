@@ -2870,7 +2870,7 @@ async function getCampaignById(campaignId) {
  * Atualiza uma campanha existente no localStorage.
  * @param {object} updatedCampaign - O objeto da campanha com os dados atualizados.
  */
-async function updateCampaign(updatedCampaign, broadcastChanges = true) {
+async function updateCampaign(updatedCampaign, broadcastChanges = true) { // A flag broadcastChanges é mantida para compatibilidade, mas a lógica interna mudou.
     const socket = window.socketInstance;
     const campaignIdForApi = updatedCampaign._id || updatedCampaign.id;
     if (!campaignIdForApi) {
@@ -2880,7 +2880,10 @@ async function updateCampaign(updatedCampaign, broadcastChanges = true) {
 
     // A única responsabilidade do cliente agora é emitir um evento para o servidor.
     // O servidor será responsável por salvar no banco e notificar os outros clientes.
-    if (broadcastChanges && socket && socket.connected) {
+    // CORREÇÃO: A verificação de 'broadcastChanges' foi removida daqui.
+    // Agora, qualquer chamada a updateCampaign tentará notificar outros jogadores via socket.
+    // Isso garante que mudanças no mapa (upload, limpeza, troca de prancheta) sejam sempre sincronizadas.
+    if (socket && socket.connected) {
         console.log("Enviando atualização de mapa para o servidor...");
         socket.emit('update-map-data', {
             campaignId: campaignIdForApi,
