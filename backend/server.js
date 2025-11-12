@@ -560,13 +560,13 @@ io.on('connection', (socket) => {
     socket.on('update-map-data', async ({ campaignId, updatedCampaignData }) => {
         try {
             // 1. Encontra e atualiza a campanha no banco de dados.
-            // A validação de permissão real acontece na rota HTTP. Para sockets, a entrada na sala já é uma forma de autorização.
-            // Usamos findByIdAndUpdate para mesclar as alterações em vez de substituir o documento inteiro.
-            // O operador $set garante que apenas os campos em updatedCampaignData sejam alterados.
+            // CORREÇÃO: Vamos usar findByIdAndUpdate, mas em vez de usar $set, vamos passar o objeto inteiro.
+            // Isso garante que toda a estrutura (incluindo o array mapBoards com todas as suas propriedades)
+            // seja substituída e salva corretamente, resolvendo o problema de persistência.
+            // A validação de permissão aqui é implícita pela conexão do usuário à sala da campanha.
             const savedCampaign = await Campaign.findByIdAndUpdate(
                 campaignId,
-                // IMPORTANTE: Usar $set para atualizar apenas os campos fornecidos.
-                { $set: updatedCampaignData },
+                updatedCampaignData, // Passa o objeto inteiro para substituir os dados antigos.
                 { new: true } // Retorna o documento atualizado
             ).populate('players', 'displayName email').populate('characters'); // Popula os dados necessários
 

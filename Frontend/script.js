@@ -2878,17 +2878,26 @@ async function updateCampaign(updatedCampaign, broadcastChanges = true) { // A f
         return;
     }
 
-    // A única responsabilidade do cliente agora é emitir um evento para o servidor.
-    // O servidor será responsável por salvar no banco e notificar os outros clientes.
-    // CORREÇÃO: A verificação de 'broadcastChanges' foi removida daqui.
-    // Agora, qualquer chamada a updateCampaign tentará notificar outros jogadores via socket.
-    // Isso garante que mudanças no mapa (upload, limpeza, troca de prancheta) sejam sempre sincronizadas.
+    // Lógica Dupla: Socket para tempo real, API para persistência garantida.
+
+    // 1. Envia via Socket.IO para atualizações em tempo real para outros jogadores.
     if (socket && socket.connected) {
         console.log("Enviando atualização de mapa para o servidor...");
         socket.emit('update-map-data', {
             campaignId: campaignIdForApi,
             updatedCampaignData: updatedCampaign
         });
+    }
+
+    // 2. Envia via API (PUT) para garantir que os dados sejam salvos permanentemente no banco.
+    // Isso resolve o problema de os dados não persistirem após o recarregamento da página.
+    try {
+        // Usamos a rota PUT que já existe e funciona para salvar a campanha inteira.
+        await api.put(`/api/campaigns/${campaignIdForApi}`, updatedCampaign);
+        console.log("Dados da campanha salvos permanentemente via API.");
+    } catch (error) {
+        console.error("Erro ao salvar permanentemente os dados da campanha via API:", error);
+        // Opcional: Adicionar um feedback visual para o usuário em caso de falha no salvamento.
     }
 }
 
