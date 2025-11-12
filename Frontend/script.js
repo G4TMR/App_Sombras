@@ -3646,6 +3646,14 @@ function initializeMasterMap(campaign, socket, renderOnLoad = true) {
             // Adiciona o novo ponto no formato SVG Path Data
             currentPathData.d += ` L ${currentX} ${currentY}`;
             
+            // NOVO: Envia o desenho em tempo real para os outros jogadores
+            if (window.socketInstance && window.socketInstance.connected) {
+                window.socketInstance.emit('map-drawing-live', {
+                    campaignId: campaign._id || campaign.id,
+                    temporaryPathData: currentPathData,
+                    temporaryPathShape: currentDrawShape
+                });
+            }
         } 
         
         // --- LÓGICA DO CUBO/CÍRCULO (Usando Div Temporária para feedback visual) ---
@@ -4143,14 +4151,19 @@ function initializePlayerMap(campaign, socket) {
  * @param {object} campaign - O objeto da campanha.
  */
 async function initializePlayerView(campaign, socket) {
-    // Listener para atualizações do mapa vindas do mestre
+    // Listener para atualizações FINAIS e SALVAS do mapa vindas do mestre.
+    // Este evento é disparado quando o mestre solta o mouse após desenhar a névoa,
+    // move um token, ou muda a prancheta.
     socket.on('map-updated', ({ updatedCampaignData }) => {
         console.log('Jogador: Recebida atualização do mapa via socket.');
         Object.assign(campaign, updatedCampaignData);
         renderMapState(campaign, false); // Re-renderiza o mapa do jogador
         renderBoardGallery(campaign, false); // Re-renderiza a galeria de pranchetas do jogador
     });
+    // Listener para o desenho em TEMPO REAL da névoa.
+    // Este evento é disparado continuamente enquanto o mestre arrasta o mouse.
     socket.on('map-drawing-live', ({ temporaryPathData, temporaryPathShape }) => {
+        // Renderiza o mapa com os dados temporários do desenho em tempo real
         renderMapState(campaign, false, temporaryPathData, temporaryPathShape);
     });
     window.socketInstance = socket; // Torna o socket acessível globalmente nesta página

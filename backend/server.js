@@ -583,6 +583,13 @@ io.on('connection', (socket) => {
         }
     });
 
+    // NOVO: Evento para transmitir o desenho do mapa em tempo real (sem salvar no banco).
+    // Isso permite que os jogadores vejam o mestre desenhando a névoa ao vivo.
+    socket.on('map-drawing-live', ({ campaignId, temporaryPathData, temporaryPathShape }) => {
+        // Apenas retransmite para os outros na sala.
+        socket.to(campaignId).emit('map-drawing-live', { temporaryPathData, temporaryPathShape });
+    });
+
     socket.on('disconnect', () => {
         console.log('🔌 Usuário desconectado:', socket.id);
     });
