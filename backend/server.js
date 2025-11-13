@@ -300,8 +300,16 @@ app.put('/api/characters/:id', ensureAuthenticated, async (req, res) => {
 
 app.delete('/api/characters/:id', ensureAuthenticated, async (req, res) => {
     try {
-        const result = await Character.findOneAndDelete({ id: req.params.id, owner: req.user._id });
-        if (!result) return res.status(404).json({ message: 'Personagem não encontrado.' });
+        // CORREÇÃO: Busca o personagem por `_id` (do MongoDB) ou pelo `id` customizado,
+        // garantindo que ele pertença ao usuário logado, antes de deletar.
+        const result = await Character.findOneAndDelete({
+            $or: [
+                { _id: mongoose.Types.ObjectId.isValid(req.params.id) ? req.params.id : null },
+                { id: req.params.id }
+            ],
+            owner: req.user._id // Garante que apenas o dono possa deletar.
+        });
+        if (!result) return res.status(404).json({ message: 'Personagem não encontrado ou você não tem permissão para excluí-lo.' });
         res.status(200).json({ message: 'Personagem excluído com sucesso.' });
     } catch (error) {
         console.error("Erro ao deletar personagem:", error);
