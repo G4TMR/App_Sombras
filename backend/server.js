@@ -115,6 +115,24 @@ const CampaignSchema = new mongoose.Schema({
 }, { strict: false }); // strict: false para permitir outros campos que o frontend possa enviar
 const Campaign = mongoose.model('Campaign', CampaignSchema);
 
+// NOVO: Schema para Ameaças (Monstros)
+const ThreatSchema = new mongoose.Schema({
+    name: { type: String, required: true, unique: true },
+    element: { type: String, required: true, enum: ['Conhecimento', 'Morte', 'Sangue', 'Energia'] },
+    lore: { type: String, required: true },
+    lore_short: { type: String, required: true }, // Lore curto para o card
+    imageUrl: { type: String, default: '' }, // Caminho para a imagem PNG
+    abilities: [{
+        name: String,
+        description: String
+    }],
+    stats: {
+        difficulty: { type: String, enum: ['Baixa', 'Média', 'Alta', 'Extrema', 'Lendária'] },
+        notes: String // Campo para notas do mestre, fraquezas, etc.
+    }
+});
+const Threat = mongoose.model('Threat', ThreatSchema);
+
 // --- 5.5. Configuração do Passport (Estratégia Google) ---
 
 // Validação para garantir que as variáveis de ambiente do Google estão definidas
@@ -561,6 +579,18 @@ app.delete('/api/campaigns/:campaignId/players/:playerId', ensureAuthenticated, 
     }
 });
 
+// --- Rotas de Ameaças (Bestiário) ---
+
+// Obter todas as ameaças (protegido, pois é conteúdo do sistema)
+app.get('/api/threats', ensureAuthenticated, async (req, res) => {
+    try {
+        const threats = await Threat.find().sort({ element: 1, name: 1 });
+        res.status(200).json(threats);
+    } catch (error) {
+        console.error("Erro ao listar ameaças:", error);
+        res.status(500).json({ message: 'Erro interno do servidor ao listar ameaças.' });
+    }
+});
 // --- 6.5. Lógica do Socket.IO para Tempo Real ---
 io.on('connection', (socket) => {
     console.log('🔌 Um usuário se conectou:', socket.id);

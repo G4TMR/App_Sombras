@@ -3,89 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ameaças | Sombras do Abismo</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="/favicon.png" sizes="any" type="image/png">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <title>Ameaças - Sombras do Abismo</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Seu arquivo de estilos principal -->
+    <link rel="stylesheet" href="ameacas.css"> <!-- Estilos específicos para esta página -->
 </head>
-<body data-page="ameacas">
-    <div class="background-overlay"></div>
-    <div id="header-placeholder"></div>
+<body>
+    <!-- Você pode incluir seu header/navbar aqui -->
 
-    <main class="main-content">
-        <div class="horizontal-container">
-            <section class="content-section">
-                <div class="content-box">
-                    <h2>Bestiário das Sombras</h2>
-                    <p class="info-text">Catálogo completo das criaturas que habitam as trevas. Desde entidades menores até horrores ancestrais que desafiam a sanidade humana.</p>
-                    
-                    <div class="threats-categories">
-                        <a href="ameacas-lista.html?categoria=entidades_menores" class="category-card-link">
-                            <div class="category-card">
-                                <h3>Entidades Menores</h3>
-                                <p>Criaturas de baixo poder, mas não menos perigosas. Ideais para investigadores iniciantes.</p>
-                                <div class="threat-count">12 Ameaças</div>
-                            </div>
-                        </a>
-                        <a href="ameacas-lista.html?categoria=aberracoes" class="category-card-link">
-                            <div class="category-card">
-                                <h3>Aberrações</h3>
-                                <p>Seres distorcidos que desafiam as leis da natureza e da realidade.</p>
-                                <div class="threat-count">8 Ameaças</div>
-                            </div>
-                        </a>
-                        <a href="ameacas-lista.html?categoria=horrores_ancestrais" class="category-card-link">
-                            <div class="category-card">
-                                <h3>Horrores Ancestrais</h3>
-                                <p>Entidades primordiais cujo mero conhecimento pode destruir mentes.</p>
-                                <div class="threat-count">5 Ameaças</div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </section>
+    <main class="threats-container">
+        <h1>Bestiário Paranormal</h1>
+        <p>Conheça as entidades que assombram a realidade.</p>
 
-            <section class="content-section">
-                <div class="content-box">
-                    <h2>Ameaças por Elemento</h2>
-                    <div class="elemental-threats-container">
-                        <!-- Elemento Temporal -->
-                        <div class="elemental-threat-group temporal">
-                            <a href="ameacas-lista.html?elemento=Temporal" class="element-threat-title-link">
-                                <h3 class="element-threat-title">Temporal</h3>
-                            </a>
-                            <p class="no-threats-message">Clique para ver as ameaças deste elemento.</p>
-                        </div>
+        <!-- Seção para Ameaças de Conhecimento -->
+        <section id="threats-conhecimento" class="threat-category">
+            <h2>Elemento: Conhecimento</h2>
+            <div class="threat-grid">
+                <!-- Cards de monstros de Conhecimento serão inseridos aqui pelo JS -->
+            </div>
+        </section>
 
-                        <!-- Elemento Cerebral -->
-                        <div class="elemental-threat-group cerebral">
-                             <a href="ameacas-lista.html?elemento=Cerebral" class="element-threat-title-link">
-                                <h3 class="element-threat-title">Cerebral</h3>
-                            </a>
-                            <p class="no-threats-message">Clique para ver as ameaças deste elemento.</p>
-                        </div>
+        <!-- Seção para Ameaças de Morte -->
+        <section id="threats-morte" class="threat-category">
+            <h2>Elemento: Morte</h2>
+            <div class="threat-grid">
+                <!-- Cards de monstros de Morte serão inseridos aqui pelo JS -->
+            </div>
+        </section>
 
-                        <!-- Elemento Visceral -->
-                        <div class="elemental-threat-group visceral">
-                             <a href="ameacas-lista.html?elemento=Visceral" class="element-threat-title-link">
-                                <h3 class="element-threat-title">Visceral</h3>
-                            </a>
-                            <p class="no-threats-message">Clique para ver as ameaças deste elemento.</p>
-                        </div>
+        <!-- Seção para Ameaças de Sangue -->
+        <section id="threats-sangue" class="threat-category">
+            <h2>Elemento: Sangue</h2>
+            <div class="threat-grid">
+                <!-- Cards de monstros de Sangue serão inseridos aqui pelo JS -->
+            </div>
+        </section>
 
-                        <!-- Elemento Vital -->
-                        <div class="elemental-threat-group vital">
-                             <a href="ameacas-lista.html?elemento=Vital" class="element-threat-title-link">
-                                <h3 class="element-threat-title">Vital</h3>
-                            </a>
-                            <p class="no-threats-message">Clique para ver as ameaças deste elemento.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
+        <!-- Seção para Ameaças de Energia -->
+        <section id="threats-energia" class="threat-category">
+            <h2>Elemento: Energia</h2>
+            <div class="threat-grid">
+                <!-- Cards de monstros de Energia serão inseridos aqui pelo JS -->
+            </div>
+        </section>
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="script.js"></script>
+
+    <!-- Modal para a Ficha da Ameaça -->
+    <div id="threat-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <div id="threat-sheet-content">
+                <!-- O conteúdo da ficha será inserido aqui pelo JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="ameacas.js"></script>
 </body>
 </html>
