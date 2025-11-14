@@ -235,12 +235,13 @@ app.get('/api/characters', ensureAuthenticated, async (req, res) => {
 app.get('/api/characters/:id', ensureAuthenticated, async (req, res) => {
     try {
         // Busca o personagem pelo ID customizado ou pelo _id do MongoDB
-        const character = await Character.findOne({ 
-            $or: [
-                { _id: mongoose.Types.ObjectId.isValid(req.params.id) ? req.params.id : null },
-                { id: req.params.id }
-            ]
-        });
+        let characterQuery = {};
+        if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+            characterQuery._id = req.params.id;
+        } else {
+            characterQuery.id = req.params.id;
+        }
+        const character = await Character.findOne(characterQuery);
         if (!character) return res.status(404).json({ message: 'Personagem não encontrado.' });
 
         // Verifica se o usuário é o dono do personagem
@@ -268,12 +269,13 @@ app.get('/api/characters/:id', ensureAuthenticated, async (req, res) => {
 app.put('/api/characters/:id', ensureAuthenticated, async (req, res) => {
     try {
         // Primeiro, encontra o personagem pelo ID (pode ser _id ou id customizado)
-        const character = await Character.findOne({
-            $or: [
-                { _id: mongoose.Types.ObjectId.isValid(req.params.id) ? req.params.id : null },
-                { id: req.params.id }
-            ]
-        });
+        let characterQuery = {};
+        if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+            characterQuery._id = req.params.id;
+        } else {
+            characterQuery.id = req.params.id;
+        }
+        const character = await Character.findOne(characterQuery);
         if (!character) return res.status(404).json({ message: 'Personagem não encontrado.' });
 
         // Verifica se o usuário logado é o dono do personagem
@@ -350,12 +352,13 @@ app.get('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
     try {
         // Adicionado .populate() para garantir que ownerId seja sempre um objeto
         // Modificado para buscar por _id (padrão do Mongo) ou pelo campo 'id' (gerado no frontend)
-        const campaign = await Campaign.findOne({
-            $or: [
-                { _id: mongoose.Types.ObjectId.isValid(req.params.id) ? req.params.id : null },
-                { id: req.params.id }
-            ]
-        }).populate('ownerId', 'displayName')
+        let campaignQuery = {};
+        if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+            campaignQuery._id = req.params.id;
+        } else {
+            campaignQuery.id = req.params.id;
+        }
+        const campaign = await Campaign.findOne(campaignQuery).populate('ownerId', 'displayName')
           // CORREÇÃO: Garante que a lista de jogadores sempre venha populada
           .populate('players', 'displayName email') 
           .populate('characters'); // Popula os dados completos dos personagens
@@ -379,11 +382,14 @@ app.get('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
 app.put('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
     try {
         // CORREÇÃO: Permite que a atualização funcione com o _id do Mongo ou o id customizado.
+        let campaignQuery = { ownerId: req.user._id };
+        if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+            campaignQuery._id = req.params.id;
+        } else {
+            campaignQuery.id = req.params.id;
+        }
         const updatedCampaign = await Campaign.findOneAndUpdate(
-            { 
-                $or: [{ _id: req.params.id }, { id: req.params.id }], // Busca por qualquer um dos IDs
-                ownerId: req.user._id // Garante que apenas o dono possa atualizar
-            }, 
+            campaignQuery,
             req.body,
             { new: true }
         );
@@ -399,13 +405,13 @@ app.put('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
 app.delete('/api/campaigns/:id', ensureAuthenticated, async (req, res) => {
     try {
         // Modificado para buscar por _id ou id, mas garantindo que apenas o dono possa deletar.
-        const result = await Campaign.findOneAndDelete({
-            $or: [
-                { _id: mongoose.Types.ObjectId.isValid(req.params.id) ? req.params.id : null },
-                { id: req.params.id }
-            ],
-            ownerId: req.user._id // A verificação de dono é crucial e permanece.
-        });
+        let campaignQuery = { ownerId: req.user._id };
+        if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+            campaignQuery._id = req.params.id;
+        } else {
+            campaignQuery.id = req.params.id;
+        }
+        const result = await Campaign.findOneAndDelete(campaignQuery);
         if (!result) return res.status(404).json({ message: 'Campanha não encontrada ou você não é o dono.' });
         res.status(200).json({ message: 'Campanha excluída com sucesso.' });
     } catch (error) {
@@ -465,12 +471,13 @@ app.put('/api/campaigns/:id/add-character', ensureAuthenticated, async (req, res
             return res.status(404).json({ message: 'Personagem não encontrado ou não pertence a você.' });
         }
 
-        const campaign = await Campaign.findOne({
-            $or: [
-                { _id: mongoose.Types.ObjectId.isValid(campaignId) ? campaignId : null },
-                { id: campaignId }
-            ]
-        });
+        let campaignQuery = {};
+        if (mongoose.Types.ObjectId.isValid(campaignId)) {
+            campaignQuery._id = campaignId;
+        } else {
+            campaignQuery.id = campaignId;
+        }
+        const campaign = await Campaign.findOne(campaignQuery);
         if (!campaign) return res.status(404).json({ message: 'Campanha não encontrada.' });
 
         // Verifica se o personagem já está na campanha
