@@ -2563,7 +2563,8 @@ body[data-page="patente"] { --page-color: #6f42c1; }
 }
 
 .map-controls-panel .panel-title {
-    margin-bottom: 0.5rem; /* Reduz a margem inferior do título principal */
+    display: none; /* Remove o título "Ferramentas do Mestre" */
+    /* margin-bottom: 0.5rem; */ /* Reduz a margem inferior do título principal */
 }
 
 /* --- MODO TELA CHEIA DO MAPA --- */
