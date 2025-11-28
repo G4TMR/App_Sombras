@@ -1,201 +1,144 @@
+/* Container principal e Grid */
 .threats-container {
     padding: 2rem;
-    max-width: 1200px;
+    max-width: 1200px; /* Limita a largura para melhor leitura */
     margin: 0 auto;
-    color: #e0e0e0;
 }
 
 .threats-container h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    color: var(--page-color, var(--color-danger));
     text-align: center;
-    font-size: 2.5rem;
+    font-size: 4.5rem; /* Aumentado para ser mais impactante */
     margin-bottom: 0.5rem;
+    text-shadow: 0 0 15px var(--page-color, rgba(220, 53, 69, 0.5)); /* Efeito de brilho ameaçador */
 }
 
-.threats-container p {
+.threats-container > p {
     text-align: center;
-    color: #aaa;
+    color: var(--color-text-secondary);
     margin-bottom: 3rem;
+    font-size: 1.1rem;
 }
 
 .threat-category {
-    margin-bottom: 3rem;
-    border-left: 3px solid #b00000; /* Cor de destaque */
-    padding-left: 1.5rem;
+    margin-bottom: 4rem;
 }
 
 .threat-category h2 {
-    font-size: 2rem;
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    color: var(--element-color); /* Usa a cor definida pela seção */
+    border-bottom: 2px solid var(--element-color);
+    padding-bottom: 0.5rem;
     margin-bottom: 1.5rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+}
+
+/* --- Definição das cores por elemento --- */
+#threats-temporal {
+    --element-color: #9E9E9E; /* Cinza */
+}
+#threats-cerebral {
+    --element-color: #ffc107; /* Amarelo */
+}
+#threats-visceral {
+    --element-color: #dc3545; /* Vermelho */
+}
+#threats-vital {
+    --element-color: #9b59b6; /* Roxo */
 }
 
 .threat-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
+    /* Cria colunas responsivas. O 'auto-fit' permite quebras em telas menores */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
 }
 
+/* Estilo do Card individual */
 .threat-card {
-    background-color: #1a1a1a;
-    border: 1px solid #333;
+    background-color: var(--color-surface-1); /* Cor escura de fundo */
+    border: 1px solid var(--color-surface-2);
     border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; /* Adiciona transição para a borda */
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .threat-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(176, 0, 0, 0.3);
+    border-color: var(--element-color); /* Usa a cor do elemento no hover */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); /* Sombra mais genérica */
 }
 
-.threat-card-image {
-    width: 100%;
-    height: 200px;
-    background-color: #000;
-    display: flex;
+.threat-card h3 {
+    color: var(--color-text-primary); /* Nome do monstro mais neutro, o card já é vermelho */
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.threat-card p {
+    font-size: 0.9em;
+    color: var(--color-text-secondary);
+}
+
+/* Modal Styling */
+.modal {
+    display: flex; /* Usando flex para centralizar verticalmente */
     align-items: center;
     justify-content: center;
-    border-bottom: 1px solid #333;
-}
-
-.threat-card-image img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-}
-
-.threat-card-body {
-    padding: 1rem;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.threat-card-body h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.5rem;
-}
-
-.threat-card-body p {
-    text-align: left;
-    font-size: 0.9rem;
-    color: #aaa;
-    flex-grow: 1;
-    margin-bottom: 1rem;
-}
-
-.threat-card-button {
-    background-color: #b00000;
-    color: #fff;
-    border: none;
-    padding: 0.75rem;
-    width: 100%;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    transition: background-color 0.3s ease;
-}
-
-.threat-card-button:hover {
-    background-color: #ff3333;
-}
-
-/* Estilos para o Modal da Ficha */
-.modal {
-    display: none;
     position: fixed;
-    z-index: 1000;
+    z-index: 1000; /* Acima de tudo */
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.8);
-    animation: fadeIn 0.5s;
+    background-color: rgba(0, 0, 0, 0.8); /* Fundo escuro semitransparente */
+    opacity: 0; /* Começa invisível para a animação */
+    pointer-events: none; /* Não interage quando invisível */
+    transition: opacity 0.3s ease-in-out;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.modal.show {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .modal-content {
-    background-color: #121212;
-    margin: 5% auto;
-    padding: 2rem;
-    border: 1px solid #444;
+    background-color: var(--color-background); /* Fundo escuro do modal */
+    padding: 30px;
+    border: 1px solid var(--color-surface-2);
     width: 90%;
-    max-width: 800px;
+    max-width: 700px; /* Limite o tamanho do modal */
     border-radius: 10px;
     position: relative;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    color: var(--color-text-primary);
 }
 
 .close-button {
-    color: #aaa;
     position: absolute;
-    top: 1rem;
-    right: 1.5rem;
-    font-size: 2rem;
+    top: 10px;
+    right: 15px;
+    color: var(--color-text-secondary);
+    font-size: 28px;
     font-weight: bold;
     cursor: pointer;
+    transition: color 0.2s;
 }
 
 .close-button:hover {
-    color: #fff;
+    color: var(--color-primary);
 }
 
-/* Estilos da Ficha Detalhada */
-.threat-sheet-header {
-    display: flex;
-    gap: 2rem;
-    margin-bottom: 2rem;
-    align-items: flex-start;
-}
-
-.threat-sheet-image {
-    flex-shrink: 0;
-    width: 250px;
-    height: 250px;
-    background-color: #000;
-    border: 1px solid #333;
-    border-radius: 5px;
-}
-
-.threat-sheet-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.threat-sheet-info h2 {
-    margin: 0;
-    font-size: 2.5rem;
-}
-
-.threat-sheet-info .element-tag {
-    background-color: #b00000;
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 5px;
-    display: inline-block;
-    margin: 0.5rem 0 1rem 0;
-}
-
-.threat-sheet-section h3 {
-    border-bottom: 2px solid #b00000;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.threat-sheet-abilities li {
-    margin-bottom: 1rem;
-}
-
-.threat-sheet-abilities strong {
-    color: #e0e0e0;
+/* Estilo da Ficha da Ameaça dentro do modal */
+#threat-sheet-content h2 {
+    font-family: var(--font-display);
+    font-size: 3rem; /* Título do monstro bem grande no modal */
+    color: var(--page-color, var(--color-danger));
+    border-bottom: 2px solid var(--page-color, var(--color-danger));
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px var(--page-color, rgba(220, 53, 69, 0.4));
 }

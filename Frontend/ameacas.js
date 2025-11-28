@@ -1,67 +1,58 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'http://localhost:3000'; // Mude para a URL do seu backend em produção
-
     const modal = document.getElementById('threat-modal');
     const closeModalButton = document.querySelector('.close-button');
     const modalContent = document.getElementById('threat-sheet-content');
 
+    // Função para buscar as ameaças usando a instância global do Axios
     const fetchThreats = async () => {
         try {
-            const response = await fetch(`${API_URL}/api/threats`, {
-                credentials: 'include' // Essencial para enviar o cookie de sessão
-            });
-
-            if (response.status === 401) {
-                // Se não estiver autenticado, redireciona para a home
-                window.location.href = '/Home.html';
-                return;
-            }
-
-            if (!response.ok) {
-                throw new Error('Falha ao carregar as ameaças.');
-            }
-
-            const threats = await response.json();
+            // A instância 'api' já está configurada no script.js para lidar com a URL base e autenticação
+            const response = await api.get('/api/threats');
+            const threats = response.data;
             displayThreats(threats);
 
         } catch (error) {
-            console.error('Erro:', error);
-            // Opcional: mostrar uma mensagem de erro na tela
+            console.error('Erro ao carregar ameaças:', error);
+            // O interceptor do Axios no script.js já deve lidar com erros 401 (não autorizado)
+            // Exibe uma mensagem de erro genérica no container principal
+            const container = document.querySelector('.threats-container');
+            if (container) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h2 style="color: var(--color-danger);">Erro ao Carregar Ameaças</h2>
+                        <p class="info-text">Não foi possível conectar ao bestiário. Verifique sua conexão ou tente novamente mais tarde.</p>
+                    </div>
+                `;
+            }
         }
     };
 
     const displayThreats = (threats) => {
         // Limpa as seções antes de adicionar novo conteúdo
-        document.querySelector('#threats-conhecimento .threat-grid').innerHTML = '';
-        document.querySelector('#threats-morte .threat-grid').innerHTML = '';
-        document.querySelector('#threats-sangue .threat-grid').innerHTML = '';
-        document.querySelector('#threats-energia .threat-grid').innerHTML = '';
+        document.querySelectorAll('.threat-grid').forEach(grid => grid.innerHTML = '');
 
         threats.forEach(threat => {
             const threatCard = `
                 <div class="threat-card" data-threat-id="${threat._id}">
-                    <div class="threat-card-image">
-                        <img src="${threat.imageUrl || 'placeholder.png'}" alt="Imagem de ${threat.name}">
-                    </div>
-                    <div class="threat-card-body">
-                        <h3>${threat.name}</h3>
-                        <p>${threat.lore_short}</p>
-                    </div>
-                    <button class="threat-card-button">Ver Ficha</button>
+                    <h3>${threat.name}</h3>
+                    <p>${threat.lore_short || 'Descrição indisponível.'}</p>
                 </div>
             `;
 
-            const elementId = `threats-${threat.element.toLowerCase()}`;
-            const grid = document.querySelector(`#${elementId} .threat-grid`);
-            if (grid) {
-                grid.innerHTML += threatCard;
+            // CORREÇÃO: Garante que a ameaça tenha um elemento antes de tentar exibi-la.
+            if (threat.element) {
+                // Converte o nome do elemento para minúsculas para corresponder ao ID do HTML
+                const elementId = `threats-${threat.element.toLowerCase()}`;
+                const grid = document.querySelector(`#${elementId} .threat-grid`);
+                if (grid) {
+                    grid.innerHTML += threatCard;
+                }
             }
         });
-
-        // Adiciona os event listeners aos botões recém-criados
-        document.querySelectorAll('.threat-card-button').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const card = e.target.closest('.threat-card');
+        
+        // Adiciona os event listeners aos cards recém-criados
+        document.querySelectorAll('.threat-card').forEach(card => {
+            card.addEventListener('click', () => {
                 const threatId = card.dataset.threatId;
                 const selectedThreat = threats.find(t => t._id === threatId);
                 if (selectedThreat) {
@@ -72,25 +63,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const openThreatModal = (threat) => {
-        const abilitiesHtml = threat.abilities.map(ability => `
+        const abilitiesHtml = threat.abilities && threat.abilities.length > 0 
+            ? threat.abilities.map(ability => `
             <li><strong>${ability.name}:</strong> ${ability.description}</li>
-        `).join('');
+            `).join('')
+            : '<li>Nenhuma habilidade especial registrada.</li>';
 
         const sheetHtml = `
-            <div class="threat-sheet-header">
-                <div class="threat-sheet-image">
-                    <img src="${threat.imageUrl || 'placeholder.png'}" alt="Imagem de ${threat.name}">
-                </div>
-                <div class="threat-sheet-info">
-                    <h2>${threat.name}</h2>
-                    <span class="element-tag">${threat.element}</span>
-                    <p><strong>Dificuldade:</strong> ${threat.stats.difficulty}</p>
-                </div>
-            </div>
+            <h2>${threat.name}</h2>
 
             <div class="threat-sheet-section">
-                <h3>Lore</h3>
-                <p>${threat.lore}</p>
+                <h3>Descrição & Comportamento</h3>
+                <p>${threat.lore || 'Lore desconhecido.'}</p>
             </div>
 
             <div class="threat-sheet-section">
@@ -99,28 +83,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${abilitiesHtml}
                 </ul>
             </div>
-
-            <div class="threat-sheet-section">
-                <h3>Notas do Mestre</h3>
-                <p>${threat.stats.notes || 'Nenhuma nota adicional.'}</p>
-            </div>
         `;
 
+        // Limpa classes de elemento anteriores e define a cor do elemento atual no modal
+        modal.classList.remove('temporal-modal', 'cerebral-modal', 'visceral-modal', 'vital-modal');
+        if (threat.element) {
+            const elementClass = `${threat.element.toLowerCase()}-modal`;
+            modal.classList.add(elementClass);
+        }
+
         modalContent.innerHTML = sheetHtml;
-        modal.style.display = 'block';
+        modal.classList.add('show'); // Adiciona a classe para ativar a animação de fade-in
     };
 
-    // Fechar o modal
-    closeModalButton.onclick = () => {
-        modal.style.display = 'none';
+    const closeThreatModal = () => {
+        modal.classList.remove('show'); // Remove a classe para o fade-out
     };
 
+    // Eventos para fechar o modal
+    closeModalButton.addEventListener('click', closeThreatModal);
     window.onclick = (event) => {
         if (event.target == modal) {
-            modal.style.display = 'none';
+            closeThreatModal();
         }
     };
 
-    // Inicia o processo
+    // Inicia o processo de busca e exibição das ameaças
     fetchThreats();
 });

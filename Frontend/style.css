@@ -12,8 +12,8 @@
     --color-text-primary: #f0f0f0;
     --color-text-secondary: #ccc;
     --font-primary: 'Roboto', sans-serif;
-    --font-display: 'Bebas Neue', sans-serif;
-    --gradient-primary: linear-gradient(135deg, var(--color-primary), var(--color-accent-rare));
+    --font-display: 'Bebas Neue', sans-serif;    
+    --gradient-primary: linear-gradient(135deg, var(--color-primary), var(--color-accent-rare), #00ffff);
 }
 
 /* --- Estilos Globais --- */
@@ -50,17 +50,6 @@ body {
     z-index: -1;
     overflow: hidden;
 }
-
-/* Adicionar este bloco */
-.home-main-content {
-    padding: 2rem; /* Adiciona um padding geral para o conteúdo */
-    max-width: 1200px; /* Limita a largura máxima do conteúdo */
-    margin: 0 auto; /* Centraliza o conteúdo na página */
-    display: flex; /* Usa flexbox para organizar os elementos internos */
-    flex-direction: column; /* Organiza os elementos em coluna */
-    gap: 3rem; /* Espaçamento entre as seções */
-}
-
 /* --- CABEÇALHO E NAVEGAÇÃO --- */
 .home-header {
     text-align: center;
@@ -187,7 +176,6 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     border-radius: 12px;
     border: 1px solid var(--color-surface-2);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
-    margin-top: 2rem; /* Espaçamento do header */
 }
 
 .hero-content h1 {
@@ -1103,18 +1091,6 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
     border-color: var(--color-primary-hover);
-}
-
-.btn-icon {
-    font-size: 1.5rem;
-    font-weight: bold;
-    background: rgba(255, 255, 255, 0.2);
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .agentes-content {
@@ -2895,23 +2871,6 @@ body.dev-mode #dev-mode-form { display: none; }
     color: var(--color-text-secondary);
     margin-top: -0.5rem;
     margin-bottom: 2.5rem;
-}
-
-.create-campaign-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.8rem;
-    background: var(--gradient-primary);
-    color: var(--color-text-primary);
-    text-decoration: none;
-    padding: 1.2rem 2rem;
-    border-radius: 10px;
-    font-weight: bold;
-    font-size: 1.2rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
-    border: 2px solid transparent;
-    cursor: pointer;
 }
 
 .create-campaign-btn:hover {
