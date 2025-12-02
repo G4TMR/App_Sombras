@@ -2960,35 +2960,6 @@ async function removeAgentFromCampaign(campaignId, characterId, cardElement) {
 // FUNÇÕES DE CAMPANHA
 // =================================================================================
 
-// Adicione/corrija esta função:
-
-async function checkAuthStatus() {
-    try {
-        const response = await api.get('/auth/user');
-        const user = response.data;
-        currentUserId = user._id;
-        
-        // ✅ AQUI: Preenche o auth-container com logout
-        const authContainer = document.querySelector('.auth-container');
-        if (authContainer) {
-            authContainer.innerHTML = `
-                <span class="user-name">${user.displayName}</span>
-                <a href="${API_BASE_URL}/auth/logout" class="logout-btn">Logout</a>
-            `;
-        }
-    } catch (error) {
-        // Usuário não autenticado - mostra botão do Google
-        const authContainer = document.querySelector('.auth-container');
-        if (authContainer) {
-            authContainer.innerHTML = `
-                <a href="${API_BASE_URL}/auth/google" class="google-login-btn">
-                    🔐 Conectar com Google
-                </a>
-            `;
-        }
-    }
-}
-
 /**
  * Extrai o ID de um objeto ou string, garantindo que seja sempre uma string para comparação.
  * @param {string|object} idField - O campo que pode ser um ID string ou um objeto com _id.
@@ -4714,16 +4685,15 @@ async function checkAuthStatus() {
     const nav = document.querySelector('.home-header nav'); // CORREÇÃO: Busca o elemento nav dentro do cabeçalho
     if (!nav) {
         console.warn("Elemento de navegação '.home-header nav' não encontrado. A verificação de status será pulada.");
-        return null;
+        return null; // Retorna nulo se o nav não for encontrado
     }
 
-    // Busca o container de autenticação que agora está no _header.html
-    const authContainer = nav.querySelector('.auth-container');
-    if (!authContainer) {
-        console.error("'.auth-container' não encontrado no cabeçalho. O botão de login não pode ser exibido.");
-        return null;
-    }
-    authContainer.innerHTML = ''; // Limpa o conteúdo anterior
+    const existingAuthContainer = nav.querySelector('.auth-container');
+    if (existingAuthContainer) existingAuthContainer.remove(); // Limpa o container antigo
+
+    const authContainer = document.createElement('div'); // Cria um novo
+    authContainer.className = 'auth-container';
+    nav.appendChild(authContainer); // Adiciona ao menu
     
     try {
         const response = await api.get('/auth/user');
@@ -4735,23 +4705,8 @@ async function checkAuthStatus() {
             currentUserId = user._id;
             return user;
         }
-
         // Se a API retornar sucesso mas sem usuário, força o estado de deslogado
-        // CORREÇÃO: Insere o HTML completo do botão do Google
-        authContainer.innerHTML = `
-            <div id="g_id_onload"
-                 data-client_id="109123732454-h34v15oaoj7v3vrb9g1881o689o8d84a.apps.googleusercontent.com"
-                 data-callback="handleCredentialResponse"
-                 data-auto_select="false">
-            </div>
-            <div class="g_id_signin"
-                 data-type="standard"
-                 data-theme="outline"
-                 data-text="sign_in_with"
-                 data-shape="rectangular"
-                 data-logo_alignment="left">
-            </div>
-        `;
+        authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
         currentUserId = null;
         return null;
     } catch (error) {
@@ -4760,17 +4715,6 @@ async function checkAuthStatus() {
         // Em caso de erro, garante que o botão de login seja exibido
         return null;
     }
-}
-
-// Função de callback que o Google chama após o login
-function handleCredentialResponse(response) {
-    console.log("Encoded JWT ID token: " + response.credential);
-    // Envia o token para o backend para verificação e criação da sessão
-    api.post('/auth/google/callback', { token: response.credential })
-        .then(() => {
-            window.location.reload(); // Recarrega a página para refletir o estado de login
-        })
-        .catch(err => console.error("Erro no callback do Google:", err));
 }
 
 // Função para carregar o header dinamicamente
@@ -4784,15 +4728,6 @@ async function loadHeader() {
         const data = response.data;
         header = headerPlaceholder; // Atribui o elemento à variável global
         headerPlaceholder.innerHTML = data;
-
-        // CORREÇÃO: Adiciona o script do Google dinamicamente APÓS carregar o header
-        // Isso garante que os elementos do botão de login já existam no DOM
-        if (!document.querySelector('script[src="https://accounts.google.com/gsi/client"]')) {
-            const googleScript = document.createElement('script');
-            googleScript.src = 'https://accounts.google.com/gsi/client';
-            googleScript.async = true;
-            document.head.appendChild(googleScript);
-        }
     } catch (error) {
         console.error('Erro ao carregar o cabeçalho:', error);
         if (window.location.protocol === 'file:') {
