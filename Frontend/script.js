@@ -1854,6 +1854,10 @@ class CharacterSheet {
         const campaignId = params.get('campaignId');
         const backBtn = document.getElementById('back-to-campaign-btn');
         if (campaignId && backBtn) {
+            // Busca os dados da campanha para aplicar os "Caminhos Iluminados"
+            const campaignData = await getCampaignById(campaignId);
+            this.campaign = campaignData; // Armazena os dados da campanha na instância da ficha
+
             backBtn.href = `gerenciar-campanha.html?id=${campaignId}`;
             backBtn.style.display = 'inline-block';
         }
@@ -2642,10 +2646,12 @@ class CharacterSheet {
         openBtn.addEventListener('click', () => {
             this.renderFullSkillTree(); // Renderiza o conteúdo antes de mostrar
             modalOverlay.classList.add('visible');
+            document.body.style.overflow = 'hidden'; // Trava a rolagem da página
         });
 
         closeBtn.addEventListener('click', () => {
             modalOverlay.classList.remove('visible');
+            document.body.style.overflow = ''; // Libera a rolagem da página
         });
 
         // Lógica de Pan e Zoom
@@ -2660,6 +2666,7 @@ class CharacterSheet {
         };
 
         viewport.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Impede o comportamento padrão de arrastar (seleção de texto)
             if (e.button !== 0) return; // Apenas clique esquerdo
             isPanning = true;
             startPanX = e.clientX - panX;
@@ -2865,6 +2872,26 @@ class CharacterSheet {
         } else {
             alert("Você não tem pontos de habilidade suficientes para desbloquear esta habilidade.");
         }
+    }
+
+    findParentSkill(childId, tree = SKILL_TREES) {
+        for (const key in tree) {
+            if (Array.isArray(tree[key])) {
+                for (const skill of tree[key]) {
+                    if (skill.children && skill.children.some(child => child.id === childId)) {
+                        return skill;
+                    }
+                    if (skill.children) {
+                        const found = this.findParentSkill(childId, { children: skill.children });
+                        if (found) return found;
+                    }
+                }
+            } else if (typeof tree[key] === 'object' && tree[key] !== null) {
+                const found = this.findParentSkill(childId, tree[key]);
+                if (found) return found;
+            }
+        }
+        return null;
     }
 
     recalculateDerivedStats() {

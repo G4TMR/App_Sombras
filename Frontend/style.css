@@ -1956,6 +1956,20 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     height: 38px;
 }
 
+.skill-node-wrapper-player::before,
+.skill-node-wrapper-player::after {
+    background-color: var(--element-color, #555);
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+}
+
+.skill-node-wrapper-player:hover::before,
+.skill-node-wrapper-player:hover::after {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--element-color, #555);
+}
+
+
 .skill-children-container-player {
     position: relative;
 }
