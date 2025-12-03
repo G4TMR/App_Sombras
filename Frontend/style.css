@@ -133,6 +133,12 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     text-shadow: 0 0 8px var(--page-color, var(--color-primary));
 }
 
+/* --- SOBRESCREVE A FONTE PARA A FICHA DE AGENTE --- */
+body[data-page="agentes"] .sheet-container {
+    /* Altera a fonte de display para a fonte primária (Roboto) apenas na ficha */
+    --font-display: var(--font-primary);
+}
+
 /* --- AUTH STATUS NO HEADER --- */
 .auth-container {
     position: absolute;
