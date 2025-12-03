@@ -120,116 +120,116 @@ const DEFAULT_SKILL_TREES = {
     'Esotérico': {
         'Temporal': {
             'Lâmina Paranormal': [
-                { id: 'esoterico-temporal-lamina-1', name: 'Lâmina Entrópica', description: 'Sua arma acelera o tempo no ponto de impacto, causando dano de decadência ao longo do tempo.', requirements: {}, tags: ['dano', 'dot'], unlocked: false, children: [] },
-                { id: 'esoterico-temporal-lamina-2', name: 'Corte Acelerado', description: 'Um ataque tão rápido que dobra o tempo, permitindo um segundo golpe imediato.', requirements: {}, tags: ['dano', 'combate'], unlocked: false, children: [] }
+                { id: 'esoterico-temporal-lamina-1', name: 'Lâmina Entrópica', description: 'Sua arma acelera o tempo no ponto de impacto, causando dano de decadência ao longo do tempo.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-temporal-lamina-2', name: 'Corte Acelerado', description: 'Um ataque tão rápido que dobra o tempo, permitindo um segundo golpe imediato.', requirements: {}, unlocked: false, children: [] }
             ],
             'Conduíte Rúnico': [
-                { id: 'esoterico-temporal-conduite-1', name: 'Selo de Lentidão', description: 'Desenha uma runa no ar que cria uma área onde o tempo passa mais devagar para seus inimigos.', requirements: {}, tags: ['controle', 'area'], unlocked: false, children: [] },
-                { id: 'esoterico-temporal-conduite-2', name: 'Rebobinar Ferimento', description: 'Você toca um aliado e reverte um ferimento no tempo, curando uma quantidade significativa de dano.', requirements: {}, tags: ['cura', 'suporte'], unlocked: false, children: [] }
+                { id: 'esoterico-temporal-conduite-1', name: 'Selo de Lentidão', description: 'Desenha uma runa no ar que cria uma área onde o tempo passa mais devagar para seus inimigos.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-temporal-conduite-2', name: 'Rebobinar Ferimento', description: 'Você toca um aliado e reverte um ferimento no tempo, curando uma quantidade significativa de dano.', requirements: {}, unlocked: false, children: [] }
             ],
             'Ceifador Anímico': [
-                { id: 'esoterico-temporal-ceifador-1', name: 'Toque do Envelhecimento', description: 'Você toca um alvo e acelera sua idade, aplicando penalidades severas em seus atributos físicos.', requirements: {}, tags: ['debuff', 'controle'], unlocked: false, children: [] },
-                { id: 'esoterico-temporal-ceifador-2', name: 'Visão da Morte', description: 'Você marca um inimigo. Se ele morrer em breve, você recupera uma grande quantidade de recursos (PA, Sanidade).', requirements: {}, tags: ['utilidade', 'recurso'], unlocked: false, children: [] }
+                { id: 'esoterico-temporal-ceifador-1', name: 'Toque do Envelhecimento', description: 'Você toca um alvo e acelera sua idade, aplicando penalidades severas em seus atributos físicos.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-temporal-ceifador-2', name: 'Visão da Morte', description: 'Você marca um inimigo. Se ele morrer em breve, você recupera uma grande quantidade de recursos (PA, Sanidade).', requirements: {}, unlocked: false, children: [] }
             ]
         },
         'Cerebral': {
             'Lâmina Paranormal': [
-                { id: 'esoterico-cerebral-lamina-1', name: 'Lâmina Psíquica', description: 'Sua arma corta a mente do alvo, causando dano de sanidade e ignorando completamente a armadura física.', requirements: {}, tags: ['dano', 'mental'], unlocked: false, children: [] },
-                { id: 'esoterico-cerebral-lamina-2', name: 'Corte da Verdade', description: 'Um golpe que revela uma verdade inconveniente sobre o alvo, expondo uma fraqueza e reduzindo sua defesa.', requirements: {}, tags: ['dano', 'debuff'], unlocked: false, children: [] }
+                { id: 'esoterico-cerebral-lamina-1', name: 'Lâmina Psíquica', description: 'Sua arma corta a mente do alvo, causando dano de sanidade e ignorando completamente a armadura física.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-cerebral-lamina-2', name: 'Corte da Verdade', description: 'Um golpe que revela uma verdade inconveniente sobre o alvo, expondo uma fraqueza e reduzindo sua defesa.', requirements: {}, unlocked: false, children: [] }
             ],
             'Conduíte Rúnico': [
-                { id: 'esoterico-cerebral-conduite-1', name: 'Glyfo de Confusão', description: 'Uma runa complexa que, ao ser vista, sobrecarrega a mente do alvo, deixando-o confuso e incapaz de distinguir amigo de inimigo.', requirements: {}, tags: ['controle', 'mental'], unlocked: false, children: [] },
-                { id: 'esoterico-cerebral-conduite-2', name: 'Projétil da Verdade', description: 'Dispara um dardo de luz que revela os atributos e status de um inimigo para toda a equipe.', requirements: {}, tags: ['suporte', 'investigacao'], unlocked: false, children: [] }
+                { id: 'esoterico-cerebral-conduite-1', name: 'Glyfo de Confusão', description: 'Uma runa complexa que, ao ser vista, sobrecarrega a mente do alvo, deixando-o confuso e incapaz de distinguir amigo de inimigo.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-cerebral-conduite-2', name: 'Projétil da Verdade', description: 'Dispara um dardo de luz que revela os atributos e status de um inimigo para toda a equipe.', requirements: {}, unlocked: false, children: [] }
             ],
             'Ceifador Anímico': [
-                { id: 'esoterico-cerebral-ceifador-1', name: 'Roubo de Memórias', description: 'Um toque que arranca uma memória recente do alvo, causando dano de sanidade e transferindo uma informação útil para você.', requirements: {}, tags: ['dano', 'mental', 'investigacao'], unlocked: false, children: [] },
-                { id: 'esoterico-cerebral-ceifador-2', name: 'Sussurros dos Mortos', description: 'Você ouve os ecos psíquicos de mortos recentes na área, podendo obter pistas sobre a causa de suas mortes.', requirements: {}, tags: ['investigacao', 'ocultismo'], unlocked: false, children: [] }
+                { id: 'esoterico-cerebral-ceifador-1', name: 'Roubo de Memórias', description: 'Um toque que arranca uma memória recente do alvo, causando dano de sanidade e transferindo uma informação útil para você.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-cerebral-ceifador-2', name: 'Sussurros dos Mortos', description: 'Você ouve os ecos psíquicos de mortos recentes na área, podendo obter pistas sobre a causa de suas mortes.', requirements: {}, unlocked: false, children: [] }
             ]
         },
         'Visceral': {
             'Lâmina Paranormal': [
-                { id: 'esoterico-visceral-lamina-1', name: 'Lâmina Voraz', description: 'Sua arma drena a força vital do alvo a cada golpe, curando uma parte do dano que você causa.', requirements: {}, tags: ['dano', 'cura'], unlocked: false, children: [] },
-                { id: 'esoterico-visceral-lamina-2', name: 'Corte Hemorrágico', description: 'Um golpe que abre uma ferida que não fecha, causando dano de sangramento contínuo.', requirements: {}, tags: ['dano', 'dot'], unlocked: false, children: [] }
+                { id: 'esoterico-visceral-lamina-1', name: 'Lâmina Voraz', description: 'Sua arma drena a força vital do alvo a cada golpe, curando uma parte do dano que você causa.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-visceral-lamina-2', name: 'Corte Hemorrágico', description: 'Um golpe que abre uma ferida que não fecha, causando dano de sangramento contínuo.', requirements: {}, unlocked: false, children: [] }
             ],
             'Conduíte Rúnico': [
-                { id: 'esoterico-visceral-conduite-1', name: 'Marca da Podridão', description: 'Você amaldiçoa um alvo com uma runa de decomposição, fazendo com que ele receba mais dano de todas as fontes.', requirements: {}, tags: ['debuff', 'suporte'], unlocked: false, children: [] },
-                { id: 'esoterico-visceral-conduite-2', name: 'Drenar Vida à Distância', description: 'Canaliza um feixe de energia que suga a vida de um inimigo para curar a si mesmo ou um aliado.', requirements: {}, tags: ['dano', 'cura'], unlocked: false, children: [] }
+                { id: 'esoterico-visceral-conduite-1', name: 'Marca da Podridão', description: 'Você amaldiçoa um alvo com uma runa de decomposição, fazendo com que ele receba mais dano de todas as fontes.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-visceral-conduite-2', name: 'Drenar Vida à Distância', description: 'Canaliza um feixe de energia que suga a vida de um inimigo para curar a si mesmo ou um aliado.', requirements: {}, unlocked: false, children: [] }
             ],
             'Ceifador Anímico': [
-                { id: 'esoterico-visceral-ceifador-1', name: 'Peste Contagiosa', description: 'Você infecta um alvo com uma doença paranormal que causa dano contínuo e pode se espalhar para outros inimigos próximos.', requirements: {}, tags: ['dano', 'dot', 'area'], unlocked: false, children: [] },
-                { id: 'esoterico-visceral-ceifador-2', name: 'Transferência de Vitalidade', description: 'Você sacrifica uma porção da sua própria vida para curar um aliado instantaneamente por uma quantidade muito maior.', requirements: {}, tags: ['cura', 'suporte'], unlocked: false, children: [] }
+                { id: 'esoterico-visceral-ceifador-1', name: 'Peste Contagiosa', description: 'Você infecta um alvo com uma doença paranormal que causa dano contínuo e pode se espalhar para outros inimigos próximos.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-visceral-ceifador-2', name: 'Transferência de Vitalidade', description: 'Você sacrifica uma porção da sua própria vida para curar um aliado instantaneamente por uma quantidade muito maior.', requirements: {}, unlocked: false, children: [] }
             ]
         },
         'Vital': {
             'Lâmina Paranormal': [
-                { id: 'esoterico-vital-lamina-1', name: 'Lâmina Cinética', description: 'Sua arma é coberta por uma força telecinética, aumentando o dano e arremessando os alvos para trás.', requirements: {}, tags: ['dano', 'controle'], unlocked: false, children: [] },
-                { id: 'esoterico-vital-lamina-2', name: 'Corte Disruptor', description: 'O impacto libera uma onda de energia caótica que pode atordoar o alvo ou cancelar uma habilidade que ele estava preparando.', requirements: {}, tags: ['dano', 'controle'], unlocked: false, children: [] }
+                { id: 'esoterico-vital-lamina-1', name: 'Lâmina Cinética', description: 'Sua arma é coberta por uma força telecinética, aumentando o dano e arremessando os alvos para trás.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-vital-lamina-2', name: 'Corte Disruptor', description: 'O impacto libera uma onda de energia caótica que pode atordoar o alvo ou cancelar uma habilidade que ele estava preparando.', requirements: {}, unlocked: false, children: [] }
             ],
             'Conduíte Rúnico': [
-                { id: 'esoterico-vital-conduite-1', name: 'Raio de Força', description: 'Um raio concentrado de pura energia que causa dano massivo a um único alvo.', requirements: {}, tags: ['dano'], unlocked: false, children: [] },
-                { id: 'esoterico-vital-conduite-2', name: 'Orbe de Contenção', description: 'Cria uma esfera de energia que aprisiona um inimigo, impedindo-o de se mover ou atacar por um período.', requirements: {}, tags: ['controle'], unlocked: false, children: [] }
+                { id: 'esoterico-vital-conduite-1', name: 'Raio de Força', description: 'Um raio concentrado de pura energia que causa dano massivo a um único alvo.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-vital-conduite-2', name: 'Orbe de Contenção', description: 'Cria uma esfera de energia que aprisiona um inimigo, impedindo-o de se mover ou atacar por um período.', requirements: {}, unlocked: false, children: [] }
             ],
             'Ceifador Anímico': [
-                { id: 'esoterico-vital-ceifador-1', name: 'Correntes Espectrais', description: 'Invoca correntes de energia que se prendem a um inimigo, imobilizando-o e causando dano contínuo.', requirements: {}, tags: ['controle', 'dano', 'dot'], unlocked: false, children: [] },
-                { id: 'esoterico-vital-ceifador-2', name: 'Devorar Alma', description: 'Executa um inimigo com vida muito baixa, desintegrando-o e restaurando todos os seus Pontos de Ação (PA).', requirements: {}, tags: ['execucao', 'recurso'], unlocked: false, children: [] }
+                { id: 'esoterico-vital-ceifador-1', name: 'Correntes Espectrais', description: 'Invoca correntes de energia que se prendem a um inimigo, imobilizando-o e causando dano contínuo.', requirements: {}, unlocked: false, children: [] },
+                { id: 'esoterico-vital-ceifador-2', name: 'Devorar Alma', description: 'Executa um inimigo com vida muito baixa, desintegrando-o e restaurando todos os seus Pontos de Ação (PA).', requirements: {}, unlocked: false, children: [] }
             ]
         }
     },
     'Erudito': {
         'Temporal': {
             'Estrategista de Campo': [
-                { id: 'erudito-temporal-estrategista-1', name: 'Análise Preditiva', description: 'Você analisa os possíveis futuros, concedendo um grande bônus de acerto ou defesa para a próxima ação de um aliado.', requirements: {}, tags: ['suporte', 'buff'], unlocked: false, children: [] },
-                { id: 'erudito-temporal-estrategista-2', name: 'Acelerar Aliado', description: 'Você manipula o fluxo do tempo de um aliado, concedendo a ele uma ação de movimento extra em seu turno.', requirements: {}, tags: ['suporte', 'buff', 'movimento'], unlocked: false, children: [] }
+                { id: 'erudito-temporal-estrategista-1', name: 'Análise Preditiva', description: 'Você analisa os possíveis futuros, concedendo um grande bônus de acerto ou defesa para a próxima ação de um aliado.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-temporal-estrategista-2', name: 'Acelerar Aliado', description: 'Você manipula o fluxo do tempo de um aliado, concedendo a ele uma ação de movimento extra em seu turno.', requirements: {}, unlocked: false, children: [] }
             ],
             'Arquiteto da Realidade': [
-                { id: 'erudito-temporal-arquiteto-1', name: 'Bolha de Dilatação Temporal', description: 'Cria uma zona onde o tempo passa 50% mais devagar para os inimigos, ou 50% mais rápido para os aliados.', requirements: {}, tags: ['controle', 'area', 'buff'], unlocked: false, children: [] },
-                { id: 'erudito-temporal-arquiteto-2', name: 'Reescrever Evento Menor', description: 'Uma vez por cena, você pode forçar a repetição de uma rolagem de dados (sua ou de um inimigo) para uma ação que não seja de ataque.', requirements: {}, tags: ['utilidade', 'suporte'], unlocked: false, children: [] }
+                { id: 'erudito-temporal-arquiteto-1', name: 'Bolha de Dilatação Temporal', description: 'Cria uma zona onde o tempo passa 50% mais devagar para os inimigos, ou 50% mais rápido para os aliados.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-temporal-arquiteto-2', name: 'Reescrever Evento Menor', description: 'Uma vez por cena, você pode forçar a repetição de uma rolagem de dados (sua ou de um inimigo) para uma ação que não seja de ataque.', requirements: {}, unlocked: false, children: [] }
             ],
             'Médico de Batalha': [
-                { id: 'erudito-temporal-medico-1', name: 'Reversão de Ferimento', description: 'Você rebobina o tempo em um ferimento, curando dano como se ele nunca tivesse acontecido.', requirements: {}, tags: ['cura', 'suporte'], unlocked: false, children: [] },
-                { id: 'erudito-temporal-medico-2', name: 'Prevenção de Dano', description: 'Aplica um selo temporal em um aliado que irá negar completamente a próxima fonte de dano que ele receber.', requirements: {}, tags: ['defesa', 'suporte'], unlocked: false, children: [] }
+                { id: 'erudito-temporal-medico-1', name: 'Reversão de Ferimento', description: 'Você rebobina o tempo em um ferimento, curando dano como se ele nunca tivesse acontecido.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-temporal-medico-2', name: 'Prevenção de Dano', description: 'Aplica um selo temporal em um aliado que irá negar completamente a próxima fonte de dano que ele receber.', requirements: {}, unlocked: false, children: [] }
             ]
         },
         'Cerebral': {
             'Estrategista de Campo': [
-                { id: 'erudito-cerebral-estrategista-1', name: 'Comando Tático', description: 'Você usa sua superioridade tática para dar um comando a um aliado, permitindo que ele use sua reação para realizar uma ação de movimento ou ataque simples.', requirements: {}, tags: ['suporte', 'buff'], unlocked: false, children: [] },
-                { id: 'erudito-cerebral-estrategista-2', name: 'Expor Fraqueza', description: 'Você grita a fraqueza de um inimigo. Todos os ataques de aliados contra esse alvo recebem um bônus de dano por um turno.', requirements: {}, tags: ['suporte', 'debuff'], unlocked: false, children: [] }
+                { id: 'erudito-cerebral-estrategista-1', name: 'Comando Tático', description: 'Você usa sua superioridade tática para dar um comando a um aliado, permitindo que ele use sua reação para realizar uma ação de movimento ou ataque simples.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-cerebral-estrategista-2', name: 'Expor Fraqueza', description: 'Você grita a fraqueza de um inimigo. Todos os ataques de aliados contra esse alvo recebem um bônus de dano por um turno.', requirements: {}, unlocked: false, children: [] }
             ],
             'Arquiteto da Realidade': [
-                { id: 'erudito-cerebral-arquiteto-1', name: 'Paradoxo Lógico', description: 'Você apresenta um paradoxo irresolúvel à mente de um alvo, causando dano de sanidade e o deixando atordoado.', requirements: {}, tags: ['dano', 'mental', 'controle'], unlocked: false, children: [] },
-                { id: 'erudito-cerebral-arquiteto-2', name: 'Ignorar Física', description: 'Por um curto período, você pode ignorar uma lei da física, permitindo-se andar por paredes ou sobre a água.', requirements: {}, tags: ['utilidade', 'movimento'], unlocked: false, children: [] }
+                { id: 'erudito-cerebral-arquiteto-1', name: 'Paradoxo Lógico', description: 'Você apresenta um paradoxo irresolúvel à mente de um alvo, causando dano de sanidade e o deixando atordoado.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-cerebral-arquiteto-2', name: 'Ignorar Física', description: 'Por um curto período, você pode ignorar uma lei da física, permitindo-se andar por paredes ou sobre a água.', requirements: {}, unlocked: false, children: [] }
             ],
             'Médico de Batalha': [
-                { id: 'erudito-cerebral-medico-1', name: 'Diagnóstico Rápido', description: 'Com um olhar, você sabe instantaneamente todos os status, ferimentos e condições (positivas e negativas) de um alvo.', requirements: {}, tags: ['investigacao', 'suporte'], unlocked: false, children: [] },
-                { id: 'erudito-cerebral-medico-2', name: 'Cirurgia Psíquica', description: 'Você entra na mente de um aliado para remover cirurgicamente efeitos mentais negativos como medo, charme ou confusão.', requirements: {}, tags: ['cura', 'mental', 'suporte'], unlocked: false, children: [] }
+                { id: 'erudito-cerebral-medico-1', name: 'Diagnóstico Rápido', description: 'Com um olhar, você sabe instantaneamente todos os status, ferimentos e condições (positivas e negativas) de um alvo.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-cerebral-medico-2', name: 'Cirurgia Psíquica', description: 'Você entra na mente de um aliado para remover cirurgicamente efeitos mentais negativos como medo, charme ou confusão.', requirements: {}, unlocked: false, children: [] }
             ]
         },
         'Visceral': {
             'Estrategista de Campo': [
-                { id: 'erudito-visceral-estrategista-1', name: 'Injeção de Adrenalina', description: 'Você usa um estimulante para aumentar temporariamente os atributos físicos (Força, Agilidade) de um aliado.', requirements: {}, tags: ['suporte', 'buff'], unlocked: false, children: [] },
-                { id: 'erudito-visceral-estrategista-2', name: 'Análise Biológica', description: 'Você identifica uma vulnerabilidade biológica em uma criatura, concedendo bônus de dano contra ela para toda a equipe.', requirements: {}, tags: ['investigacao', 'suporte', 'debuff'], unlocked: false, children: [] }
+                { id: 'erudito-visceral-estrategista-1', name: 'Injeção de Adrenalina', description: 'Você usa um estimulante para aumentar temporariamente os atributos físicos (Força, Agilidade) de um aliado.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-visceral-estrategista-2', name: 'Análise Biológica', description: 'Você identifica uma vulnerabilidade biológica em uma criatura, concedendo bônus de dano contra ela para toda a equipe.', requirements: {}, unlocked: false, children: [] }
             ],
             'Arquiteto da Realidade': [
-                { id: 'erudito-visceral-arquiteto-1', name: 'Metamorfose Instável', description: 'Você altera temporariamente a biologia de um alvo, transformando sua mão em pedra para impedi-lo de atacar, por exemplo.', requirements: {}, tags: ['controle', 'debuff'], unlocked: false, children: [] },
-                { id: 'erudito-visceral-arquiteto-2', name: 'Remodelar Terreno', description: 'Você manipula a terra e a matéria orgânica para criar cobertura ou terreno difícil em uma área.', requirements: {}, tags: ['utilidade', 'controle', 'area'], unlocked: false, children: [] }
+                { id: 'erudito-visceral-arquiteto-1', name: 'Metamorfose Instável', description: 'Você altera temporariamente a biologia de um alvo, transformando sua mão em pedra para impedi-lo de atacar, por exemplo.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-visceral-arquiteto-2', name: 'Remodelar Terreno', description: 'Você manipula a terra e a matéria orgânica para criar cobertura ou terreno difícil em uma área.', requirements: {}, unlocked: false, children: [] }
             ],
             'Médico de Batalha': [
-                { id: 'erudito-visceral-medico-1', name: 'Sutura Acelerada', description: 'Uma poderosa cura em um único alvo que também remove condições como sangramento e veneno.', requirements: {}, tags: ['cura', 'suporte'], unlocked: false, children: [] },
-                { id: 'erudito-visceral-medico-2', name: 'Concoção de Combate', description: 'Você mistura reagentes rapidamente para criar um tônico que pode ser usado por um aliado para ganhar um bônus temporário.', requirements: {}, tags: ['suporte', 'buff', 'utilidade'], unlocked: false, children: [] }
+                { id: 'erudito-visceral-medico-1', name: 'Sutura Acelerada', description: 'Uma poderosa cura em um único alvo que também remove condições como sangramento e veneno.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-visceral-medico-2', name: 'Concoção de Combate', description: 'Você mistura reagentes rapidamente para criar um tônico que pode ser usado por um aliado para ganhar um bônus temporário.', requirements: {}, unlocked: false, children: [] }
             ]
         },
         'Vital': {
             'Estrategista de Campo': [
-                { id: 'erudito-vital-estrategista-1', name: 'Redirecionar Energia', description: 'Você cria um elo entre um aliado e um inimigo. Parte do dano que o aliado receberia é transferido para o inimigo.', requirements: {}, tags: ['suporte', 'dano', 'defesa'], unlocked: false, children: [] },
-                { id: 'erudito-vital-estrategista-2', name: 'Ponto de Foco', description: 'Você marca um alvo com energia. Todos os ataques contra ele têm a precisão aumentada.', requirements: {}, tags: ['suporte', 'debuff'], unlocked: false, children: [] }
+                { id: 'erudito-vital-estrategista-1', name: 'Redirecionar Energia', description: 'Você cria um elo entre um aliado e um inimigo. Parte do dano que o aliado receberia é transferido para o inimigo.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-vital-estrategista-2', name: 'Ponto de Foco', description: 'Você marca um alvo com energia. Todos os ataques contra ele têm a precisão aumentada.', requirements: {}, unlocked: false, children: [] }
             ],
             'Arquiteto da Realidade': [
-                { id: 'erudito-vital-arquiteto-1', name: 'Anular Poder', description: 'Você projeta um campo que anula efeitos paranormais em uma pequena área, funcionando como uma contra-mágica.', requirements: {}, tags: ['controle', 'defesa', 'area'], unlocked: false, children: [] },
-                { id: 'erudito-vital-arquiteto-2', name: 'Barreira de Força', description: 'Cria uma parede de energia sólida e transparente que pode bloquear ataques e passagem.', requirements: {}, tags: ['defesa', 'utilidade'], unlocked: false, children: [] }
+                { id: 'erudito-vital-arquiteto-1', name: 'Anular Poder', description: 'Você projeta um campo que anula efeitos paranormais em uma pequena área, funcionando como uma contra-mágica.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-vital-arquiteto-2', name: 'Barreira de Força', description: 'Cria uma parede de energia sólida e transparente que pode bloquear ataques e passagem.', requirements: {}, unlocked: false, children: [] }
             ],
             'Médico de Batalha': [
-                { id: 'erudito-vital-medico-1', name: 'Pulso de Cura', description: 'Libera uma onda de energia benigna que cura uma pequena quantidade de vida de todos os aliados próximos.', requirements: {}, tags: ['cura', 'suporte', 'area'], unlocked: false, children: [] },
-                { id: 'erudito-vital-medico-2', name: 'Escudo Sanitário', description: 'Cria um escudo de energia em um aliado que o protege de receber status negativos (veneno, paralisia, etc.) por um período.', requirements: {}, tags: ['defesa', 'suporte'], unlocked: false, children: [] }
+                { id: 'erudito-vital-medico-1', name: 'Pulso de Cura', description: 'Libera uma onda de energia benigna que cura uma pequena quantidade de vida de todos os aliados próximos.', requirements: {}, unlocked: false, children: [] },
+                { id: 'erudito-vital-medico-2', name: 'Escudo Sanitário', description: 'Cria um escudo de energia em um aliado que o protege de receber status negativos (veneno, paralisia, etc.) por um período.', requirements: {}, unlocked: false, children: [] }
             ]
         }
     },
@@ -1854,10 +1854,6 @@ class CharacterSheet {
         const campaignId = params.get('campaignId');
         const backBtn = document.getElementById('back-to-campaign-btn');
         if (campaignId && backBtn) {
-            // Busca os dados da campanha para aplicar os "Caminhos Iluminados"
-            const campaignData = await getCampaignById(campaignId);
-            this.campaign = campaignData; // Armazena os dados da campanha na instância da ficha
-
             backBtn.href = `gerenciar-campanha.html?id=${campaignId}`;
             backBtn.style.display = 'inline-block';
         }
@@ -1865,7 +1861,7 @@ class CharacterSheet {
         if (this.character) {
             this.setupEventListeners();
             this.renderSkillTree();
-            this.renderFullSkillTree(); // Adicionado para renderizar a nova aba de habilidades
+            this.initializeSkillTreeModal(); // Inicializa o novo modal da constelação
             this.setupImageUpload(); // Adiciona o listener para upload de imagem
             this.checkSpecialization(); // Verifica se a escolha de especialização deve ser mostrada
             this.renderProficiencies();
@@ -2631,62 +2627,145 @@ class CharacterSheet {
         return skillNode;
     }
 
-    // --- NOVAS FUNÇÕES PARA O SISTEMA DE REVELAÇÃO ---
-
     /**
-     * Renderiza a árvore de habilidades completa na nova aba "Habilidades".
-     * Esta é uma visualização para o jogador planejar sua build.
+     * Inicializa o modal da árvore de habilidades, incluindo pan e zoom.
      */
+    initializeSkillTreeModal() {
+        const modalOverlay = document.getElementById('skill-tree-modal-overlay');
+        const openBtn = document.getElementById('open-skills-modal-btn');
+        const closeBtn = document.getElementById('close-skills-modal-btn');
+        const viewport = document.getElementById('skill-tree-viewport');
+        const canvas = document.getElementById('skill-tree-canvas');
+
+        if (!modalOverlay || !openBtn || !closeBtn || !viewport || !canvas) return;
+
+        openBtn.addEventListener('click', () => {
+            this.renderFullSkillTree(); // Renderiza o conteúdo antes de mostrar
+            modalOverlay.classList.add('visible');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('visible');
+        });
+
+        // Lógica de Pan e Zoom
+        let scale = 1;
+        let panX = 0;
+        let panY = 0;
+        let isPanning = false;
+        let startPanX, startPanY;
+
+        const applyTransform = () => {
+            canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+        };
+
+        viewport.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return; // Apenas clique esquerdo
+            isPanning = true;
+            startPanX = e.clientX - panX;
+            startPanY = e.clientY - panY;
+            viewport.style.cursor = 'grabbing';
+        });
+
+        viewport.addEventListener('mousemove', (e) => {
+            if (!isPanning) return;
+            panX = e.clientX - startPanX;
+            panY = e.clientY - startPanY;
+            applyTransform();
+        });
+
+        viewport.addEventListener('mouseup', () => {
+            isPanning = false;
+            viewport.style.cursor = 'grab';
+        });
+
+        viewport.addEventListener('mouseleave', () => {
+            isPanning = false;
+            viewport.style.cursor = 'grab';
+        });
+
+        viewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomIntensity = 0.1;
+            const rect = viewport.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const oldScale = scale;
+            scale += e.deltaY * -0.001 * zoomIntensity * scale;
+            scale = Math.min(Math.max(0.2, scale), 3); // Limita o zoom
+
+            // Ajusta o pan para que o zoom seja centrado no mouse
+            panX = mouseX - (mouseX - panX) * (scale / oldScale);
+            panY = mouseY - (mouseY - panY) * (scale / oldScale);
+
+            applyTransform();
+        });
+
+        // Centraliza a visão inicial
+        const rect = viewport.getBoundingClientRect();
+        panX = rect.width / 4; // Começa um pouco deslocado
+        panY = rect.height / 4;
+        applyTransform();
+    }
+
     renderFullSkillTree() {
-        const container = document.getElementById('full-skill-tree-container');
-        if (!container) return;
+        const canvas = document.getElementById('skill-tree-canvas');
+        if (!canvas) return;
 
-        container.innerHTML = ''; // Limpa o conteúdo anterior
+        canvas.innerHTML = ''; // Limpa o conteúdo anterior
 
+        const mainContainer = document.createElement('div');
+        mainContainer.style.position = 'absolute';
+        mainContainer.style.left = '50px';
+        mainContainer.style.top = '50px';
+        
         // 1. Nebulosa da Classe e Elemento
         const classTree = SKILL_TREES[this.character.class];
         if (classTree) {
             const elementTree = classTree[this.character.element];
             if (elementTree) {
                 for (const specName in elementTree) {
-                    const specSkills = elementTree[specName];
-                    const specContainer = document.createElement('div');
-                    specContainer.className = 'skill-tree-sub-category';
-                    specContainer.innerHTML = `<h4>${specName} (${this.character.class} / ${this.character.element})</h4>`;
-                    const skillListContainer = document.createElement('div');
-                    skillListContainer.className = 'skill-tree-root';
-                    specSkills.forEach(skill => this._renderSkillNodeRecursive(skill, skillListContainer, null));
-                    specContainer.appendChild(skillListContainer);
-                    container.appendChild(specContainer);
+                    const skills = elementTree[specName];
+                    const categoryContainer = this._createTreeCategory(
+                        `${specName} (${this.character.class})`,
+                        skills
+                    );
+                    mainContainer.appendChild(categoryContainer);
                 }
             }
         }
 
         // 2. Nebulosa dos Atributos
         const attributeTree = SKILL_TREES.Atributo;
-        if (attributeTree) {
-            for (const attrName in attributeTree) {
-                const attrSkills = attributeTree[attrName];
-                const attrContainer = document.createElement('div');
-                attrContainer.className = 'skill-tree-sub-category';
-                attrContainer.innerHTML = `<h4>Habilidades de ${attrName}</h4>`;
-                const skillListContainer = document.createElement('div');
-                skillListContainer.className = 'skill-tree-root';
-                attrSkills.forEach(skill => this._renderSkillNodeRecursive(skill, skillListContainer, null));
-                attrContainer.appendChild(skillListContainer);
-                container.appendChild(attrContainer);
-            }
+        for (const attrName in attributeTree) {
+            const skills = attributeTree[attrName];
+            const categoryContainer = this._createTreeCategory(
+                `Habilidades de ${attrName}`,
+                skills
+            );
+            mainContainer.appendChild(categoryContainer);
         }
+
+        canvas.appendChild(mainContainer);
     }
 
-    /**
-     * Cria o nó de uma habilidade para a árvore completa, mostrando requisitos e status.
-     */
+    _createTreeCategory(title, skills) {
+        const categoryContainer = document.createElement('div');
+        categoryContainer.className = 'skill-tree-sub-category';
+        categoryContainer.innerHTML = `<h4>${title}</h4>`;
+        const skillListContainer = document.createElement('div');
+        skillListContainer.className = 'skill-tree-root';
+        skills.forEach(skill => this._renderSkillNodeRecursive(skill, skillListContainer, null));
+        categoryContainer.appendChild(skillListContainer);
+        return categoryContainer;
+    }
+
     _renderSkillNodeRecursive(skill, parentContainer, parentSkill) {
         const skillWrapper = document.createElement('div');
         skillWrapper.className = 'skill-node-wrapper-player';
 
-        const skillNode = this.createSkillNode(skill, parentSkill); // Reutiliza a função de criação de nó
+        const skillNode = this.createSkillNode(skill, parentSkill);
         skillWrapper.appendChild(skillNode);
 
         if (skill.children && skill.children.length > 0) {
@@ -2701,9 +2780,6 @@ class CharacterSheet {
         parentContainer.appendChild(skillWrapper);
     }
 
-    /**
-     * Cria o elemento visual de um nó de habilidade, com botão para desbloquear se aplicável.
-     */
     createSkillNode(skill, parentSkill) {
         const skillNode = document.createElement('div');
         skillNode.className = 'skill-node';
@@ -2789,26 +2865,6 @@ class CharacterSheet {
         } else {
             alert("Você não tem pontos de habilidade suficientes para desbloquear esta habilidade.");
         }
-    }
-
-    findParentSkill(childId, tree = SKILL_TREES) {
-        for (const key in tree) {
-            if (Array.isArray(tree[key])) {
-                for (const skill of tree[key]) {
-                    if (skill.children && skill.children.some(child => child.id === childId)) {
-                        return skill;
-                    }
-                    if (skill.children) {
-                        const found = this.findParentSkill(childId, { children: skill.children });
-                        if (found) return found;
-                    }
-                }
-            } else if (typeof tree[key] === 'object' && tree[key] !== null) {
-                const found = this.findParentSkill(childId, tree[key]);
-                if (found) return found;
-            }
-        }
-        return null;
     }
 
     recalculateDerivedStats() {

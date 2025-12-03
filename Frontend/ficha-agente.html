@@ -212,6 +212,12 @@
 
             <!-- Coluna Direita: Habilidades, Inventário e História -->
             <div class="sheet-col-right">
+                <!-- NOVO: Botões de Ação Principais -->
+                <div class="main-actions-container">
+                    <button id="open-skills-modal-btn" class="wizard-btn">Habilidades</button>
+                    <!-- O botão de rolagem de dados pode ser movido para cá no futuro se desejado -->
+                </div>
+
                 <div class="actions-accordion">
                     <div class="accordion-panel">
                         <button class="accordion-header">Habilidades Desbloqueadas</button>
@@ -270,15 +276,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="accordion-panel">
-                        <button class="accordion-header">Habilidades</button>
-                        <div class="accordion-content">
-                            <div id="full-skill-tree-container" class="skill-tree-container">
-                                <!-- O conteúdo da árvore de habilidades completa será renderizado aqui -->
-                                <p class="log-placeholder">A árvore de habilidades do personagem aparecerá aqui.</p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -297,6 +294,19 @@
             <div id="specialization-options-container" class="specialization-options-container">
                 <!-- Opções serão inseridas aqui pelo script -->
             </div>
+        </div>
+    </div>
+
+    <!-- NOVO: Modal da Constelação de Habilidades -->
+    <div id="skill-tree-modal-overlay" class="modal-overlay">
+        <div class="skill-tree-modal-content">
+            <button id="close-skills-modal-btn" class="close-viewer-btn">&times;</button>
+            <div id="skill-tree-viewport" class="skill-tree-viewport">
+                <div id="skill-tree-canvas">
+                    <!-- A árvore de habilidades completa será renderizada aqui -->
+                </div>
+            </div>
+            <div class="skill-tree-instructions"><p>Use a roda do mouse para dar zoom e arraste para navegar.</p></div>
         </div>
     </div>
 
