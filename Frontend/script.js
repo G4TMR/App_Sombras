@@ -62,180 +62,180 @@ const DEFAULT_SKILL_TREES = {
     'Bélico': {
         'Temporal': {
             'Vanguarda': [
-                { id: 'belico-temporal-vanguarda-1', name: 'Barreira Temporal', description: 'Ao ser atingido, você cria uma distorção que retarda o agressor, reduzindo sua velocidade de movimento e ataque por um turno.', requirements: {}, unlocked: false, children: [] },
-                { id: 'belico-temporal-vanguarda-2', name: 'Resistência Ancestral', description: 'Você canaliza a resiliência de guerreiros passados, ganhando uma redução de dano temporária baseada em quantos inimigos te cercam.', requirements: {}, unlocked: false, children: [] }
+                { id: 'belico-temporal-vanguarda-1', name: 'Barreira Temporal', description: 'Ao ser atingido, você cria uma distorção que retarda o agressor, reduzindo sua velocidade de movimento e ataque por um turno.', requirements: {}, tags: ['defesa', 'controle'], unlocked: false, children: [] },
+                { id: 'belico-temporal-vanguarda-2', name: 'Resistência Ancestral', description: 'Você canaliza a resiliência de guerreiros passados, ganhando uma redução de dano temporária baseada em quantos inimigos te cercam.', requirements: {}, tags: ['defesa', 'buff'], unlocked: false, children: [] }
             ],
             'Aniquilador': [
-                { id: 'belico-temporal-aniquilador-1', name: 'Golpe Acelerado', description: 'Manipula uma fração de segundo para realizar um ataque extra com sua arma, com dano ligeiramente reduzido.', requirements: {}, unlocked: false, children: [] },
-                { id: 'belico-temporal-aniquilador-2', name: 'Lâmina do Crepúsculo', description: 'Seu ataque ressoa com a entropia, causando dano adicional a alvos que já estão com pouca vida.', requirements: {}, unlocked: false, children: [] }
+                { id: 'belico-temporal-aniquilador-1', name: 'Golpe Acelerado', description: 'Manipula uma fração de segundo para realizar um ataque extra com sua arma, com dano ligeiramente reduzido.', requirements: {}, tags: ['dano', 'combate'], unlocked: false, children: [] },
+                { id: 'belico-temporal-aniquilador-2', name: 'Lâmina do Crepúsculo', description: 'Seu ataque ressoa com a entropia, causando dano adicional a alvos que já estão com pouca vida.', requirements: {}, tags: ['dano', 'execução'], unlocked: false, children: [] }
             ],
             'Tático de Guerrilha': [
-                { id: 'belico-temporal-tatico-1', name: 'Armadilha de Estase', description: 'Você marca uma área no chão. O próximo inimigo a pisar nela fica congelado no tempo por um turno, incapaz de agir.', requirements: {}, unlocked: false, children: [] },
-                { id: 'belico-temporal-tatico-2', name: 'Passo Fantasma', description: 'Você se desloca brevemente do fluxo do tempo, tornando-se invisível e inalvejável por um curto período.', requirements: {}, unlocked: false, children: [] }
+                { id: 'belico-temporal-tatico-1', name: 'Armadilha de Estase', description: 'Você marca uma área no chão. O próximo inimigo a pisar nela fica congelado no tempo por um turno, incapaz de agir.', requirements: {}, tags: ['controle', 'armadilha'], unlocked: false, children: [] },
+                { id: 'belico-temporal-tatico-2', name: 'Passo Fantasma', description: 'Você se desloca brevemente do fluxo do tempo, tornando-se invisível e inalvejável por um curto período.', requirements: {}, tags: ['furtividade', 'defesa'], unlocked: false, children: [] }
             ]
         },
         'Cerebral': {
             'Vanguarda': [
-                { id: 'belico-cerebral-vanguarda-1', name: 'Provocação Psíquica', description: 'Você implanta um comando mental em um alvo, forçando-o a te atacar no próximo turno, ignorando seus aliados.', requirements: {}, unlocked: false, children: [] },
-                { id: 'belico-cerebral-vanguarda-2', name: 'Fortaleza Mental', description: 'Sua mente se torna uma cidadela, concedendo alta resistência a efeitos de medo, confusão e controle mental.', requirements: {}, unlocked: false, children: [] }
+                { id: 'belico-cerebral-vanguarda-1', name: 'Provocação Psíquica', description: 'Você implanta um comando mental em um alvo, forçando-o a te atacar no próximo turno, ignorando seus aliados.', requirements: {}, tags: ['controle', 'social'], unlocked: false, children: [] },
+                { id: 'belico-cerebral-vanguarda-2', name: 'Fortaleza Mental', description: 'Sua mente se torna uma cidadela, concedendo alta resistência a efeitos de medo, confusão e controle mental.', requirements: {}, tags: ['defesa', 'mental'], unlocked: false, children: [] }
             ],
             'Aniquilador': [
-                { id: 'belico-cerebral-aniquilador-1', name: 'Ponto Fraco Exposto', description: 'Sua análise de combate revela uma falha na defesa do inimigo. Seu próximo ataque contra ele é um acerto crítico garantido.', requirements: {}, unlocked: false, children: [] },
-                { id: 'belico-cerebral-aniquilador-2', name: 'Impacto Mental', description: 'Além do dano físico, seu golpe sobrecarrega a mente do alvo, causando confusão e penalidade em suas ações.', requirements: {}, unlocked: false, children: [] }
+                { id: 'belico-cerebral-aniquilador-1', name: 'Ponto Fraco Exposto', description: 'Sua análise de combate revela uma falha na defesa do inimigo. Seu próximo ataque contra ele é um acerto crítico garantido.', requirements: {}, tags: ['dano', 'suporte', 'investigacao'], unlocked: false, children: [] },
+                { id: 'belico-cerebral-aniquilador-2', name: 'Impacto Mental', description: 'Além do dano físico, seu golpe sobrecarrega a mente do alvo, causando confusão e penalidade em suas ações.', requirements: {}, tags: ['dano', 'mental', 'controle'], unlocked: false, children: [] }
             ],
             'Tático de Guerrilha': [
-                { id: 'belico-cerebral-tatico-1', name: 'Isca Ilusória', description: 'Você projeta uma cópia perfeita de si mesmo que atrai o fogo inimigo por um turno ou até ser atingida.', requirements: {}, unlocked: false, children: [] },
-                { id: 'belico-cerebral-tatico-2', name: 'Campo de Silêncio', description: 'Cria uma pequena área onde todos os sons são completamente abafados, ideal para operações furtivas.', requirements: {}, unlocked: false, children: [] }
+                { id: 'belico-cerebral-tatico-1', name: 'Isca Ilusória', description: 'Você projeta uma cópia perfeita de si mesmo que atrai o fogo inimigo por um turno ou até ser atingida.', requirements: {}, tags: ['enganação', 'defesa'], unlocked: false, children: [] },
+                { id: 'belico-cerebral-tatico-2', name: 'Campo de Silêncio', description: 'Cria uma pequena área onde todos os sons são completamente abafados, ideal para operações furtivas.', requirements: {}, tags: ['furtividade', 'utilidade'], unlocked: false, children: [] }
             ]
         },
         'Visceral': {
             'Vanguarda': [
-                { id: 'belico-visceral-vanguarda-1', name: 'Pele de Pedra', description: 'Sua pele endurece como rocha, concedendo uma massiva redução a dano físico por um curto período.', requirements: {}, unlocked: false, children: [] },
-                { id: 'belico-visceral-vanguarda-2', name: 'Fôlego Infinito', description: 'Sua biologia se adapta, eliminando a necessidade de respirar e concedendo imunidade a venenos gasosos e exaustão.', requirements: {}, unlocked: false, children: [] }
+                { id: 'belico-visceral-vanguarda-1', name: 'Pele de Pedra', description: 'Sua pele endurece como rocha, concedendo uma massiva redução a dano físico por um curto período.', requirements: {}, tags: ['defesa', 'buff'], unlocked: false, children: [] },
+                { id: 'belico-visceral-vanguarda-2', name: 'Fôlego Infinito', description: 'Sua biologia se adapta, eliminando a necessidade de respirar e concedendo imunidade a venenos gasosos e exaustão.', requirements: {}, tags: ['defesa', 'sobrevivencia'], unlocked: false, children: [] }
             ],
             'Aniquilador': [
-                { id: 'belico-visceral-aniquilador-1', name: 'Frenesi Sangrento', description: 'Quanto menos vida você tem, mais rápido e forte você ataca. Um ciclo de dor e poder.', requirements: {}, unlocked: false, children: [] },
-                { id: 'belico-visceral-aniquilador-2', name: 'Golpe Esmagador', description: 'Um ataque brutal que quebra ossos, aplicando uma penalidade permanente nos atributos físicos do alvo.', requirements: {}, unlocked: false, children: [] }
+                { id: 'belico-visceral-aniquilador-1', name: 'Frenesi Sangrento', description: 'Quanto menos vida você tem, mais rápido e forte você ataca. Um ciclo de dor e poder.', requirements: {}, tags: ['dano', 'combate'], unlocked: false, children: [] },
+                { id: 'belico-visceral-aniquilador-2', name: 'Golpe Esmagador', description: 'Um ataque brutal que quebra ossos, aplicando uma penalidade permanente nos atributos físicos do alvo.', requirements: {}, tags: ['dano', 'debuff'], unlocked: false, children: [] }
             ],
             'Tático de Guerrilha': [
-                { id: 'belico-visceral-tatico-1', name: 'Mimetismo Biológico', description: 'Você altera a pigmentação e textura da sua pele para se camuflar perfeitamente com o ambiente.', requirements: {}, unlocked: false, children: [] },
-                { id: 'belico-visceral-tatico-2', name: 'Injeção de Veneno', description: 'Suas armas ou ataques desarmados podem aplicar uma toxina que causa dano contínuo e reduz a cura recebida pelo alvo.', requirements: {}, unlocked: false, children: [] }
+                { id: 'belico-visceral-tatico-1', name: 'Mimetismo Biológico', description: 'Você altera a pigmentação e textura da sua pele para se camuflar perfeitamente com o ambiente.', requirements: {}, tags: ['furtividade', 'utilidade'], unlocked: false, children: [] },
+                { id: 'belico-visceral-tatico-2', name: 'Injeção de Veneno', description: 'Suas armas ou ataques desarmados podem aplicar uma toxina que causa dano contínuo e reduz a cura recebida pelo alvo.', requirements: {}, tags: ['dano', 'debuff'], unlocked: false, children: [] }
             ]
         },
         'Vital': {
             'Vanguarda': [
-                { id: 'belico-vital-vanguarda-1', name: 'Escudo de Força Reativo', description: 'Você projeta um escudo de energia. Se for quebrado, ele explode, causando dano e empurrando inimigos próximos.', requirements: {}, unlocked: false, children: [] },
-                { id: 'belico-vital-vanguarda-2', name: 'Aura Protetora', description: 'Você emana uma aura de energia que concede uma pequena redução de dano a todos os aliados próximos a você.', requirements: {}, unlocked: false, children: [] }
+                { id: 'belico-vital-vanguarda-1', name: 'Escudo de Força Reativo', description: 'Você projeta um escudo de energia. Se for quebrado, ele explode, causando dano e empurrando inimigos próximos.', requirements: {}, tags: ['defesa', 'dano'], unlocked: false, children: [] },
+                { id: 'belico-vital-vanguarda-2', name: 'Aura Protetora', description: 'Você emana uma aura de energia que concede uma pequena redução de dano a todos os aliados próximos a você.', requirements: {}, tags: ['defesa', 'suporte'], unlocked: false, children: [] }
             ],
             'Aniquilador': [
-                { id: 'belico-vital-aniquilador-1', name: 'Lâmina de Energia Pura', description: 'Sua arma é envolta em energia crepitante, ignorando armaduras e causando dano de energia pura.', requirements: {}, unlocked: false, children: [] },
-                { id: 'belico-vital-aniquilador-2', name: 'Impacto Cinético', description: 'Seu golpe libera uma onda de força telecinética, arremessando o alvo para longe e causando dano de colisão.', requirements: {}, unlocked: false, children: [] }
+                { id: 'belico-vital-aniquilador-1', name: 'Lâmina de Energia Pura', description: 'Sua arma é envolta em energia crepitante, ignorando armaduras e causando dano de energia pura.', requirements: {}, tags: ['dano', 'combate'], unlocked: false, children: [] },
+                { id: 'belico-vital-aniquilador-2', name: 'Impacto Cinético', description: 'Seu golpe libera uma onda de força telecinética, arremessando o alvo para longe e causando dano de colisão.', requirements: {}, tags: ['dano', 'controle'], unlocked: false, children: [] }
             ],
             'Tático de Guerrilha': [
-                { id: 'belico-vital-tatico-1', name: 'Mina de Proximidade', description: 'Você deixa para trás uma armadilha invisível de energia que explode quando um inimigo se aproxima.', requirements: {}, unlocked: false, children: [] },
-                { id: 'belico-vital-tatico-2', name: 'Fio de Força', description: 'Cria um fio de energia quase invisível entre dois pontos. Inimigos que o atravessam sofrem dano e ficam lentos.', requirements: {}, unlocked: false, children: [] }
+                { id: 'belico-vital-tatico-1', name: 'Mina de Proximidade', description: 'Você deixa para trás uma armadilha invisível de energia que explode quando um inimigo se aproxima.', requirements: {}, tags: ['armadilha', 'dano'], unlocked: false, children: [] },
+                { id: 'belico-vital-tatico-2', name: 'Fio de Força', description: 'Cria um fio de energia quase invisível entre dois pontos. Inimigos que o atravessam sofrem dano e ficam lentos.', requirements: {}, tags: ['armadilha', 'controle'], unlocked: false, children: [] }
             ]
         }
     },
     'Esotérico': {
         'Temporal': {
             'Lâmina Paranormal': [
-                { id: 'esoterico-temporal-lamina-1', name: 'Lâmina Entrópica', description: 'Sua arma acelera o tempo no ponto de impacto, causando dano de decadência ao longo do tempo.', requirements: {}, unlocked: false, children: [] },
-                { id: 'esoterico-temporal-lamina-2', name: 'Corte Acelerado', description: 'Um ataque tão rápido que dobra o tempo, permitindo um segundo golpe imediato.', requirements: {}, unlocked: false, children: [] }
+                { id: 'esoterico-temporal-lamina-1', name: 'Lâmina Entrópica', description: 'Sua arma acelera o tempo no ponto de impacto, causando dano de decadência ao longo do tempo.', requirements: {}, tags: ['dano', 'dot'], unlocked: false, children: [] },
+                { id: 'esoterico-temporal-lamina-2', name: 'Corte Acelerado', description: 'Um ataque tão rápido que dobra o tempo, permitindo um segundo golpe imediato.', requirements: {}, tags: ['dano', 'combate'], unlocked: false, children: [] }
             ],
             'Conduíte Rúnico': [
-                { id: 'esoterico-temporal-conduite-1', name: 'Selo de Lentidão', description: 'Desenha uma runa no ar que cria uma área onde o tempo passa mais devagar para seus inimigos.', requirements: {}, unlocked: false, children: [] },
-                { id: 'esoterico-temporal-conduite-2', name: 'Rebobinar Ferimento', description: 'Você toca um aliado e reverte um ferimento no tempo, curando uma quantidade significativa de dano.', requirements: {}, unlocked: false, children: [] }
+                { id: 'esoterico-temporal-conduite-1', name: 'Selo de Lentidão', description: 'Desenha uma runa no ar que cria uma área onde o tempo passa mais devagar para seus inimigos.', requirements: {}, tags: ['controle', 'area'], unlocked: false, children: [] },
+                { id: 'esoterico-temporal-conduite-2', name: 'Rebobinar Ferimento', description: 'Você toca um aliado e reverte um ferimento no tempo, curando uma quantidade significativa de dano.', requirements: {}, tags: ['cura', 'suporte'], unlocked: false, children: [] }
             ],
             'Ceifador Anímico': [
-                { id: 'esoterico-temporal-ceifador-1', name: 'Toque do Envelhecimento', description: 'Você toca um alvo e acelera sua idade, aplicando penalidades severas em seus atributos físicos.', requirements: {}, unlocked: false, children: [] },
-                { id: 'esoterico-temporal-ceifador-2', name: 'Visão da Morte', description: 'Você marca um inimigo. Se ele morrer em breve, você recupera uma grande quantidade de recursos (PA, Sanidade).', requirements: {}, unlocked: false, children: [] }
+                { id: 'esoterico-temporal-ceifador-1', name: 'Toque do Envelhecimento', description: 'Você toca um alvo e acelera sua idade, aplicando penalidades severas em seus atributos físicos.', requirements: {}, tags: ['debuff', 'controle'], unlocked: false, children: [] },
+                { id: 'esoterico-temporal-ceifador-2', name: 'Visão da Morte', description: 'Você marca um inimigo. Se ele morrer em breve, você recupera uma grande quantidade de recursos (PA, Sanidade).', requirements: {}, tags: ['utilidade', 'recurso'], unlocked: false, children: [] }
             ]
         },
         'Cerebral': {
             'Lâmina Paranormal': [
-                { id: 'esoterico-cerebral-lamina-1', name: 'Lâmina Psíquica', description: 'Sua arma corta a mente do alvo, causando dano de sanidade e ignorando completamente a armadura física.', requirements: {}, unlocked: false, children: [] },
-                { id: 'esoterico-cerebral-lamina-2', name: 'Corte da Verdade', description: 'Um golpe que revela uma verdade inconveniente sobre o alvo, expondo uma fraqueza e reduzindo sua defesa.', requirements: {}, unlocked: false, children: [] }
+                { id: 'esoterico-cerebral-lamina-1', name: 'Lâmina Psíquica', description: 'Sua arma corta a mente do alvo, causando dano de sanidade e ignorando completamente a armadura física.', requirements: {}, tags: ['dano', 'mental'], unlocked: false, children: [] },
+                { id: 'esoterico-cerebral-lamina-2', name: 'Corte da Verdade', description: 'Um golpe que revela uma verdade inconveniente sobre o alvo, expondo uma fraqueza e reduzindo sua defesa.', requirements: {}, tags: ['dano', 'debuff'], unlocked: false, children: [] }
             ],
             'Conduíte Rúnico': [
-                { id: 'esoterico-cerebral-conduite-1', name: 'Glyfo de Confusão', description: 'Uma runa complexa que, ao ser vista, sobrecarrega a mente do alvo, deixando-o confuso e incapaz de distinguir amigo de inimigo.', requirements: {}, unlocked: false, children: [] },
-                { id: 'esoterico-cerebral-conduite-2', name: 'Projétil da Verdade', description: 'Dispara um dardo de luz que revela os atributos e status de um inimigo para toda a equipe.', requirements: {}, unlocked: false, children: [] }
+                { id: 'esoterico-cerebral-conduite-1', name: 'Glyfo de Confusão', description: 'Uma runa complexa que, ao ser vista, sobrecarrega a mente do alvo, deixando-o confuso e incapaz de distinguir amigo de inimigo.', requirements: {}, tags: ['controle', 'mental'], unlocked: false, children: [] },
+                { id: 'esoterico-cerebral-conduite-2', name: 'Projétil da Verdade', description: 'Dispara um dardo de luz que revela os atributos e status de um inimigo para toda a equipe.', requirements: {}, tags: ['suporte', 'investigacao'], unlocked: false, children: [] }
             ],
             'Ceifador Anímico': [
-                { id: 'esoterico-cerebral-ceifador-1', name: 'Roubo de Memórias', description: 'Um toque que arranca uma memória recente do alvo, causando dano de sanidade e transferindo uma informação útil para você.', requirements: {}, unlocked: false, children: [] },
-                { id: 'esoterico-cerebral-ceifador-2', name: 'Sussurros dos Mortos', description: 'Você ouve os ecos psíquicos de mortos recentes na área, podendo obter pistas sobre a causa de suas mortes.', requirements: {}, unlocked: false, children: [] }
+                { id: 'esoterico-cerebral-ceifador-1', name: 'Roubo de Memórias', description: 'Um toque que arranca uma memória recente do alvo, causando dano de sanidade e transferindo uma informação útil para você.', requirements: {}, tags: ['dano', 'mental', 'investigacao'], unlocked: false, children: [] },
+                { id: 'esoterico-cerebral-ceifador-2', name: 'Sussurros dos Mortos', description: 'Você ouve os ecos psíquicos de mortos recentes na área, podendo obter pistas sobre a causa de suas mortes.', requirements: {}, tags: ['investigacao', 'ocultismo'], unlocked: false, children: [] }
             ]
         },
         'Visceral': {
             'Lâmina Paranormal': [
-                { id: 'esoterico-visceral-lamina-1', name: 'Lâmina Voraz', description: 'Sua arma drena a força vital do alvo a cada golpe, curando uma parte do dano que você causa.', requirements: {}, unlocked: false, children: [] },
-                { id: 'esoterico-visceral-lamina-2', name: 'Corte Hemorrágico', description: 'Um golpe que abre uma ferida que não fecha, causando dano de sangramento contínuo.', requirements: {}, unlocked: false, children: [] }
+                { id: 'esoterico-visceral-lamina-1', name: 'Lâmina Voraz', description: 'Sua arma drena a força vital do alvo a cada golpe, curando uma parte do dano que você causa.', requirements: {}, tags: ['dano', 'cura'], unlocked: false, children: [] },
+                { id: 'esoterico-visceral-lamina-2', name: 'Corte Hemorrágico', description: 'Um golpe que abre uma ferida que não fecha, causando dano de sangramento contínuo.', requirements: {}, tags: ['dano', 'dot'], unlocked: false, children: [] }
             ],
             'Conduíte Rúnico': [
-                { id: 'esoterico-visceral-conduite-1', name: 'Marca da Podridão', description: 'Você amaldiçoa um alvo com uma runa de decomposição, fazendo com que ele receba mais dano de todas as fontes.', requirements: {}, unlocked: false, children: [] },
-                { id: 'esoterico-visceral-conduite-2', name: 'Drenar Vida à Distância', description: 'Canaliza um feixe de energia que suga a vida de um inimigo para curar a si mesmo ou um aliado.', requirements: {}, unlocked: false, children: [] }
+                { id: 'esoterico-visceral-conduite-1', name: 'Marca da Podridão', description: 'Você amaldiçoa um alvo com uma runa de decomposição, fazendo com que ele receba mais dano de todas as fontes.', requirements: {}, tags: ['debuff', 'suporte'], unlocked: false, children: [] },
+                { id: 'esoterico-visceral-conduite-2', name: 'Drenar Vida à Distância', description: 'Canaliza um feixe de energia que suga a vida de um inimigo para curar a si mesmo ou um aliado.', requirements: {}, tags: ['dano', 'cura'], unlocked: false, children: [] }
             ],
             'Ceifador Anímico': [
-                { id: 'esoterico-visceral-ceifador-1', name: 'Peste Contagiosa', description: 'Você infecta um alvo com uma doença paranormal que causa dano contínuo e pode se espalhar para outros inimigos próximos.', requirements: {}, unlocked: false, children: [] },
-                { id: 'esoterico-visceral-ceifador-2', name: 'Transferência de Vitalidade', description: 'Você sacrifica uma porção da sua própria vida para curar um aliado instantaneamente por uma quantidade muito maior.', requirements: {}, unlocked: false, children: [] }
+                { id: 'esoterico-visceral-ceifador-1', name: 'Peste Contagiosa', description: 'Você infecta um alvo com uma doença paranormal que causa dano contínuo e pode se espalhar para outros inimigos próximos.', requirements: {}, tags: ['dano', 'dot', 'area'], unlocked: false, children: [] },
+                { id: 'esoterico-visceral-ceifador-2', name: 'Transferência de Vitalidade', description: 'Você sacrifica uma porção da sua própria vida para curar um aliado instantaneamente por uma quantidade muito maior.', requirements: {}, tags: ['cura', 'suporte'], unlocked: false, children: [] }
             ]
         },
         'Vital': {
             'Lâmina Paranormal': [
-                { id: 'esoterico-vital-lamina-1', name: 'Lâmina Cinética', description: 'Sua arma é coberta por uma força telecinética, aumentando o dano e arremessando os alvos para trás.', requirements: {}, unlocked: false, children: [] },
-                { id: 'esoterico-vital-lamina-2', name: 'Corte Disruptor', description: 'O impacto libera uma onda de energia caótica que pode atordoar o alvo ou cancelar uma habilidade que ele estava preparando.', requirements: {}, unlocked: false, children: [] }
+                { id: 'esoterico-vital-lamina-1', name: 'Lâmina Cinética', description: 'Sua arma é coberta por uma força telecinética, aumentando o dano e arremessando os alvos para trás.', requirements: {}, tags: ['dano', 'controle'], unlocked: false, children: [] },
+                { id: 'esoterico-vital-lamina-2', name: 'Corte Disruptor', description: 'O impacto libera uma onda de energia caótica que pode atordoar o alvo ou cancelar uma habilidade que ele estava preparando.', requirements: {}, tags: ['dano', 'controle'], unlocked: false, children: [] }
             ],
             'Conduíte Rúnico': [
-                { id: 'esoterico-vital-conduite-1', name: 'Raio de Força', description: 'Um raio concentrado de pura energia que causa dano massivo a um único alvo.', requirements: {}, unlocked: false, children: [] },
-                { id: 'esoterico-vital-conduite-2', name: 'Orbe de Contenção', description: 'Cria uma esfera de energia que aprisiona um inimigo, impedindo-o de se mover ou atacar por um período.', requirements: {}, unlocked: false, children: [] }
+                { id: 'esoterico-vital-conduite-1', name: 'Raio de Força', description: 'Um raio concentrado de pura energia que causa dano massivo a um único alvo.', requirements: {}, tags: ['dano'], unlocked: false, children: [] },
+                { id: 'esoterico-vital-conduite-2', name: 'Orbe de Contenção', description: 'Cria uma esfera de energia que aprisiona um inimigo, impedindo-o de se mover ou atacar por um período.', requirements: {}, tags: ['controle'], unlocked: false, children: [] }
             ],
             'Ceifador Anímico': [
-                { id: 'esoterico-vital-ceifador-1', name: 'Correntes Espectrais', description: 'Invoca correntes de energia que se prendem a um inimigo, imobilizando-o e causando dano contínuo.', requirements: {}, unlocked: false, children: [] },
-                { id: 'esoterico-vital-ceifador-2', name: 'Devorar Alma', description: 'Executa um inimigo com vida muito baixa, desintegrando-o e restaurando todos os seus Pontos de Ação (PA).', requirements: {}, unlocked: false, children: [] }
+                { id: 'esoterico-vital-ceifador-1', name: 'Correntes Espectrais', description: 'Invoca correntes de energia que se prendem a um inimigo, imobilizando-o e causando dano contínuo.', requirements: {}, tags: ['controle', 'dano', 'dot'], unlocked: false, children: [] },
+                { id: 'esoterico-vital-ceifador-2', name: 'Devorar Alma', description: 'Executa um inimigo com vida muito baixa, desintegrando-o e restaurando todos os seus Pontos de Ação (PA).', requirements: {}, tags: ['execucao', 'recurso'], unlocked: false, children: [] }
             ]
         }
     },
     'Erudito': {
         'Temporal': {
             'Estrategista de Campo': [
-                { id: 'erudito-temporal-estrategista-1', name: 'Análise Preditiva', description: 'Você analisa os possíveis futuros, concedendo um grande bônus de acerto ou defesa para a próxima ação de um aliado.', requirements: {}, unlocked: false, children: [] },
-                { id: 'erudito-temporal-estrategista-2', name: 'Acelerar Aliado', description: 'Você manipula o fluxo do tempo de um aliado, concedendo a ele uma ação de movimento extra em seu turno.', requirements: {}, unlocked: false, children: [] }
+                { id: 'erudito-temporal-estrategista-1', name: 'Análise Preditiva', description: 'Você analisa os possíveis futuros, concedendo um grande bônus de acerto ou defesa para a próxima ação de um aliado.', requirements: {}, tags: ['suporte', 'buff'], unlocked: false, children: [] },
+                { id: 'erudito-temporal-estrategista-2', name: 'Acelerar Aliado', description: 'Você manipula o fluxo do tempo de um aliado, concedendo a ele uma ação de movimento extra em seu turno.', requirements: {}, tags: ['suporte', 'buff', 'movimento'], unlocked: false, children: [] }
             ],
             'Arquiteto da Realidade': [
-                { id: 'erudito-temporal-arquiteto-1', name: 'Bolha de Dilatação Temporal', description: 'Cria uma zona onde o tempo passa 50% mais devagar para os inimigos, ou 50% mais rápido para os aliados.', requirements: {}, unlocked: false, children: [] },
-                { id: 'erudito-temporal-arquiteto-2', name: 'Reescrever Evento Menor', description: 'Uma vez por cena, você pode forçar a repetição de uma rolagem de dados (sua ou de um inimigo) para uma ação que não seja de ataque.', requirements: {}, unlocked: false, children: [] }
+                { id: 'erudito-temporal-arquiteto-1', name: 'Bolha de Dilatação Temporal', description: 'Cria uma zona onde o tempo passa 50% mais devagar para os inimigos, ou 50% mais rápido para os aliados.', requirements: {}, tags: ['controle', 'area', 'buff'], unlocked: false, children: [] },
+                { id: 'erudito-temporal-arquiteto-2', name: 'Reescrever Evento Menor', description: 'Uma vez por cena, você pode forçar a repetição de uma rolagem de dados (sua ou de um inimigo) para uma ação que não seja de ataque.', requirements: {}, tags: ['utilidade', 'suporte'], unlocked: false, children: [] }
             ],
             'Médico de Batalha': [
-                { id: 'erudito-temporal-medico-1', name: 'Reversão de Ferimento', description: 'Você rebobina o tempo em um ferimento, curando dano como se ele nunca tivesse acontecido.', requirements: {}, unlocked: false, children: [] },
-                { id: 'erudito-temporal-medico-2', name: 'Prevenção de Dano', description: 'Aplica um selo temporal em um aliado que irá negar completamente a próxima fonte de dano que ele receber.', requirements: {}, unlocked: false, children: [] }
+                { id: 'erudito-temporal-medico-1', name: 'Reversão de Ferimento', description: 'Você rebobina o tempo em um ferimento, curando dano como se ele nunca tivesse acontecido.', requirements: {}, tags: ['cura', 'suporte'], unlocked: false, children: [] },
+                { id: 'erudito-temporal-medico-2', name: 'Prevenção de Dano', description: 'Aplica um selo temporal em um aliado que irá negar completamente a próxima fonte de dano que ele receber.', requirements: {}, tags: ['defesa', 'suporte'], unlocked: false, children: [] }
             ]
         },
         'Cerebral': {
             'Estrategista de Campo': [
-                { id: 'erudito-cerebral-estrategista-1', name: 'Comando Tático', description: 'Você usa sua superioridade tática para dar um comando a um aliado, permitindo que ele use sua reação para realizar uma ação de movimento ou ataque simples.', requirements: {}, unlocked: false, children: [] },
-                { id: 'erudito-cerebral-estrategista-2', name: 'Expor Fraqueza', description: 'Você grita a fraqueza de um inimigo. Todos os ataques de aliados contra esse alvo recebem um bônus de dano por um turno.', requirements: {}, unlocked: false, children: [] }
+                { id: 'erudito-cerebral-estrategista-1', name: 'Comando Tático', description: 'Você usa sua superioridade tática para dar um comando a um aliado, permitindo que ele use sua reação para realizar uma ação de movimento ou ataque simples.', requirements: {}, tags: ['suporte', 'buff'], unlocked: false, children: [] },
+                { id: 'erudito-cerebral-estrategista-2', name: 'Expor Fraqueza', description: 'Você grita a fraqueza de um inimigo. Todos os ataques de aliados contra esse alvo recebem um bônus de dano por um turno.', requirements: {}, tags: ['suporte', 'debuff'], unlocked: false, children: [] }
             ],
             'Arquiteto da Realidade': [
-                { id: 'erudito-cerebral-arquiteto-1', name: 'Paradoxo Lógico', description: 'Você apresenta um paradoxo irresolúvel à mente de um alvo, causando dano de sanidade e o deixando atordoado.', requirements: {}, unlocked: false, children: [] },
-                { id: 'erudito-cerebral-arquiteto-2', name: 'Ignorar Física', description: 'Por um curto período, você pode ignorar uma lei da física, permitindo-se andar por paredes ou sobre a água.', requirements: {}, unlocked: false, children: [] }
+                { id: 'erudito-cerebral-arquiteto-1', name: 'Paradoxo Lógico', description: 'Você apresenta um paradoxo irresolúvel à mente de um alvo, causando dano de sanidade e o deixando atordoado.', requirements: {}, tags: ['dano', 'mental', 'controle'], unlocked: false, children: [] },
+                { id: 'erudito-cerebral-arquiteto-2', name: 'Ignorar Física', description: 'Por um curto período, você pode ignorar uma lei da física, permitindo-se andar por paredes ou sobre a água.', requirements: {}, tags: ['utilidade', 'movimento'], unlocked: false, children: [] }
             ],
             'Médico de Batalha': [
-                { id: 'erudito-cerebral-medico-1', name: 'Diagnóstico Rápido', description: 'Com um olhar, você sabe instantaneamente todos os status, ferimentos e condições (positivas e negativas) de um alvo.', requirements: {}, unlocked: false, children: [] },
-                { id: 'erudito-cerebral-medico-2', name: 'Cirurgia Psíquica', description: 'Você entra na mente de um aliado para remover cirurgicamente efeitos mentais negativos como medo, charme ou confusão.', requirements: {}, unlocked: false, children: [] }
+                { id: 'erudito-cerebral-medico-1', name: 'Diagnóstico Rápido', description: 'Com um olhar, você sabe instantaneamente todos os status, ferimentos e condições (positivas e negativas) de um alvo.', requirements: {}, tags: ['investigacao', 'suporte'], unlocked: false, children: [] },
+                { id: 'erudito-cerebral-medico-2', name: 'Cirurgia Psíquica', description: 'Você entra na mente de um aliado para remover cirurgicamente efeitos mentais negativos como medo, charme ou confusão.', requirements: {}, tags: ['cura', 'mental', 'suporte'], unlocked: false, children: [] }
             ]
         },
         'Visceral': {
             'Estrategista de Campo': [
-                { id: 'erudito-visceral-estrategista-1', name: 'Injeção de Adrenalina', description: 'Você usa um estimulante para aumentar temporariamente os atributos físicos (Força, Agilidade) de um aliado.', requirements: {}, unlocked: false, children: [] },
-                { id: 'erudito-visceral-estrategista-2', name: 'Análise Biológica', description: 'Você identifica uma vulnerabilidade biológica em uma criatura, concedendo bônus de dano contra ela para toda a equipe.', requirements: {}, unlocked: false, children: [] }
+                { id: 'erudito-visceral-estrategista-1', name: 'Injeção de Adrenalina', description: 'Você usa um estimulante para aumentar temporariamente os atributos físicos (Força, Agilidade) de um aliado.', requirements: {}, tags: ['suporte', 'buff'], unlocked: false, children: [] },
+                { id: 'erudito-visceral-estrategista-2', name: 'Análise Biológica', description: 'Você identifica uma vulnerabilidade biológica em uma criatura, concedendo bônus de dano contra ela para toda a equipe.', requirements: {}, tags: ['investigacao', 'suporte', 'debuff'], unlocked: false, children: [] }
             ],
             'Arquiteto da Realidade': [
-                { id: 'erudito-visceral-arquiteto-1', name: 'Metamorfose Instável', description: 'Você altera temporariamente a biologia de um alvo, transformando sua mão em pedra para impedi-lo de atacar, por exemplo.', requirements: {}, unlocked: false, children: [] },
-                { id: 'erudito-visceral-arquiteto-2', name: 'Remodelar Terreno', description: 'Você manipula a terra e a matéria orgânica para criar cobertura ou terreno difícil em uma área.', requirements: {}, unlocked: false, children: [] }
+                { id: 'erudito-visceral-arquiteto-1', name: 'Metamorfose Instável', description: 'Você altera temporariamente a biologia de um alvo, transformando sua mão em pedra para impedi-lo de atacar, por exemplo.', requirements: {}, tags: ['controle', 'debuff'], unlocked: false, children: [] },
+                { id: 'erudito-visceral-arquiteto-2', name: 'Remodelar Terreno', description: 'Você manipula a terra e a matéria orgânica para criar cobertura ou terreno difícil em uma área.', requirements: {}, tags: ['utilidade', 'controle', 'area'], unlocked: false, children: [] }
             ],
             'Médico de Batalha': [
-                { id: 'erudito-visceral-medico-1', name: 'Sutura Acelerada', description: 'Uma poderosa cura em um único alvo que também remove condições como sangramento e veneno.', requirements: {}, unlocked: false, children: [] },
-                { id: 'erudito-visceral-medico-2', name: 'Concoção de Combate', description: 'Você mistura reagentes rapidamente para criar um tônico que pode ser usado por um aliado para ganhar um bônus temporário.', requirements: {}, unlocked: false, children: [] }
+                { id: 'erudito-visceral-medico-1', name: 'Sutura Acelerada', description: 'Uma poderosa cura em um único alvo que também remove condições como sangramento e veneno.', requirements: {}, tags: ['cura', 'suporte'], unlocked: false, children: [] },
+                { id: 'erudito-visceral-medico-2', name: 'Concoção de Combate', description: 'Você mistura reagentes rapidamente para criar um tônico que pode ser usado por um aliado para ganhar um bônus temporário.', requirements: {}, tags: ['suporte', 'buff', 'utilidade'], unlocked: false, children: [] }
             ]
         },
         'Vital': {
             'Estrategista de Campo': [
-                { id: 'erudito-vital-estrategista-1', name: 'Redirecionar Energia', description: 'Você cria um elo entre um aliado e um inimigo. Parte do dano que o aliado receberia é transferido para o inimigo.', requirements: {}, unlocked: false, children: [] },
-                { id: 'erudito-vital-estrategista-2', name: 'Ponto de Foco', description: 'Você marca um alvo com energia. Todos os ataques contra ele têm a precisão aumentada.', requirements: {}, unlocked: false, children: [] }
+                { id: 'erudito-vital-estrategista-1', name: 'Redirecionar Energia', description: 'Você cria um elo entre um aliado e um inimigo. Parte do dano que o aliado receberia é transferido para o inimigo.', requirements: {}, tags: ['suporte', 'dano', 'defesa'], unlocked: false, children: [] },
+                { id: 'erudito-vital-estrategista-2', name: 'Ponto de Foco', description: 'Você marca um alvo com energia. Todos os ataques contra ele têm a precisão aumentada.', requirements: {}, tags: ['suporte', 'debuff'], unlocked: false, children: [] }
             ],
             'Arquiteto da Realidade': [
-                { id: 'erudito-vital-arquiteto-1', name: 'Anular Poder', description: 'Você projeta um campo que anula efeitos paranormais em uma pequena área, funcionando como uma contra-mágica.', requirements: {}, unlocked: false, children: [] },
-                { id: 'erudito-vital-arquiteto-2', name: 'Barreira de Força', description: 'Cria uma parede de energia sólida e transparente que pode bloquear ataques e passagem.', requirements: {}, unlocked: false, children: [] }
+                { id: 'erudito-vital-arquiteto-1', name: 'Anular Poder', description: 'Você projeta um campo que anula efeitos paranormais em uma pequena área, funcionando como uma contra-mágica.', requirements: {}, tags: ['controle', 'defesa', 'area'], unlocked: false, children: [] },
+                { id: 'erudito-vital-arquiteto-2', name: 'Barreira de Força', description: 'Cria uma parede de energia sólida e transparente que pode bloquear ataques e passagem.', requirements: {}, tags: ['defesa', 'utilidade'], unlocked: false, children: [] }
             ],
             'Médico de Batalha': [
-                { id: 'erudito-vital-medico-1', name: 'Pulso de Cura', description: 'Libera uma onda de energia benigna que cura uma pequena quantidade de vida de todos os aliados próximos.', requirements: {}, unlocked: false, children: [] },
-                { id: 'erudito-vital-medico-2', name: 'Escudo Sanitário', description: 'Cria um escudo de energia em um aliado que o protege de receber status negativos (veneno, paralisia, etc.) por um período.', requirements: {}, unlocked: false, children: [] }
+                { id: 'erudito-vital-medico-1', name: 'Pulso de Cura', description: 'Libera uma onda de energia benigna que cura uma pequena quantidade de vida de todos os aliados próximos.', requirements: {}, tags: ['cura', 'suporte', 'area'], unlocked: false, children: [] },
+                { id: 'erudito-vital-medico-2', name: 'Escudo Sanitário', description: 'Cria um escudo de energia em um aliado que o protege de receber status negativos (veneno, paralisia, etc.) por um período.', requirements: {}, tags: ['defesa', 'suporte'], unlocked: false, children: [] }
             ]
         }
     },
     'Atributo': {
         'Força': [
-            { id: 'forca-5-1', name: 'Golpe Poderoso', description: 'Um ataque básico e potente, que serve como base para técnicas de força mais avançadas.', requirements: { forca: 5 }, unlocked: false, children: [
+            { id: 'forca-5-1', name: 'Golpe Poderoso', description: 'Um ataque básico e potente, que serve como base para técnicas de força mais avançadas.', requirements: { forca: 5 }, tags: ['dano', 'combate'], unlocked: false, children: [
                 { id: 'forca-10-1', name: 'Postura de Colosso', description: 'Foca em peso e estabilidade, aumentando a resistência a ser movido.', requirements: { forca: 10 }, unlocked: false, children: [
                     { id: 'forca-15-1-1', name: 'Passo de Colosso', description: 'Atravessa inimigos e objetos, causando dano de impacto.', requirements: { forca: 15 }, unlocked: false, children: [] },
                     { id: 'forca-15-1-2', name: 'Despedaçador de Concreto', description: 'Quebra barreiras com força, causando dano em área.', requirements: { forca: 15 }, unlocked: false, children: [] },
@@ -273,7 +273,7 @@ const DEFAULT_SKILL_TREES = {
                 ]}
             ]},
             { id: 'forca-5-2', name: 'Técnica de Agarrão', description: 'Usa a força para controlar a posição de inimigos em combate.', requirements: { forca: 5 }, unlocked: false, children: [
-                { id: 'forca-10-6', name: 'Imobilizar', description: 'Prende um inimigo, impedindo-o de se mover ou atacar.', requirements: { forca: 10 }, unlocked: false, children: [
+                { id: 'forca-10-6', name: 'Imobilizar', description: 'Prende um inimigo, impedindo-o de se mover ou atacar.', requirements: { forca: 10 }, tags: ['controle'], unlocked: false, children: [
                     { id: 'forca-15-6-1', name: 'Esmagamento de Ossos', description: 'Causa dano contínuo ao alvo imobilizado.', requirements: { forca: 15 }, unlocked: false, children: [] },
                     { id: 'forca-15-6-2', name: 'Sufocar', description: 'Corta a respiração do alvo, causando penalidades.', requirements: { forca: 15 }, unlocked: false, children: [] },
                     { id: 'forca-15-6-3', name: 'Nó Humano', description: 'Torce o corpo do alvo de forma a dificultar sua fuga.', requirements: { forca: 15 }, unlocked: false, children: [] },
@@ -422,7 +422,7 @@ const DEFAULT_SKILL_TREES = {
             ]}
         ],
         'Agilidade': [
-            { id: 'agilidade-5-1', name: 'Mergulho no Vazio', description: 'Permite se mover rapidamente para desviar de ataques ou se reposicionar.', requirements: { agilidade: 5 }, unlocked: false, children: [
+            { id: 'agilidade-5-1', name: 'Mergulho no Vazio', description: 'Permite se mover rapidamente para desviar de ataques ou se reposicionar.', requirements: { agilidade: 5 }, tags: ['movimento', 'defesa'], unlocked: false, children: [
                 { id: 'agilidade-10-1', name: 'Ataque Rápido', description: 'Permite realizar um ataque adicional no mesmo turno, mas com dano reduzido.', requirements: { agilidade: 10 }, unlocked: false, children: [
                     { id: 'agilidade-15-1-1', name: 'Salto Fantasma', description: 'Ao usar o Ataque Rápido, você deixa uma ilusão de si mesmo para trás, confundindo inimigos e aumentando sua chance de esquiva.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
                     { id: 'agilidade-15-1-2', name: 'Ataque de Sombra', description: 'Seus ataques rápidos agora têm a chance de teleportá-lo para trás do inimigo, permitindo que você atinja pontos fracos.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
@@ -460,7 +460,7 @@ const DEFAULT_SKILL_TREES = {
                 ]}
             ]},
             { id: 'agilidade-5-2', name: 'Furtividade', description: 'A arte de se mover sem ser visto ou ouvido.', requirements: { agilidade: 5 }, unlocked: false, children: [
-                { id: 'agilidade-10-6', name: 'Movimento Silencioso', description: 'Reduz o ruído que você faz ao se mover.', requirements: { agilidade: 10 }, unlocked: false, children: [
+                { id: 'agilidade-10-6', name: 'Movimento Silencioso', description: 'Reduz o ruído que você faz ao se mover.', requirements: { agilidade: 10 }, tags: ['furtividade'], unlocked: false, children: [
                     { id: 'agilidade-15-6-1', name: 'Passos de Gato', description: 'Você não faz barulho ao andar ou correr lentamente.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
                     { id: 'agilidade-15-6-2', name: 'Ignorar Terreno Ruidoso', description: 'Move-se silenciosamente sobre superfícies como cascalho ou folhas secas.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
                     { id: 'agilidade-15-6-3', name: 'Corrida Silenciosa', description: 'Pode correr sem fazer barulho por um curto período.', requirements: { agilidade: 15 }, unlocked: false, children: [] },
@@ -609,7 +609,7 @@ const DEFAULT_SKILL_TREES = {
             ]}
         ],
         'Presença': [
-            { id: 'presenca-5-1', name: 'Grito de Guerra', description: 'Uma habilidade básica para intimidar inimigos próximos, podendo causar hesitação.', requirements: { presenca: 5 }, unlocked: false, children: [
+            { id: 'presenca-5-1', name: 'Grito de Guerra', description: 'Uma habilidade básica para intimidar inimigos próximos, podendo causar hesitação.', requirements: { presenca: 5 }, tags: ['social', 'controle'], unlocked: false, children: [
                 { id: 'presenca-10-1', name: 'Aparência Imponente', description: 'Foca na sua capacidade de convencer ou intimidar pessoas e de ter uma presença notável em qualquer ambiente.', requirements: { presenca: 10 }, unlocked: false, children: [
                     { id: 'presenca-15-1-1', name: 'O Olhar Vazio', description: 'Um olhar que lança um terror paralisante, forçando inimigos mais fracos a fugir ou ficar atordoados.', requirements: { presenca: 15 }, unlocked: false, children: [] },
                     { id: 'presenca-15-1-2', name: 'Presença Opressora', description: 'Você emite uma aura que diminui a moral de todos os inimigos próximos, reduzindo a precisão e o dano de seus ataques.', requirements: { presenca: 15 }, unlocked: false, children: [] },
@@ -646,7 +646,7 @@ const DEFAULT_SKILL_TREES = {
                     { id: 'presenca-15-5-5', name: 'Proteção contra Espíritos', description: 'Você e aliados próximos recebem um bônus de defesa contra ataques de entidades incorpóreas.', requirements: { presenca: 15 }, unlocked: false, children: [] }
                 ]}
             ]},
-            { id: 'presenca-5-2', name: 'Liderança', description: 'Capacidade de inspirar e comandar aliados em batalha.', requirements: { presenca: 5 }, unlocked: false, children: [
+            { id: 'presenca-5-2', name: 'Liderança', description: 'Capacidade de inspirar e comandar aliados em batalha.', requirements: { presenca: 5 }, tags: ['suporte', 'social'], unlocked: false, children: [
                 { id: 'presenca-10-6', name: 'Inspirar Coragem', description: 'Remove o efeito de medo de um aliado e concede um bônus temporário.', requirements: { presenca: 10 }, unlocked: false, children: [
                     { id: 'presenca-15-6-1', name: 'Aura de Bravura', description: 'Aliados próximos a você ganham resistência a medo.', requirements: { presenca: 15 }, unlocked: false, children: [] },
                     { id: 'presenca-15-6-2', name: 'Grito de Batalha', description: 'Concede a todos os aliados um bônus de dano no próximo ataque.', requirements: { presenca: 15 }, unlocked: false, children: [] },
@@ -662,7 +662,7 @@ const DEFAULT_SKILL_TREES = {
                     { id: 'presenca-15-7-5', name: 'Plano B', description: 'Quando um plano falha, você rapidamente bola outro, concedendo um bônus para a equipe.', requirements: { presenca: 15 }, unlocked: false, children: [] }
                 ]}
             ]},
-            { id: 'presenca-5-3', name: 'Manipulação Social', description: 'Influencia sutilmente os pensamentos e ações dos outros.', requirements: { presenca: 5 }, unlocked: false, children: [
+            { id: 'presenca-5-3', name: 'Manipulação Social', description: 'Influencia sutilmente os pensamentos e ações dos outros.', requirements: { presenca: 5 }, tags: ['social', 'enganação'], unlocked: false, children: [
                 { id: 'presenca-10-8', name: 'Persuasão', description: 'Convence outros a concordarem com você ou a fazerem pequenos favores.', requirements: { presenca: 10 }, unlocked: false, children: [
                     { id: 'presenca-15-8-1', name: 'Lábia', description: 'Mente de forma convincente.', requirements: { presenca: 15 }, unlocked: false, children: [] },
                     { id: 'presenca-15-8-2', name: 'Diplomacia', description: 'Acalma situações tensas e negocia acordos.', requirements: { presenca: 15 }, unlocked: false, children: [] },
@@ -678,7 +678,7 @@ const DEFAULT_SKILL_TREES = {
                     { id: 'presenca-15-9-5', 'name': 'Causar Medo', 'description': 'Pode forçar um inimigo de vontade fraca a fugir.', 'requirements': { 'presenca': 15 }, 'unlocked': false, 'children': [] }
                 ]}
             ]},
-            { id: 'presenca-5-4', name: 'Percepção Paranormal', description: 'Sente e interage com o mundo invisível e sobrenatural.', requirements: { presenca: 5 }, unlocked: false, children: [
+            { id: 'presenca-5-4', name: 'Percepção Paranormal', description: 'Sente e interage com o mundo invisível e sobrenatural.', requirements: { presenca: 5 }, tags: ['investigacao', 'ocultismo'], unlocked: false, children: [
                 { id: 'presenca-10-10', name: 'Sentir o Paranormal', description: 'Detecta a presença de entidades ou fenômenos anormais.', requirements: { presenca: 10 }, unlocked: false, children: [
                     { id: 'presenca-15-10-1', name: 'Localizar Fonte', description: 'Determina a direção e a distância de uma presença paranormal.', requirements: { presenca: 15 }, unlocked: false, children: [] },
                     { id: 'presenca-15-10-2', name: 'Identificar Tipo', description: 'Tenta identificar o tipo de entidade (fantasma, demônio, etc.).', requirements: { presenca: 15 }, unlocked: false, children: [] },
@@ -712,7 +712,7 @@ const DEFAULT_SKILL_TREES = {
             ]}
         ],
         'Vitalidade': [
-            { id: 'vitalidade-5-1', name: 'Recuperação Acelerada', description: 'Sua capacidade de recuperação é aprimorada, recuperando mais vida e vigor em descansos.', requirements: { vitalidade: 5 }, unlocked: false, children: [
+            { id: 'vitalidade-5-1', name: 'Recuperação Acelerada', description: 'Sua capacidade de recuperação é aprimorada, recuperando mais vida e vigor em descansos.', requirements: { vitalidade: 5 }, tags: ['cura', 'sobrevivencia'], unlocked: false, children: [
                 { id: 'vitalidade-10-1', name: 'Resistência à Dor', description: 'Foca em sua capacidade de suportar dano e continuar lutando. Diminui o dano de ataques críticos e de efeitos de sangramento.', requirements: { vitalidade: 10 }, unlocked: false, children: [
                     { id: 'vitalidade-15-1-1', name: 'Pulso de Vigor', description: 'Você libera um pulso de sua própria energia vital que afeta aliados e inimigos próximos. Os aliados são curados e têm seu vigor restaurado. Os inimigos, por sua vez, sentem sua energia vital sendo drenada, sofrendo dano e ficando mais lentos.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
                     { id: 'vitalidade-15-1-2', name: 'Vitalidade Compartilhada', description: 'Você pode transferir seu vigor e parte de sua energia vital para um aliado, curando-o e permitindo que ele use mais habilidades.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
@@ -750,7 +750,7 @@ const DEFAULT_SKILL_TREES = {
                 ]}
             ]},
             { id: 'vitalidade-5-2', name: 'Resistência Passiva', description: 'Aumenta suas defesas naturais contra vários tipos de dano.', requirements: { vitalidade: 5 }, unlocked: false, children: [
-                { id: 'vitalidade-10-6', name: 'Pele de Couro', description: 'Aumenta a resistência a dano físico (corte, perfuração, impacto).', requirements: { vitalidade: 10 }, unlocked: false, children: [
+                { id: 'vitalidade-10-6', name: 'Pele de Couro', description: 'Aumenta a resistência a dano físico (corte, perfuração, impacto).', requirements: { vitalidade: 10 }, tags: ['defesa'], unlocked: false, children: [
                     { id: 'vitalidade-15-6-1', name: 'Resistência a Cortes', description: 'Reduz significativamente o dano de lâminas.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
                     { id: 'vitalidade-15-6-2', name: 'Resistência a Perfuração', description: 'Reduz significativamente o dano de balas e estocadas.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
                     { id: 'vitalidade-15-6-3', name: 'Resistência a Impacto', description: 'Reduz significativamente o dano de quedas e golpes contundentes.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
@@ -782,7 +782,7 @@ const DEFAULT_SKILL_TREES = {
                 ]}
             ]},
             { id: 'vitalidade-5-4', name: 'Sobrevivencialismo', description: 'Técnicas para sobreviver em ambientes hostis e situações de perigo.', requirements: { vitalidade: 5 }, unlocked: false, children: [
-                { id: 'vitalidade-10-10', name: 'Mestre da Natureza', description: 'Conhecimento profundo sobre a vida selvagem e plantas.', requirements: { vitalidade: 10 }, unlocked: false, children: [
+                { id: 'vitalidade-10-10', name: 'Mestre da Natureza', description: 'Conhecimento profundo sobre a vida selvagem e plantas.', requirements: { vitalidade: 10 }, tags: ['sobrevivencia', 'utilidade'], unlocked: false, children: [
                     { id: 'vitalidade-15-10-1', name: 'Encontrar Comida e Água', description: 'Sabe como encontrar sustento em qualquer ambiente.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
                     { id: 'vitalidade-15-10-2', name: 'Criar Abrigo', description: 'Constrói abrigos improvisados rapidamente.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
                     { id: 'vitalidade-15-10-3', name: 'Rastreamento', description: 'Segue rastros de animais e pessoas.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
@@ -798,7 +798,7 @@ const DEFAULT_SKILL_TREES = {
                 ]}
             ]},
             { id: 'vitalidade-5-5', name: 'Protetor', description: 'Habilidades focadas em defender e proteger aliados.', requirements: { vitalidade: 5 }, unlocked: false, children: [
-                { id: 'vitalidade-10-12', name: 'Posição de Guarda', description: 'Aumenta sua defesa e a de um aliado adjacente.', requirements: { vitalidade: 10 }, unlocked: false, children: [
+                { id: 'vitalidade-10-12', name: 'Posição de Guarda', description: 'Aumenta sua defesa e a de um aliado adjacente.', requirements: { vitalidade: 10 }, tags: ['defesa', 'suporte'], unlocked: false, children: [
                     { id: 'vitalidade-15-12-1', name: 'Muralha Humana', description: 'Você pode bloquear completamente um caminho estreito.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
                     { id: 'vitalidade-15-12-2', name: 'Atenção Dividida', description: 'Pode proteger dois aliados ao mesmo tempo com penalidade reduzida.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
                     { id: 'vitalidade-15-12-3', name: 'Escudo Aliado', description: 'Usa seu escudo para proteger um aliado adjacente.', requirements: { vitalidade: 15 }, unlocked: false, children: [] },
@@ -815,7 +815,7 @@ const DEFAULT_SKILL_TREES = {
             ]}
         ],
         'Inteligência': [
-            { id: 'inteligencia-5-1', name: 'Análise Tática', description: 'Permite gastar uma ação para descobrir fraquezas e resistências de um inimigo.', requirements: { inteligencia: 5 }, unlocked: false, children: [
+            { id: 'inteligencia-5-1', name: 'Análise Tática', description: 'Permite gastar uma ação para descobrir fraquezas e resistências de um inimigo.', requirements: { inteligencia: 5 }, tags: ['investigacao', 'suporte'], unlocked: false, children: [
                 { id: 'inteligencia-10-1', name: 'Memória Fotográfica', description: 'Foca na sua capacidade de absorver e reter informações rapidamente. Permite que o personagem se lembre de detalhes e informações com facilidade.', requirements: { inteligencia: 10 }, unlocked: false, children: [
                     { id: 'inteligencia-15-1-1', name: 'Previsão de Falhas', description: 'Você analisa a realidade e o ambiente ao seu redor tão rapidamente que pode prever as falhas mais prováveis em um inimigo ou na estrutura.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
                     { id: 'inteligencia-15-1-2', name: 'Leitura de Mente', description: 'Você pode ler os pensamentos de um inimigo para descobrir seus planos, fraquezas ou segredos.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
@@ -852,7 +852,7 @@ const DEFAULT_SKILL_TREES = {
                     { id: 'inteligencia-15-5-5', name: 'Enfraquecer pelo Conhecimento', description: 'Descobrir o nome verdadeiro ou a origem de uma entidade a enfraquece.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
                 ]}
             ]},
-            { id: 'inteligencia-5-2', name: 'Conhecimento Acadêmico', description: 'Perícia em áreas do saber como história, ciência ou ocultismo.', requirements: { inteligencia: 5 }, unlocked: false, children: [
+            { id: 'inteligencia-5-2', name: 'Conhecimento Acadêmico', description: 'Perícia em áreas do saber como história, ciência ou ocultismo.', requirements: { inteligencia: 5 }, tags: ['investigacao', 'ocultismo'], unlocked: false, children: [
                 { id: 'inteligencia-10-6', name: 'Historiador', description: 'Conhecimento profundo sobre eventos passados, culturas e civilizações.', requirements: { inteligencia: 10 }, unlocked: false, children: [
                     { id: 'inteligencia-15-6-1', name: 'Lembrar Detalhe', description: 'Lembra-se de um fato histórico relevante para a situação atual.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
                     { id: 'inteligencia-15-6-2', name: 'Analisar Artefato', description: 'Determina a origem e a idade de um objeto antigo.', requirements: { inteligencia: 15 }, unlocked: false, children: [] },
@@ -923,7 +923,7 @@ const DEFAULT_SKILL_TREES = {
                     { id: 'inteligencia-15-14-5', name: 'Obter Confissão', description: 'Consegue uma confissão completa de um alvo culpado.', requirements: { inteligencia: 15 }, unlocked: false, children: [] }
                 ]}
             ]}
-        ]
+        ],
     }
 };
 
@@ -1854,6 +1854,10 @@ class CharacterSheet {
         const campaignId = params.get('campaignId');
         const backBtn = document.getElementById('back-to-campaign-btn');
         if (campaignId && backBtn) {
+            // Busca os dados da campanha para aplicar os "Caminhos Iluminados"
+            const campaignData = await getCampaignById(campaignId);
+            this.campaign = campaignData; // Armazena os dados da campanha na instância da ficha
+
             backBtn.href = `gerenciar-campanha.html?id=${campaignId}`;
             backBtn.style.display = 'inline-block';
         }
@@ -1861,6 +1865,7 @@ class CharacterSheet {
         if (this.character) {
             this.setupEventListeners();
             this.renderSkillTree();
+            this.renderFullSkillTree(); // Adicionado para renderizar a nova aba de habilidades
             this.setupImageUpload(); // Adiciona o listener para upload de imagem
             this.checkSpecialization(); // Verifica se a escolha de especialização deve ser mostrada
             this.renderProficiencies();
@@ -2147,6 +2152,12 @@ class CharacterSheet {
                 const currentPanel = e.target.closest('.accordion-panel');
                 
                 document.querySelectorAll('.actions-accordion .accordion-panel.active').forEach(activePanel => {
+                    // Se o painel que está sendo aberto é o de Habilidades, não fecha os outros
+                    if (currentPanel.querySelector('#full-skill-tree-container')) {
+                        // Ação especial para o painel de habilidades, se necessário
+                    }
+
+                    // Fecha outros painéis se não forem o que foi clicado
                     if (activePanel !== currentPanel) {
                         activePanel.classList.remove('active');
                     }
@@ -2620,16 +2631,184 @@ class CharacterSheet {
         return skillNode;
     }
 
-    unlockSkill(skillId) {
+    // --- NOVAS FUNÇÕES PARA O SISTEMA DE REVELAÇÃO ---
+
+    /**
+     * Renderiza a árvore de habilidades completa na nova aba "Habilidades".
+     * Esta é uma visualização para o jogador planejar sua build.
+     */
+    renderFullSkillTree() {
+        const container = document.getElementById('full-skill-tree-container');
+        if (!container) return;
+
+        container.innerHTML = ''; // Limpa o conteúdo anterior
+
+        // 1. Nebulosa da Classe e Elemento
+        const classTree = SKILL_TREES[this.character.class];
+        if (classTree) {
+            const elementTree = classTree[this.character.element];
+            if (elementTree) {
+                for (const specName in elementTree) {
+                    const specSkills = elementTree[specName];
+                    const specContainer = document.createElement('div');
+                    specContainer.className = 'skill-tree-sub-category';
+                    specContainer.innerHTML = `<h4>${specName} (${this.character.class} / ${this.character.element})</h4>`;
+                    const skillListContainer = document.createElement('div');
+                    skillListContainer.className = 'skill-tree-root';
+                    specSkills.forEach(skill => this._renderSkillNodeRecursive(skill, skillListContainer, null));
+                    specContainer.appendChild(skillListContainer);
+                    container.appendChild(specContainer);
+                }
+            }
+        }
+
+        // 2. Nebulosa dos Atributos
+        const attributeTree = SKILL_TREES.Atributo;
+        if (attributeTree) {
+            for (const attrName in attributeTree) {
+                const attrSkills = attributeTree[attrName];
+                const attrContainer = document.createElement('div');
+                attrContainer.className = 'skill-tree-sub-category';
+                attrContainer.innerHTML = `<h4>Habilidades de ${attrName}</h4>`;
+                const skillListContainer = document.createElement('div');
+                skillListContainer.className = 'skill-tree-root';
+                attrSkills.forEach(skill => this._renderSkillNodeRecursive(skill, skillListContainer, null));
+                attrContainer.appendChild(skillListContainer);
+                container.appendChild(attrContainer);
+            }
+        }
+    }
+
+    /**
+     * Cria o nó de uma habilidade para a árvore completa, mostrando requisitos e status.
+     */
+    _renderSkillNodeRecursive(skill, parentContainer, parentSkill) {
+        const skillWrapper = document.createElement('div');
+        skillWrapper.className = 'skill-node-wrapper-player';
+
+        const skillNode = this.createSkillNode(skill, parentSkill); // Reutiliza a função de criação de nó
+        skillWrapper.appendChild(skillNode);
+
+        if (skill.children && skill.children.length > 0) {
+            const childrenContainer = document.createElement('div');
+            childrenContainer.className = 'skill-children-container-player';
+            skill.children.forEach(childSkill => {
+                this._renderSkillNodeRecursive(childSkill, childrenContainer, skill);
+            });
+            skillWrapper.appendChild(childrenContainer);
+        }
+
+        parentContainer.appendChild(skillWrapper);
+    }
+
+    /**
+     * Cria o elemento visual de um nó de habilidade, com botão para desbloquear se aplicável.
+     */
+    createSkillNode(skill, parentSkill) {
+        const skillNode = document.createElement('div');
+        skillNode.className = 'skill-node';
+        const isUnlocked = this.character.skills && this.character.skills.includes(skill.id);
+        if (isUnlocked) {
+            skillNode.classList.add('unlocked');
+            // Se a habilidade desbloqueada era um caminho iluminado, marca como tal
+            if (this.character.unlockedAlignedSkills && this.character.unlockedAlignedSkills.includes(skill.id)) {
+                skillNode.classList.add('aligned-path-unlocked');
+            }
+        }
+
+        let requirementsMet = Object.entries(skill.requirements || {}).every(([req, value]) => this.character.attributes[req] >= value);
+        const parentUnlocked = !parentSkill || (this.character.skills && this.character.skills.includes(parentSkill.id));
+
+        if (!parentUnlocked) {
+            skillNode.classList.add('locked-by-parent');
+        }
+
+        // Lógica dos "Caminhos Iluminados"
+        const campaignAlignment = this.campaign?.cosmicAlignment || [];
+        const isAligned = skill.tags && skill.tags.some(tag => campaignAlignment.includes(tag));
+        if (isAligned && !isUnlocked) {
+            skillNode.classList.add('aligned-path');
+        }
+
+        // Lógica do "Atalho" (Bypass de Requisitos)
+        const parentWasAligned = parentSkill && this.character.unlockedAlignedSkills && this.character.unlockedAlignedSkills.includes(parentSkill.id);
+        if (parentWasAligned) {
+            requirementsMet = true; // Ignora os requisitos de atributo
+            skillNode.classList.add('requirement-bypassed');
+        }
+
+        const reqString = Object.entries(skill.requirements || {}).map(([key, value]) => `${key.toUpperCase()} ${value}`).join(', ');
+
+        skillNode.innerHTML = `
+            <h4 class="skill-name">${skill.name}</h4>
+            <p class="skill-description">${skill.description}</p>
+            ${reqString ? `<div class="skill-requirements">
+                <strong>Requisitos:</strong> 
+                <span class="${parentWasAligned ? 'bypassed-text' : ''}">${reqString}</span>
+                ${parentWasAligned ? '<span class="bypassed-tag">IGNORADO</span>' : ''}
+            </div>` : ''}
+            ${isAligned && !isUnlocked ? '<div class="aligned-tag">CAMINHO ILUMINADO</div>' : ''}
+        `;
+
+        if (!isUnlocked && requirementsMet && parentUnlocked && this.character.skillPoints > 0) {
+            const unlockButton = document.createElement('button');
+            unlockButton.textContent = 'Desbloquear';
+            unlockButton.className = 'unlock-skill-btn';
+            unlockButton.addEventListener('click', () => this.unlockSkill(skill.id, isAligned));
+            skillNode.appendChild(unlockButton);
+        }
+
+        return skillNode;
+    }
+
+    unlockSkill(skillId, wasAligned) {
         if (this.character.skillPoints > 0) {
             this.character.skillPoints--;
-            this.character.skills.push(skillId);
+            if (!this.character.skills) this.character.skills = [];
+            if (!this.character.unlockedAlignedSkills) this.character.unlockedAlignedSkills = [];
+
+            // Se a habilidade desbloqueada era um "Caminho Iluminado", registra isso.
+            if (wasAligned) {
+                this.character.unlockedAlignedSkills.push(skillId);
+            }
+
+            // Remove o ID da habilidade pai da lista de bypass, pois o benefício foi usado.
+            const parentSkill = this.findParentSkill(skillId);
+            if (parentSkill && this.character.unlockedAlignedSkills.includes(parentSkill.id)) {
+                const index = this.character.unlockedAlignedSkills.indexOf(parentSkill.id);
+                if (index > -1) {
+                    this.character.unlockedAlignedSkills.splice(index, 1);
+                }
+            }
+
+            this.character.skills.push(skillId); // Adiciona a habilidade à lista de desbloqueadas
             this.saveDebounced();
             this.renderSkillTree();
+            this.renderFullSkillTree(); // Re-renderiza a árvore completa para atualizar o status
             this.renderSheet();
         } else {
             alert("Você não tem pontos de habilidade suficientes para desbloquear esta habilidade.");
         }
+    }
+
+    findParentSkill(childId, tree = SKILL_TREES) {
+        for (const key in tree) {
+            if (Array.isArray(tree[key])) {
+                for (const skill of tree[key]) {
+                    if (skill.children && skill.children.some(child => child.id === childId)) {
+                        return skill;
+                    }
+                    if (skill.children) {
+                        const found = this.findParentSkill(childId, { children: skill.children });
+                        if (found) return found;
+                    }
+                }
+            } else if (typeof tree[key] === 'object' && tree[key] !== null) {
+                const found = this.findParentSkill(childId, tree[key]);
+                if (found) return found;
+            }
+        }
+        return null;
     }
 
     recalculateDerivedStats() {

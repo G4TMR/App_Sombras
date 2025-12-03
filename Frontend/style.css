@@ -2017,6 +2017,42 @@ body[data-page="patente"] { --page-color: #6f42c1; }
     background-color: var(--color-primary-hover);
 }
 
+.skill-node.aligned-path {
+    border-color: var(--color-accent-rare);
+    box-shadow: 0 0 15px rgba(50, 205, 50, 0.5);
+}
+
+.skill-node.aligned-path .skill-name {
+    color: var(--color-accent-rare);
+    text-shadow: 0 0 8px rgba(50, 205, 50, 0.7);
+}
+
+.aligned-tag {
+    display: inline-block;
+    background-color: rgba(50, 205, 50, 0.2);
+    color: var(--color-accent-rare);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
+
+.skill-node.requirement-bypassed {
+    border-style: dashed;
+}
+
+.bypassed-text {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.bypassed-tag {
+    color: var(--color-accent-rare);
+    font-weight: bold;
+    margin-left: 0.5rem;
+}
+
 .actions-accordion {
     display: flex;
     flex-direction: column;
