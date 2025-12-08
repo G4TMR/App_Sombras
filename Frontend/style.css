@@ -3476,6 +3476,70 @@ body.dev-mode #dev-mode-form { display: none; }
     transform: translateY(0);
 }
 
+/* --- NOVO E CORRIGIDO: NAVEGAÇÃO FLUTUANTE MOBILE PARA FICHA --- */
+.mobile-fab-container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 1050;
+    display: none; /* CRÍTICO: Escondido por padrão para não aparecer no PC */
+}
+
+.mobile-fab {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px; /* Quadrado com cantos arredondados */
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.mobile-fab .fab-icon {
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.mobile-fab .icon-close {
+    transform: rotate(-45deg) scale(0.5);
+    opacity: 0;
+}
+
+.mobile-fab.open {
+    background: var(--color-danger);
+}
+
+.mobile-fab.open .icon-grid {
+    transform: rotate(45deg) scale(0.5);
+    opacity: 0;
+}
+
+.mobile-fab.open .icon-close {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+}
+
+.mobile-nav-menu {
+    position: absolute;
+    bottom: 75px;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    opacity: 0;
+    visibility: hidden; /* CRÍTICO: Escondido por padrão */
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+}
+
 .loader-small {
     width: 20px;
     height: 20px;
@@ -3651,11 +3715,10 @@ body.dev-mode #dev-mode-form { display: none; }
         margin-bottom: 1rem; /* Espaço entre as seções quando visíveis */
     }
     
-    /* Mostra apenas a seção marcada como padrão (Lore) */
     .sheet-mobile-section.mobile-default-visible, #mobile-section-lore {
         display: block; /* Mostra apenas a seção de lore inicialmente */
     }
-    
+
     /* --- GERENCIAR CAMPANHA (MOBILE) --- */
     .campaign-layout {
         grid-template-columns: 1fr; /* Força uma única coluna */
