@@ -1850,6 +1850,10 @@ class CharacterSheet {
         this.renderSheet();
 
         // Lógica para o botão "Voltar para a Campanha"
+        // NOVO: Inicializa a navegação mobile se aplicável
+        if (window.innerWidth <= 800) {
+            this.initializeMobileNavigation();
+        }
         const params = new URLSearchParams(window.location.search);
         const campaignId = params.get('campaignId');
         const backBtn = document.getElementById('back-to-campaign-btn');
@@ -2631,6 +2635,29 @@ class CharacterSheet {
         return skillNode;
     }
 
+    initializeMobileNavigation() {
+        const fab = document.getElementById('mobile-fab');
+        const navMenu = document.getElementById('mobile-nav-menu');
+        const navLinks = navMenu.querySelectorAll('a');
+        const sections = document.querySelectorAll('.sheet-mobile-section');
+
+        fab.addEventListener('click', () => {
+            navMenu.classList.toggle('visible');
+            fab.classList.toggle('open');
+        });
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                sections.forEach(section => {
+                    section.style.display = section.id === targetId ? 'block' : 'none';
+                });
+                navMenu.classList.remove('visible');
+                fab.classList.remove('open');
+            });
+        });
+    }
     /**
      * Inicializa o modal da árvore de habilidades, incluindo pan e zoom.
      */
@@ -2691,6 +2718,52 @@ class CharacterSheet {
             viewport.style.cursor = 'grab';
         });
 
+        // --- NOVOS EVENTOS DE TOQUE PARA MOBILE ---
+        let initialPinchDistance = null;
+
+        viewport.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) { // Pan com um dedo
+                isPanning = true;
+                startPanX = e.touches[0].clientX - panX;
+                startPanY = e.touches[0].clientY - panY;
+            } else if (e.touches.length === 2) { // Zoom com dois dedos (pinça)
+                isPanning = false; // Para de mover ao fazer pinça
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                initialPinchDistance = Math.sqrt(dx * dx + dy * dy);
+            }
+        }, { passive: true });
+
+        viewport.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Previne o scroll da página enquanto navega no mapa
+            if (e.touches.length === 1 && isPanning) { // Movimento de Pan
+                panX = e.touches[0].clientX - startPanX;
+                panY = e.touches[0].clientY - startPanY;
+                applyTransform();
+            } else if (e.touches.length === 2 && initialPinchDistance) { // Movimento de Zoom
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const newPinchDistance = Math.sqrt(dx * dx + dy * dy);
+                const scaleFactor = newPinchDistance / initialPinchDistance;
+
+                const rect = viewport.getBoundingClientRect();
+                const pinchCenterX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
+                const pinchCenterY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+
+                const oldScale = scale;
+                scale = Math.min(Math.max(0.2, scale), 3); // Limita o zoom
+                scale *= scaleFactor;
+
+                panX = pinchCenterX - (pinchCenterX - panX) * (scale / oldScale);
+                panY = pinchCenterY - (pinchCenterY - panY) * (scale / oldScale);
+
+                applyTransform();
+                initialPinchDistance = newPinchDistance; // Atualiza para um zoom contínuo
+            }
+        }, { passive: false });
+
+        viewport.addEventListener('touchend', () => { isPanning = false; initialPinchDistance = null; });
+
         viewport.addEventListener('wheel', (e) => {
             e.preventDefault();
             const zoomIntensity = 0.15; // Aumentado de 0.1 para 0.15 para um zoom um pouco mais rápido
@@ -2716,51 +2789,75 @@ class CharacterSheet {
         applyTransform();
     }
 
+    /**
+     * Renderiza a árvore de habilidades completa no modal.
+     * A nova estrutura será vertical, com as especializações no topo,
+     * seguidas pelas árvores de atributos.
+     */
     renderFullSkillTree() {
         const canvas = document.getElementById('skill-tree-canvas');
         if (!canvas) return;
-
-        canvas.innerHTML = ''; // Limpa o conteúdo anterior
-
+    
+        canvas.innerHTML = ''; // Limpa o conteúdo anterior para re-renderizar
+    
+        // Container principal para todas as árvores
         const mainContainer = document.createElement('div');
-        mainContainer.style.position = 'absolute';
-        mainContainer.style.left = '50px';
-        mainContainer.style.top = '50px';
-        
-        // 1. Nebulosa da Classe e Elemento
+        mainContainer.className = 'skill-tree-main-container';
+    
+        // --- Seção de Especializações (Topo) ---
+        const specializationsContainer = document.createElement('div');
+        specializationsContainer.className = 'skill-tree-section-container';
+        const specHeader = document.createElement('h2');
+        specHeader.className = 'skill-tree-section-header';
+        specHeader.textContent = 'Especializações';
+        specializationsContainer.appendChild(specHeader);
+    
+        const specTreesContainer = document.createElement('div');
+        specTreesContainer.className = 'skill-tree-row'; // Coloca as árvores de especialização lado a lado
+    
         const classTree = SKILL_TREES[this.character.class];
         if (classTree) {
             const elementTree = classTree[this.character.element];
             if (elementTree) {
                 for (const specName in elementTree) {
                     const skills = elementTree[specName];
-                    const categoryContainer = this._createTreeCategory(
-                        `${specName} (${this.character.class})`,
-                        skills
-                    );
-                    mainContainer.appendChild(categoryContainer);
+                    // Cria uma coluna para cada árvore de especialização
+                    const specColumn = this._createTreeCategory(`${specName} (${this.character.class})`, skills);
+                    specTreesContainer.appendChild(specColumn);
                 }
             }
         }
-
-        // 2. Nebulosa dos Atributos
+        specializationsContainer.appendChild(specTreesContainer);
+        mainContainer.appendChild(specializationsContainer);
+    
+        // --- Seção de Atributos (Abaixo) ---
+        const attributesContainer = document.createElement('div');
+        attributesContainer.className = 'skill-tree-section-container';
+        const attrHeader = document.createElement('h2');
+        attrHeader.className = 'skill-tree-section-header';
+        attrHeader.textContent = 'Atributos';
+        attributesContainer.appendChild(attrHeader);
+    
+        const attrTreesContainer = document.createElement('div');
+        attrTreesContainer.className = 'skill-tree-row'; // Coloca as árvores de atributos lado a lado
+    
         const attributeTree = SKILL_TREES.Atributo;
         for (const attrName in attributeTree) {
             const skills = attributeTree[attrName];
-            const categoryContainer = this._createTreeCategory(
-                `Habilidades de ${attrName}`,
-                skills
-            );
-            mainContainer.appendChild(categoryContainer);
+            // Cria uma coluna para cada árvore de atributo
+            const attrColumn = this._createTreeCategory(`Habilidades de ${attrName}`, skills);
+            attrTreesContainer.appendChild(attrColumn);
         }
-
+        attributesContainer.appendChild(attrTreesContainer);
+        mainContainer.appendChild(attributesContainer);
+    
         canvas.appendChild(mainContainer);
     }
 
     _createTreeCategory(title, skills) {
         const categoryContainer = document.createElement('div');
-        categoryContainer.className = 'skill-tree-sub-category';
-        categoryContainer.innerHTML = `<h4>${title}</h4>`;
+        categoryContainer.className = 'skill-tree-category-column'; // Nova classe para a coluna
+        categoryContainer.innerHTML = `<h3 class="skill-tree-category-title">${title}</h3>`;
         const skillListContainer = document.createElement('div');
         skillListContainer.className = 'skill-tree-root';
         skills.forEach(skill => this._renderSkillNodeRecursive(skill, skillListContainer, null));
@@ -2769,22 +2866,22 @@ class CharacterSheet {
     }
 
     _renderSkillNodeRecursive(skill, parentContainer, parentSkill) {
-        const skillWrapper = document.createElement('div');
-        skillWrapper.className = 'skill-node-wrapper-player';
-
-        const skillNode = this.createSkillNode(skill, parentSkill);
-        skillWrapper.appendChild(skillNode);
-
+        const nodeContainer = document.createElement('div');
+        nodeContainer.className = 'skill-node-container';
+    
+        const skillNode = this.createSkillNode(skill, parentSkill); // Cria o nó da habilidade
+        nodeContainer.appendChild(skillNode);
+    
         if (skill.children && skill.children.length > 0) {
             const childrenContainer = document.createElement('div');
-            childrenContainer.className = 'skill-children-container-player';
+            childrenContainer.className = 'skill-children-container'; // Container para os filhos
             skill.children.forEach(childSkill => {
                 this._renderSkillNodeRecursive(childSkill, childrenContainer, skill);
             });
-            skillWrapper.appendChild(childrenContainer);
+            nodeContainer.appendChild(childrenContainer);
         }
-
-        parentContainer.appendChild(skillWrapper);
+    
+        parentContainer.appendChild(nodeContainer);
     }
 
     createSkillNode(skill, parentSkill) {
@@ -4956,25 +5053,28 @@ async function checkAuthStatus() {
     const authContainer = document.createElement('div'); // Cria um novo
     authContainer.className = 'auth-container';
     nav.appendChild(authContainer); // Adiciona ao menu
-    
+
+    // Otimização: Exibe o botão de login imediatamente.
+    // Se um usuário for encontrado, este conteúdo será substituído.
+    authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
+    currentUserId = null;
+
     try {
         const response = await api.get('/auth/user');
         const user = response.data;
 
         if (user && user._id) {
-            // Se encontrar um usuário logado, atualiza o container e define o ID global
+            // Usuário logado: substitui o botão de login pelas informações do usuário.
             authContainer.innerHTML = `<span class="user-info">Olá, <span class="user-display-name">${user.displayName}</span>! <a href="${API_BASE_URL}/auth/logout" class="auth-link">[Sair]</a></span>`;
             currentUserId = user._id;
             return user;
         }
-        // Se a API retornar sucesso mas sem usuário, força o estado de deslogado
-        authContainer.innerHTML = `<a href="${API_BASE_URL}/auth/google" class="login-btn auth-link">Login com Google</a>`;
-        currentUserId = null;
+        // Se a API responder mas não houver usuário, o botão de login já está visível.
         return null;
     } catch (error) {
-        // Se a API falhar (ex: 401, erro de rede), o botão de login já está na tela.
+        // Se a API falhar (ex: 401, erro de rede), o botão de login já está visível.
         console.log('Nenhuma sessão de usuário ativa encontrada. O botão de login será exibido.');
-        // Em caso de erro, garante que o botão de login seja exibido
+        // Retorna nulo para indicar que não há usuário.
         return null;
     }
 }
@@ -5034,11 +5134,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const protectedPages = ['criar-agente.html', 'agentes.html', 'campanhas.html', 'ficha-agente.html', 'gerenciar-campanha.html'];
 
     // Verifica se a página atual é protegida e se o usuário não está logado
-    if (protectedPages.some(p => path.includes(p)) && !user) {
+    const isProtected = protectedPages.some(p => path.includes(p));
+    if (isProtected && !user) {
         console.log(`Acesso negado à página ${path}. Redirecionando para login.`);
         const mainContent = document.querySelector('main');
         if (mainContent) {
-            mainContent.innerHTML = `
+            mainContent.style.display = 'block'; // Garante que o <main> esteja visível
+            mainContent.innerHTML = ` 
                 <div class="content-box" style="text-align: center; max-width: 600px; margin: 4rem auto;">
                     <h2>Acesso Restrito</h2>
                     <p class="info-text">Você precisa estar logado para acessar esta página.</p>
@@ -5048,6 +5150,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         // Impede a execução do resto do script da página
         return;
+    }
+
+    // Se a página é protegida e o usuário está logado, mostra o conteúdo.
+    if (isProtected && user) {
+        const mainContent = document.querySelector('main');
+        if (mainContent) mainContent.style.display = 'block';
     }
 
     // Se o usuário estiver logado, continua com a inicialização da página
