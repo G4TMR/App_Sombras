@@ -3569,17 +3569,17 @@ body.dev-mode #dev-mode-form { display: none; }
         text-align: center; /* Centraliza o texto do título */
     }
 
-    /* --- NOVO E CORRIGIDO: LAYOUT MOBILE DA FICHA DE AGENTE --- */
+    /* --- LAYOUT MOBILE DA FICHA DE AGENTE --- */
     .sheet-main-desktop {
         display: block; /* Remove o grid e empilha as colunas */
         padding: 0.5rem; /* Adiciona um pequeno padding para não colar nas bordas */
     }
 
+    /* Esconde todas as seções por padrão no mobile. O JS controlará a visibilidade. */
     .sheet-mobile-section {
-        display: none; /* Esconde todas as seções por padrão */
         margin-bottom: 1rem; /* Espaço entre as seções quando visíveis */
     }
-
+    
     /* Mostra apenas a seção marcada como padrão (Lore) */
     .sheet-mobile-section.mobile-default-visible {
         display: block; /* Mostra apenas a seção de lore inicialmente */

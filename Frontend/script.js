@@ -2642,6 +2642,13 @@ class CharacterSheet {
         const sections = document.querySelectorAll('.sheet-mobile-section');
 
         fab.addEventListener('click', () => {
+            // Se o menu estiver sendo aberto pela primeira vez e nenhuma seção estiver visível,
+            // mostra a seção de Lore por padrão.
+            const isAnySectionVisible = Array.from(sections).some(s => s.style.display === 'block');
+            if (!isAnySectionVisible) {
+                document.getElementById('mobile-section-lore').style.display = 'block';
+            }
+
             navMenu.classList.toggle('visible');
             fab.classList.toggle('open');
         });
@@ -2657,6 +2664,12 @@ class CharacterSheet {
                 fab.classList.remove('open');
             });
         });
+
+        // Garante que ao carregar a página, apenas a seção de Lore esteja visível.
+        sections.forEach(section => {
+            section.style.display = 'none';
+        });
+        document.getElementById('mobile-section-lore').style.display = 'block';
     }
     /**
      * Inicializa o modal da árvore de habilidades, incluindo pan e zoom.
