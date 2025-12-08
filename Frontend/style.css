@@ -1910,9 +1910,11 @@ body[data-page="agentes"] .sheet-container {
 }
 
 .skill-tree-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* CRÍTICO: Cria 5 colunas para as especializações */
+    gap: 2rem; /* Espaço entre as colunas das especializações */
     margin-top: 1rem;
-    overflow-y: auto;
-    padding-right: 10px;
+    overflow: auto; /* Permite rolagem horizontal e vertical se necessário */
 }
 
 .skill-tree-sub-category {
@@ -3717,6 +3719,11 @@ body.dev-mode #dev-mode-form { display: none; }
     
     .sheet-mobile-section.mobile-default-visible, #mobile-section-lore {
         display: block; /* Mostra apenas a seção de lore inicialmente */
+    }
+
+    /* Esconde o botão de "Ver Habilidades" no mobile, pois o FAB o substitui */
+    .main-actions-container {
+        display: none;
     }
 
     /* --- GERENCIAR CAMPANHA (MOBILE) --- */
