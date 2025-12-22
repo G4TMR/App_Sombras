@@ -2790,7 +2790,7 @@ class CharacterSheet {
 
         viewport.addEventListener('wheel', (e) => {
             e.preventDefault();
-            const zoomIntensity = 0.15; // Aumentado de 0.1 para 0.15 para um zoom um pouco mais rápido
+            const zoomIntensity = 1.5; // Aumentado para melhorar a sensibilidade do zoom
             const rect = viewport.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;

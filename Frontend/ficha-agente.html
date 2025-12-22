@@ -652,7 +652,7 @@
 
                 viewport.addEventListener('wheel', (e) => {
                     e.preventDefault(); // Previne o scroll da página
-                    const zoomIntensity = 0.1;
+                    const zoomIntensity = 1.5;
                     const rect = viewport.getBoundingClientRect();
                     const mouseX = e.clientX - rect.left;
                     const mouseY = e.clientY - rect.top;
