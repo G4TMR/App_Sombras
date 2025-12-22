@@ -182,4 +182,8 @@ const skillTrees = {
   },
 };
 
-module.exports = skillTrees;
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = skillTrees;
+} else {
+  window.skillTrees = skillTrees;
+}
