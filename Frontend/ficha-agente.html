@@ -447,8 +447,7 @@
         </div>
     </div>
 
-    <!-- NOVO: Modal da Constelação de Habilidades (Corrigido e Unificado) -(>
-    <div id="skill-tree-mCdal-oorrigid class="modal-overlay"o e Unificado) -->
+    <!-- NOVO: Modal da Constelação de Habilidades (Corrigido e Unificado) -->
     <div id="skill-tree-modal-overlay" class="modal-overlay">
         <div class="skill-tree-modal-content">
             <button id="close-skills-modal-btn" class="close-viewer-btn">&times;</button>
@@ -462,17 +461,8 @@
             <div class="skill-tree-instructions"><p>Use a roda do mouse para dar zoom e arraste para navegar.</p></div>
         </div>
     </div>
-script>
-    <!-- Importa os dado das árvores -->
-    <script src="skillTrees.js"></script>
-    <script src="script.js"></script>
-    
-    <!-- S de Integração da Árvore --
-    <scsiptc
-        document.addEventListener('DOMContentLoaded', () => {
-            const openSkillsBtn = document.getElementById('open-skills-modal-btn');
-            const modalOverlay = document.getElementById('skill-tree-modal-overlay');
-rip         t src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- Importa os dados das árvores -->
     <script src="skillTrees.js"></script>
     <script src="script.js"></script>
@@ -482,7 +472,7 @@ rip         t src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></scrip
         document.addEventListener('DOMContentLoaded', () => {
             const openSkillsBtn = document.getElementById('open-skills-modal-btn');
             const modalOverlay = document.getElementById('skill-tree-modal-overlay');
-            const closeSkillsBtn = modalOverlay.querySelector('#close-skills-modal-btn'); 
+            const closeSkillsBtn = modalOverlay.querySelector('#close-skills-modal-btn'); // Garante que pegamos o botão certo
             
             if(openSkillsBtn && modalOverlay) {
                 openSkillsBtn.addEventListener('click', () => {
@@ -529,15 +519,13 @@ rip         t src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></scrip
                 canvas.appendChild(classNode);
 
                 // 2. Desenha as especializações em um círculo
-
-                    // 3. Desenha as habilidades de cada especiali                const radius = Math.min(width, height) * 0.3; // DIMINUÍDO: Dá mais espaço para as ramificações
+                const radius = Math.min(width, height) * 0.3; // DIMINUÍDO: Dá mais espaço para as ramificações
                 const angleStep = (2 * Math.PI) / treeData.specializations.length;
 
                 treeData.specializations.forEach((spec, index) => {
                     const angle = angleStep * index - (Math.PI / 2); // Começa no topo
                     const specX = 50 + (radius / width * 100) * Math.cos(angle);
-
-                        const skillNode = createNode(skill, skillX, skillY, skill.type);                    const specY = 50 + (radius / height * 100) * Math.sin(angle);
+                    const specY = 50 + (radius / height * 100) * Math.sin(angle);
                     
                     const specNode = createNode(spec, specX, specY, 'specialization');
                     canvas.appendChild(specNode);
@@ -650,14 +638,14 @@ rip         t src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></scrip
                 });
 
                 viewport.addEventListener('wheel', (e) => {
-                    e.preventDefault(); // Previne o scroll da página
+                    e.preventDefault();
                     const zoomIntensity = 0.1;
                     const rect = viewport.getBoundingClientRect();
                     const mouseX = e.clientX - rect.left;
                     const mouseY = e.clientY - rect.top;
 
                     const oldScale = scale;
-                    scale += e.deltaY * -0.001 * zoomIntensity * scale; // Inverte a direção do scroll
+                    scale += e.deltaY * -0.001 * zoomIntensity * scale;
                     scale = Math.min(Math.max(0.2, scale), 3);
 
                     panX = mouseX - (mouseX - panX) * (scale / oldScale);
