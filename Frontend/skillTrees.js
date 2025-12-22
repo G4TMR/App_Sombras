@@ -1,184 +1,192 @@
 const skillTrees = {
   belico: {
     className: "Bélico",
-    // Habilidades genéricas da classe (ramificação central)
-    skills: [
-      {
-        id: "belico_vigor_de_combate",
-        name: "Vigor de Combate",
-        description: "Você recebe um bônus em testes de Vitalidade igual à sua Força.",
-        type: "passive",
-        cost: 1,
-        requirements: { nf: 5 },
-        position: { x: 50, y: 10 }, // Posição central no topo
-      },
-      // --- Ramo Combatente ---
-      {
-        id: "belico_ataque_especial",
-        name: "Ataque Especial",
-        description: "Gaste 2 PA para adicionar seu atributo de Força novamente ao dano de um ataque.",
-        type: "active",
-        cost: 1,
-        requirements: { nf: 15, skills: ["belico_combatente"] },
-        position: { x: 25, y: 40 },
-      },
-      {
-        id: "belico_sangue_e_aco",
-        name: "Sangue e Aço",
-        description: "Quando você sofre dano, recebe +1 em rolagens de ataque até o fim da sua próxima rodada.",
-        type: "passive",
-        cost: 1,
-        requirements: { nf: 25, skills: ["belico_ataque_especial"] },
-        position: { x: 25, y: 55 },
-      },
-      // --- Ramo Protetor ---
-      {
-        id: "belico_posicao_defensiva",
-        name: "Posição Defensiva",
-        description: "Gaste 1 PA para aumentar sua Defesa em +5 até o início do seu próximo turno.",
-        type: "active",
-        cost: 1,
-        requirements: { nf: 15, skills: ["belico_protetor"] },
-        position: { x: 75, y: 40 },
-      },
-      {
-        id: "belico_proteger_aliado",
-        name: "Proteger Aliado",
-        description: "Uma vez por rodada, você pode sofrer o dano de um ataque que mirava um aliado adjacente.",
-        type: "reaction",
-        cost: 1,
-        requirements: { nf: 25, skills: ["belico_posicao_defensiva"] },
-        position: { x: 75, y: 55 },
-      },
-    ],
+    description: "Especialistas em combate, seja com armas de fogo, lâminas ou os próprios punhos. São a linha de frente contra as sombras.",
+    icon: "⚔️",
+    position: { x: 50, y: 50 }, // Nó central
     specializations: [
       {
-        id: "belico_combatente",
-        name: "Combatente",
-        description: "Focado em maximizar o potencial de dano, utilizando técnicas agressivas para subjugar os inimigos.",
+        id: "belico_colosso",
+        name: "Colosso",
+        description: "Focado na resistência e força bruta, um pilar inabalável no campo de batalha.",
         type: "specialization",
-        cost: 1,
-        requirements: { nf: 10, skills: ["belico_vigor_de_combate"] }, // Requer a habilidade genérica
-        position: { x: 25, y: 25 }, // Posição da ramificação esquerda
+        icon: "🏋️",
+        skills: [
+          { id: "colosso_1", name: "Pele de Ferro", description: "Aumenta a defesa passiva.", type: "passive", cost: 1 },
+          { id: "colosso_2", name: "Golpe Esmagador", description: "Ataque pesado que pode atordoar.", type: "active", cost: 2 },
+        ]
       },
       {
-        id: "belico_protetor",
-        name: "Protetor",
-        description: "Especializado em defesa, resistência e proteção de aliados, servindo como a muralha do time.",
+        id: "belico_tropa_assalto",
+        name: "Tropa de Assalto",
+        description: "Especialista em táticas de invasão e combate com armas de fogo a curta e média distância.",
         type: "specialization",
-        cost: 1,
-        requirements: { nf: 10, skills: ["belico_vigor_de_combate"] }, // Requer a habilidade genérica
-        position: { x: 75, y: 25 }, // Posição da ramificação direita
+        icon: "🔫",
+        skills: [
+          { id: "tropa_1", name: "Tiro Rápido", description: "Permite um segundo tiro com penalidade.", type: "active", cost: 2 },
+          { id: "tropa_2", name: "Recarga Tática", description: "Recarrega mais rápido em cobertura.", type: "passive", cost: 1 },
+        ]
       },
-    ],
+      {
+        id: "belico_paladino",
+        name: "Paladino",
+        description: "Guerreiro que protege seus aliados com sua vida, usando escudos e fé para resistir ao paranormal.",
+        type: "specialization",
+        icon: "🛡️",
+        skills: [
+          { id: "paladino_1", name: "Escudo Sagrado", description: "Bloqueia dano paranormal.", type: "reaction", cost: 1 },
+          { id: "paladino_2", name: "Aura Protetora", description: "Concede bônus de defesa a aliados próximos.", type: "passive", cost: 2 },
+        ]
+      },
+      {
+        id: "belico_franco_atirador",
+        name: "Franco-Atirador",
+        description: "Mestre da precisão a longa distância, eliminando alvos antes que se tornem uma ameaça.",
+        type: "specialization",
+        icon: "🎯",
+        skills: [
+          { id: "franco_1", name: "Mira Mortal", description: "Aumenta a chance de acerto crítico.", type: "passive", cost: 2 },
+          { id: "franco_2", name: "Tiro Perfurante", description: "Ignora parte da armadura do alvo.", type: "active", cost: 2 },
+        ]
+      },
+      {
+        id: "belico_duelista",
+        name: "Duelista",
+        description: "Especialista em combate com lâminas, focado em agilidade, aparar e contra-atacar.",
+        type: "specialization",
+        icon: "🤺",
+        skills: [
+          { id: "duelista_1", name: "Ripostar", description: "Contra-ataca após uma defesa bem-sucedida.", type: "reaction", cost: 1 },
+          { id: "duelista_2", name: "Dança das Lâminas", description: "Aumenta a esquiva em combate corpo a corpo.", type: "passive", cost: 2 },
+        ]
+      }
+    ]
   },
   esoterico: {
     className: "Esotérico",
-    skills: [
-      {
-        id: "esoterico_fluxo_de_poder",
-        name: "Fluxo de Poder",
-        description: "Uma vez por cena, você pode gastar 5 de Sanidade para recuperar 3 PA.",
-        type: "active",
-        cost: 1,
-        requirements: { nf: 5 },
-        position: { x: 50, y: 10 },
-      },
-      // --- Ramo Elemental ---
-      {
-        id: "esoterico_raio_elemental",
-        name: "Raio Elemental",
-        description: "Gaste 2 PA para lançar um raio do seu elemento que causa 2d8 de dano elemental.",
-        type: "active",
-        cost: 1,
-        requirements: { nf: 15, skills: ["esoterico_elementalista"] },
-        position: { x: 25, y: 40 },
-      },
-      // --- Ramo Manipulador ---
-      {
-        id: "esoterico_elo_elemental",
-        name: "Elo Elemental",
-        description: "Gaste 2 PA para encantar a arma de um aliado com seu elemento, adicionando 1d6 de dano elemental por uma cena.",
-        type: "active",
-        cost: 1,
-        requirements: { nf: 15, skills: ["esoterico_manipulador"] },
-        position: { x: 75, y: 40 },
-      },
-    ],
+    description: "Manipuladores de energia e matéria, que usam o poder dos elementos para enfrentar o abismo.",
+    icon: "🔮",
+    position: { x: 50, y: 50 },
     specializations: [
       {
-        id: "esoterico_elementalista",
-        name: "Elemental",
-        description: "Focado no controle bruto e destrutivo do seu elemento, causando dano em área e controlando o campo.",
+        id: "esoterico_alquimista",
+        name: "Alquimista",
+        description: "Cria poções, venenos e elixires com efeitos paranormais para alterar o campo de batalha.",
         type: "specialization",
-        cost: 1,
-        requirements: { nf: 10, skills: ["esoterico_fluxo_de_poder"] },
-        position: { x: 25, y: 25 },
+        icon: "⚗️",
+        skills: [
+          { id: "alquimista_1", name: "Bomba de Fumaça", description: "Cria uma área que bloqueia a visão.", type: "active", cost: 1 },
+          { id: "alquimista_2", name: "Poção Curativa", description: "Cria uma poção que restaura vida.", type: "active", cost: 2 },
+        ]
       },
       {
-        id: "esoterico_manipulador",
-        name: "Manipulador",
-        description: "Usa o elemento de forma sutil e técnica para enfraquecer inimigos e fortalecer aliados.",
+        id: "esoterico_runico",
+        name: "Rúnico",
+        description: "Inscreve runas em objetos e no ambiente para criar armadilhas e efeitos duradouros.",
         type: "specialization",
-        cost: 1,
-        requirements: { nf: 10, skills: ["esoterico_fluxo_de_poder"] },
-        position: { x: 75, y: 25 },
+        icon: "📜",
+        skills: [
+          { id: "runico_1", name: "Runa de Alarme", description: "Alerta quando um inimigo se aproxima.", type: "active", cost: 1 },
+          { id: "runico_2", name: "Runa Explosiva", description: "Cria uma armadilha que explode.", type: "active", cost: 2 },
+        ]
       },
-    ],
+      {
+        id: "esoterico_tecelao",
+        name: "Tecelão",
+        description: "Manipula os fios da realidade para criar ilusões, distorções e controlar a percepção dos alvos.",
+        type: "specialization",
+        icon: "🕸️",
+        skills: [
+          { id: "tecelao_1", name: "Imagem Espelhada", description: "Cria um clone ilusório.", type: "active", cost: 2 },
+          { id: "tecelao_2", name: "Manto de Sombras", description: "Aumenta a furtividade.", type: "passive", cost: 1 },
+        ]
+      },
+      {
+        id: "esoterico_astrologo",
+        name: "Astrólogo",
+        description: "Lê as estrelas e o cosmos para prever o futuro, amaldiçoar inimigos e abençoar aliados.",
+        type: "specialization",
+        icon: "🔭",
+        skills: [
+          { id: "astrologo_1", name: "Bênção Estelar", description: "Concede bônus em um teste.", type: "active", cost: 1 },
+          { id: "astrologo_2", name: "Maldição Cósmica", description: "Aplica penalidade a um inimigo.", type: "active", cost: 2 },
+        ]
+      },
+      {
+        id: "esoterico_ceifador",
+        name: "Ceifador",
+        description: "Manipula a energia da vida e da morte, drenando inimigos e fortalecendo-se com a essência roubada.",
+        type: "specialization",
+        icon: "💀",
+        skills: [
+          { id: "ceifador_1", name: "Toque Vampírico", description: "Drena vida de um alvo.", type: "active", cost: 2 },
+          { id: "ceifador_2", name: "Pacto de Sangue", description: "Sacrifica vida por mais poder.", type: "passive", cost: 1 },
+        ]
+      }
+    ]
   },
   erudito: {
     className: "Erudito",
-    skills: [
-      {
-        id: "erudito_mente_afiada",
-        name: "Mente Afiada",
-        description: "Você pode usar Inteligência em vez de Presença para resistir a efeitos mentais.",
-        type: "passive",
-        cost: 1,
-        requirements: { nf: 5 },
-        position: { x: 50, y: 10 },
-      },
-      // --- Ramo Investigador ---
-      {
-        id: "erudito_analisar_criatura",
-        name: "Analisar Criatura",
-        description: "Gaste uma ação e faça um teste de Inteligência. Se passar, o Mestre revela uma fraqueza ou um status da criatura.",
-        type: "active",
-        cost: 1,
-        requirements: { nf: 15, skills: ["erudito_investigador"] },
-        position: { x: 25, y: 40 },
-      },
-      // --- Ramo Suporte ---
-      {
-        id: "erudito_primeiros_socorros",
-        name: "Primeiros Socorros Aprimorados",
-        description: "Gaste 1 PA para curar um aliado em 1d8 + sua Presença.",
-        type: "active",
-        cost: 1,
-        requirements: { nf: 15, skills: ["erudito_suporte"] },
-        position: { x: 75, y: 40 },
-      },
-    ],
+    description: "Estudiosos do oculto, que usam seu conhecimento para fortalecer aliados e enfraquecer inimigos.",
+    icon: "🧠",
+    position: { x: 50, y: 50 },
     specializations: [
+      {
+        id: "erudito_tatico",
+        name: "Tático",
+        description: "Analisa o campo de batalha para coordenar a equipe e explorar as fraquezas do inimigo.",
+        type: "specialization",
+        icon: "🗺️",
+        skills: [
+          { id: "tatico_1", name: "Analisar Inimigo", description: "Descobre uma fraqueza do alvo.", type: "active", cost: 1 },
+          { id: "tatico_2", name: "Comando de Voz", description: "Permite que um aliado se mova.", type: "reaction", cost: 1 },
+        ]
+      },
+      {
+        id: "erudito_tecnico",
+        name: "Técnico",
+        description: "Especialista em tecnologia, hacking e criação de dispositivos para superar obstáculos.",
+        type: "specialization",
+        icon: "⚙️",
+        skills: [
+          { id: "tecnico_1", name: "Hackear Sistema", description: "Invade sistemas eletrônicos.", type: "active", cost: 2 },
+          { id: "tecnico_2", name: "Conserto Rápido", description: "Repara um item quebrado.", type: "active", cost: 1 },
+        ]
+      },
+      {
+        id: "erudito_apotecario",
+        name: "Apotecário",
+        description: "Mestre em química e biologia, criando compostos para curar, fortalecer ou envenenar.",
+        type: "specialization",
+        icon: "🧪",
+        skills: [
+          { id: "apotecario_1", name: "Estimulante", description: "Concede bônus de atributo a um aliado.", type: "active", cost: 2 },
+          { id: "apotecario_2", name: "Toxina Debilitante", description: "Envenena um alvo, causando dano contínuo.", type: "active", cost: 2 },
+        ]
+      },
       {
         id: "erudito_investigador",
         name: "Investigador",
-        description: "Mestre em dedução e análise, focado em descobrir pistas e fraquezas no oculto.",
+        description: "Focado em encontrar pistas, decifrar enigmas e entender os mistérios do paranormal.",
         type: "specialization",
-        cost: 1,
-        requirements: { nf: 10, skills: ["erudito_mente_afiada"] },
-        position: { x: 25, y: 25 },
+        icon: "🔍",
+        skills: [
+          { id: "investigador_1", name: "Conectar Pistas", description: "Recebe uma dica do mestre.", type: "active", cost: 1 },
+          { id: "investigador_2", name: "Sexto Sentido", description: "Detecta perigos ocultos.", type: "passive", cost: 2 },
+        ]
       },
       {
-        id: "erudito_suporte",
-        name: "Suporte",
-        description: "Utiliza seu conhecimento para coordenar a equipe, curar e fortalecer seus aliados em combate.",
+        id: "erudito_medico_campo",
+        name: "Médico de Campo",
+        description: "Especialista em manter a equipe viva, tratando ferimentos graves sob pressão.",
         type: "specialization",
-        cost: 1,
-        requirements: { nf: 10, skills: ["erudito_mente_afiada"] },
-        position: { x: 75, y: 25 },
-      },
-    ],
+        icon: "🩺",
+        skills: [
+          { id: "medico_1", name: "Primeiros Socorros", description: "Estabiliza um aliado morrendo.", type: "active", cost: 1 },
+          { id: "medico_2", name: "Reanimar", description: "Traz um aliado de volta à consciência.", type: "active", cost: 3 },
+        ]
+      }
+    ]
   },
 };
 

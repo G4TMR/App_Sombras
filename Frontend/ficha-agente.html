@@ -64,6 +64,48 @@
             filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));
             transition: stroke 0.3s;
         }
+
+        .tree-path.active {
+            stroke: var(--element-color, var(--color-primary));
+            stroke-width: 3;
+        }
+
+        .tree-node.active {
+            border-color: #fff;
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        /* Painel de Detalhes da Habilidade */
+        .skill-details-panel {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 300px;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.9);
+            border-left: 1px solid #333;
+            backdrop-filter: blur(10px);
+            transform: translateX(100%);
+            transition: transform 0.4s ease-in-out;
+            z-index: 100;
+            padding: 2rem;
+            box-sizing: border-box;
+            color: var(--color-text-primary);
+            overflow-y: auto;
+        }
+
+        .skill-details-panel.visible {
+            transform: translateX(0);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+
+        .skill-details-panel h3 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: var(--page-color, var(--color-primary));
+            margin: 0 0 1rem 0;
+            letter-spacing: 1px;
+        }
     </style>
 </head>
 <body data-page="agentes">
@@ -403,6 +445,15 @@
         </div>
     </div>
 
+    <!-- NOVO: Modal da Constelação de Habilidades -->
+    <div id="skill-tree-modal-overlay" class="modal-overlay">
+        <div class="skill-tree-modal-content">
+            <button id="close-skills-modal-btn" class="close-viewer-btn">&times;</button>
+            <div id="skill-tree-canvas"></div>
+            <div id="skill-details-panel" class="skill-details-panel"></div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- Importa os dados das árvores -->
     <script src="skillTrees.js"></script>
@@ -412,89 +463,123 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const openSkillsBtn = document.getElementById('open-skills-modal-btn');
-            const canvas = document.getElementById('skill-tree-canvas');
+            const modalOverlay = document.getElementById('skill-tree-modal-overlay');
+            const closeSkillsBtn = document.getElementById('close-skills-modal-btn');
             
-            if(openSkillsBtn && canvas) {
+            if(openSkillsBtn && modalOverlay) {
                 openSkillsBtn.addEventListener('click', () => {
-                    // Pequeno delay para garantir que o modal abriu e o canvas tem tamanho
-                    setTimeout(renderIntegratedTree, 100);
+                    modalOverlay.classList.add('visible');
+                    document.body.style.overflow = 'hidden';
+                    setTimeout(renderSkillConstellation, 50); // Delay para renderizar após a abertura
+                });
+            }
+            if(closeSkillsBtn) {
+                closeSkillsBtn.addEventListener('click', () => {
+                    modalOverlay.classList.remove('visible');
+                    document.body.style.overflow = '';
                 });
             }
 
-            function renderIntegratedTree() {
-                // Tenta descobrir a classe do personagem pelo texto na ficha
+            function renderSkillConstellation() {
+                const canvas = document.getElementById('skill-tree-canvas');
+                const detailsPanel = document.getElementById('skill-details-panel');
+                if (!canvas || !window.skillTrees) return;
+
                 const classTextElement = document.getElementById('sheet-char-class-player');
-                let className = 'belico'; // Padrão
-                
+                let classKey = 'belico'; // Padrão
                 if (classTextElement) {
                     const text = classTextElement.textContent.toLowerCase();
-                    if (text.includes('bélico') || text.includes('belico')) className = 'belico';
-                    else if (text.includes('esotérico') || text.includes('esoterico')) className = 'esoterico';
-                    else if (text.includes('erudito')) className = 'erudito';
+                    if (text.includes('bélico') || text.includes('belico')) classKey = 'belico';
+                    else if (text.includes('esotérico') || text.includes('esoterico')) classKey = 'esoterico';
+                    else if (text.includes('erudito')) classKey = 'erudito';
                 }
 
-                const treeData = window.skillTrees ? window.skillTrees[className] : null;
+                const treeData = window.skillTrees[classKey];
                 if (!treeData) return;
 
                 canvas.innerHTML = ''; // Limpa o canvas
-                
-                // Cria camada SVG
                 const svgNS = "http://www.w3.org/2000/svg";
                 const svgLayer = document.createElementNS(svgNS, "svg");
                 canvas.appendChild(svgLayer);
 
-                const allNodes = [...treeData.skills, ...treeData.specializations];
-                const nodeMap = {};
-                allNodes.forEach(n => nodeMap[n.id] = n);
-
                 const width = canvas.clientWidth || 800;
                 const height = canvas.clientHeight || 600;
 
-                // Função auxiliar de coordenadas
-                const getCoords = (node) => ({
-                    x: (node.position.x / 100) * width,
-                    y: (node.position.y / 100) * height
+                // 1. Desenha o nó raiz (a classe)
+                const classNode = createNode(treeData, treeData.position.x, treeData.position.y, 'class-root');
+                canvas.appendChild(classNode);
+
+                // 2. Desenha as especializações em um círculo
+                const radius = Math.min(width, height) * 0.25; // Raio do círculo de especializações
+                const angleStep = (2 * Math.PI) / treeData.specializations.length;
+
+                treeData.specializations.forEach((spec, index) => {
+                    const angle = angleStep * index - (Math.PI / 2); // Começa no topo
+                    const specX = 50 + (radius / width * 100) * Math.cos(angle);
+                    const specY = 50 + (radius / height * 100) * Math.sin(angle);
+                    
+                    const specNode = createNode(spec, specX, specY, 'specialization');
+                    canvas.appendChild(specNode);
+                    drawConnection(treeData.position, {x: specX, y: specY});
+
+                    // 3. Desenha as habilidades de cada especialização
+                    const skillRadius = 80; // Distância da habilidade para a especialização
+                    spec.skills.forEach((skill, skillIndex) => {
+                        const skillAngle = angle + (skillIndex - (spec.skills.length - 1) / 2) * 0.25; // Espalha as habilidades
+                        const skillX = specX + (skillRadius / width * 100) * Math.cos(skillAngle);
+                        const skillY = specY + (skillRadius / height * 100) * Math.sin(skillAngle);
+
+                        const skillNode = createNode(skill, skillX, skillY, skill.type);
+                        canvas.appendChild(skillNode);
+                        drawConnection({x: specX, y: specY}, {x: skillX, y: skillY});
+                    });
                 });
 
-                // 1. Desenhar Linhas
-                allNodes.forEach(node => {
-                    if (node.requirements && node.requirements.skills) {
-                        node.requirements.skills.forEach(parentId => {
-                            const parent = nodeMap[parentId];
-                            if (parent) {
-                                const p = getCoords(parent);
-                                const c = getCoords(node);
-                                
-                                const path = document.createElementNS(svgNS, "path");
-                                const cp1x = p.x;
-                                const cp1y = (p.y + c.y) / 2;
-                                const cp2x = c.x;
-                                const cp2y = (p.y + c.y) / 2;
-                                
-                                const d = `M ${p.x} ${p.y} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${c.x} ${c.y}`;
-                                path.setAttribute("d", d);
-                                path.setAttribute("class", "tree-path");
-                                svgLayer.appendChild(path);
-                            }
-                        });
+                function createNode(data, x, y, type) {
+                    const el = document.createElement('div');
+                    el.className = `tree-node type-${type}`;
+                    el.style.left = `${x}%`;
+                    el.style.top = `${y}%`;
+                    el.innerHTML = `<span style="font-size:20px; pointer-events:none;">${data.icon || '🔹'}</span>`;
+
+                    el.addEventListener('click', () => {
+                        document.querySelectorAll('.tree-node.active').forEach(n => n.classList.remove('active'));
+                        el.classList.add('active');
+                        
+                        detailsPanel.innerHTML = `
+                            <h3>${data.name}</h3>
+                            <p>${data.description}</p>
+                            ${data.cost ? `<p><strong>Custo:</strong> ${data.cost} Ponto(s)</p>` : ''}
+                        `;
+                        detailsPanel.classList.add('visible');
+                    });
+
+                    return el;
+                }
+
+                function drawConnection(pos1, pos2) {
+                    const p1 = { x: (pos1.x / 100) * width, y: (pos1.y / 100) * height };
+                    const p2 = { x: (pos2.x / 100) * width, y: (pos2.y / 100) * height };
+
+                    const path = document.createElementNS(svgNS, "path");
+                    const d = `M ${p1.x} ${p1.y} C ${p1.x} ${p1.y + (p2.y - p1.y) / 2}, ${p2.x} ${p2.y - (p2.y - p1.y) / 2}, ${p2.x} ${p2.y}`;
+                    path.setAttribute("d", d);
+                    path.setAttribute("class", "tree-path");
+                    svgLayer.appendChild(path);
+                }
+
+                // Fechar o painel se clicar fora dele (no canvas)
+                canvas.addEventListener('click', (e) => {
+                    if (e.target === canvas) {
+                        detailsPanel.classList.remove('visible');
+                        document.querySelectorAll('.tree-node.active').forEach(n => n.classList.remove('active'));
                     }
                 });
-
-                // 2. Desenhar Nós
-                const icons = { specialization: "🌟", active: "⚔️", passive: "🛡️", reaction: "⚡" };
-
-                allNodes.forEach(node => {
-                    const el = document.createElement('div');
-                    el.className = `tree-node type-${node.type}`;
-                    el.style.left = `${node.position.x}%`;
-                    el.style.top = `${node.position.y}%`;
-                    el.title = `${node.name}\n${node.description}`; // Tooltip nativo simples por enquanto
-                    
-                    const icon = icons[node.type] || "🔹";
-                    el.innerHTML = `<span style="font-size:20px; pointer-events:none;">${icon}</span>`;
-                    
-                    // Aqui você pode adicionar lógica de clique para desbloquear futuramente
-                    
+            }
+        });
+    </script>
+</body>
+</html>
                     canvas.appendChild(el);
                 });
             }
