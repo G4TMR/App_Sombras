@@ -447,7 +447,8 @@
         </div>
     </div>
 
-    <!-- NOVO: Modal da Constelação de Habilidades -->
+    <!-- NOVO: Modal da Constelação de Habilidades (Corrigido e Unificado) -(>
+    <div id="skill-tree-mCdal-oorrigid class="modal-overlay"o e Unificado) -->
     <div id="skill-tree-modal-overlay" class="modal-overlay">
         <div class="skill-tree-modal-content">
             <button id="close-skills-modal-btn" class="close-viewer-btn">&times;</button>
@@ -456,20 +457,22 @@
                     <!-- A árvore de habilidades completa será renderizada aqui -->
                 </div>
             </div>
+            <!-- O painel de detalhes fica aqui, fora do viewport mas dentro do content -->
+            <div id="skill-details-panel" class="skill-details-panel"></div>
             <div class="skill-tree-instructions"><p>Use a roda do mouse para dar zoom e arraste para navegar.</p></div>
         </div>
     </div>
-
-    <!-- NOVO: Modal da Constelação de Habilidades -->
-    <div id="skill-tree-modal-overlay" class="modal-overlay">
-        <div class="skill-tree-modal-content">
-            <button id="close-skills-modal-btn" class="close-viewer-btn">&times;</button>
-            <div id="skill-tree-canvas"></div>
-            <div id="skill-details-panel" class="skill-details-panel"></div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+script>
+    <!-- Importa os dado das árvores -->
+    <script src="skillTrees.js"></script>
+    <script src="script.js"></script>
+    
+    <!-- S de Integração da Árvore --
+    <scsiptc
+        document.addEventListener('DOMContentLoaded', () => {
+            const openSkillsBtn = document.getElementById('open-skills-modal-btn');
+            const modalOverlay = document.getElementById('skill-tree-modal-overlay');
+rip         t src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- Importa os dados das árvores -->
     <script src="skillTrees.js"></script>
     <script src="script.js"></script>
@@ -479,7 +482,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const openSkillsBtn = document.getElementById('open-skills-modal-btn');
             const modalOverlay = document.getElementById('skill-tree-modal-overlay');
-            const closeSkillsBtn = document.getElementById('close-skills-modal-btn');
+            const closeSkillsBtn = modalOverlay.querySelector('#close-skills-modal-btn'); // Garante que pegamos o botão certo
             
             if(openSkillsBtn && modalOverlay) {
                 openSkillsBtn.addEventListener('click', () => {
@@ -492,6 +495,7 @@
                 closeSkillsBtn.addEventListener('click', () => {
                     modalOverlay.classList.remove('visible');
                     document.body.style.overflow = '';
+                    document.getElementById('skill-details-panel').classList.remove('visible'); // Esconde o painel ao fechar
                 });
             }
 
@@ -525,22 +529,24 @@
                 canvas.appendChild(classNode);
 
                 // 2. Desenha as especializações em um círculo
-                const radius = Math.min(width, height) * 0.35; // AUMENTADO: Mais espaço para as especializações
+
+                    // 3. Desenha as habilidades de cada especiali                const radius = Math.min(width, height) * 0.3; // DIMINUÍDO: Dá mais espaço para as ramificações
                 const angleStep = (2 * Math.PI) / treeData.specializations.length;
 
                 treeData.specializations.forEach((spec, index) => {
                     const angle = angleStep * index - (Math.PI / 2); // Começa no topo
                     const specX = 50 + (radius / width * 100) * Math.cos(angle);
-                    const specY = 50 + (radius / height * 100) * Math.sin(angle);
 
+                        const skillNode = createNode(skill, skillX, skillY, skill.type);                    const specY = 50 + (radius / height * 100) * Math.sin(angle);
+                    
                     const specNode = createNode(spec, specX, specY, 'specialization');
                     canvas.appendChild(specNode);
                     drawConnection(treeData.position, {x: specX, y: specY});
 
                     // 3. Desenha as habilidades de cada especialização
-                    const skillRadius = Math.min(width, height) * 0.12; // ALTERADO: Raio relativo para as habilidades
+                    const skillRadius = Math.min(width, height) * 0.20; // AUMENTADO: Habilidades mais longe da especialização
                     spec.skills.forEach((skill, skillIndex) => {
-                        const skillAngle = angle + (skillIndex - (spec.skills.length - 1) / 2) * 0.35; // AUMENTADO: Espalha mais as habilidades
+                        const skillAngle = angle + (skillIndex - (spec.skills.length - 1) / 2) * 0.45; // AUMENTADO: Espalha mais as habilidades
                         const skillX = specX + (skillRadius / width * 100) * Math.cos(skillAngle);
                         const skillY = specY + (skillRadius / height * 100) * Math.sin(skillAngle);
 
@@ -555,12 +561,16 @@
                     el.className = `tree-node type-${type}`;
                     el.style.left = `${x}%`;
                     el.style.top = `${y}%`;
-                    el.innerHTML = `<span style="font-size:20px; pointer-events:none;">${data.icon || '🔹'}</span>`;
+                    el.innerHTML = `<span style="font-size:20p
+x; pointer-events:none;">${data.icon || '🔹'}</span>`;
 
-                    el.addEventListener('click', () => {
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Impede que o clique no nó feche o painel
+
                         document.querySelectorAll('.tree-node.active').forEach(n => n.classList.remove('active'));
                         el.classList.add('active');
                         
+                        // O painel de detalhes é buscado aqui para garantir que ele exista
                         detailsPanel.innerHTML = `
                             <h3>${data.name || 'Habilidade'}</h3>
                             <p class="skill-details-meta">${data.type || 'Classe'}</p>
@@ -593,6 +603,73 @@
                     }
                 });
             }
+
+            function initializeSkillTreeModal() {
+                const modalOverlay = document.getElementById('skill-tree-modal-overlay');
+                const viewport = modalOverlay.querySelector('#skill-tree-viewport');
+                const canvas = modalOverlay.querySelector('#skill-tree-canvas');
+
+                if (!viewport || !canvas) return;
+
+                let scale = 1;
+                let panX = 0;
+                let panY = 0;
+                let isPanning = false;
+                let startPanX, startPanY;
+
+                const applyTransform = () => {
+                    canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+                };
+
+                // Centraliza a visão inicial
+                const rect = viewport.getBoundingClientRect();
+                // NOVO: Define um canvas gigante e o centraliza na viewport
+                canvas.style.width = '300vw'; // 3x a largura da tela
+                canvas.style.height = '300vh'; // 3x a altura da tela
+                panX = -canvas.offsetWidth / 2 + rect.width / 2;
+                panY = -canvas.offsetHeight / 2 + rect.height / 2;
+                applyTransform();
+
+                viewport.addEventListener('mousedown', (e) => {
+                    if (e.button !== 0) return;
+                    isPanning = true;
+                    startPanX = e.clientX - panX;
+                    startPanY = e.clientY - panY;
+                    viewport.style.cursor = 'grabbing';
+                });
+
+                viewport.addEventListener('mousemove', (e) => {
+                    if (!isPanning) return;
+                    panX = e.clientX - startPanX;
+                    panY = e.clientY - startPanY;
+                    applyTransform();
+                });
+
+                document.addEventListener('mouseup', () => {
+                    isPanning = false;
+                    viewport.style.cursor = 'grab';
+                });
+
+                viewport.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const zoomIntensity = 0.1;
+                    const rect = viewport.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+
+                    const oldScale = scale;
+                    scale += e.deltaY * -0.001 * zoomIntensity * scale;
+                    scale = Math.min(Math.max(0.2, scale), 3);
+
+                    panX = mouseX - (mouseX - panX) * (scale / oldScale);
+                    panY = mouseY - (mouseY - panY) * (scale / oldScale);
+
+                    applyTransform();
+                });
+            }
+
+            // Inicializa a lógica do modal de habilidades
+            initializeSkillTreeModal();
         });
     </script>
 </body>

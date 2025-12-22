@@ -2118,7 +2118,8 @@ body[data-page="agentes"] .sheet-container {
     flex-grow: 1;
     overflow: hidden;
     cursor: grab;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%232e2e2e' fill-opacity='0.4' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+    /* O fundo agora é aplicado ao canvas para ser "infinito" */
+    background-color: #050505; /* Cor de fundo caso o canvas não carregue */
     border-radius: 8px;
 }
 
@@ -2127,11 +2128,12 @@ body[data-page="agentes"] .sheet-container {
 }
 
 #skill-tree-canvas {
-    width: 100%;
-    height: 100%;
     position: relative;
     transform-origin: 0 0;
     transition: transform 0.1s ease-out; /* Suaviza o pan/zoom */
+    /* Fundo radial aplicado aqui para se mover com o pan/zoom */
+    background: radial-gradient(circle at center, #1b1b25 0%, #050505 100%);
+    /* A largura e altura serão definidas dinamicamente via JS para serem maiores que a viewport */
 }
 
 .close-viewer-btn {
