@@ -2684,9 +2684,20 @@ class CharacterSheet {
         if (!modalOverlay || !openBtn || !closeBtn || !viewport || !canvas) return;
 
         openBtn.addEventListener('click', () => {
+            // Define um canvas gigante para ter espaço de navegação
+            canvas.style.width = '300vw';
+            canvas.style.height = '300vh';
+
             this.renderFullSkillTree(); // Renderiza o conteúdo antes de mostrar
             modalOverlay.classList.add('visible');
             document.body.style.overflow = 'hidden'; // Trava a rolagem da página
+
+            // Centraliza a visão inicial no meio do canvas gigante
+            const rect = viewport.getBoundingClientRect();
+            panX = -canvas.offsetWidth / 2 + rect.width / 2;
+            panY = -canvas.offsetHeight / 2 + rect.height / 2;
+            scale = 1;
+            applyTransform();
         });
 
         closeBtn.addEventListener('click', () => {

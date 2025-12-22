@@ -8,14 +8,24 @@
     <link rel="icon" href="/favicon.png" sizes="any" type="image/png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <style>
+        /* NOVO: Viewport da árvore de habilidades */
+        .skill-tree-viewport {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            overflow: hidden; /* Esconde o que sai da tela */
+            position: relative;
+            background: radial-gradient(circle at center, #1b1b25 0%, #050505 100%); /* Fundo unificado */
+        }
+
         /* Estilos da Árvore de Habilidades Integrada */
         #skill-tree-canvas {
             position: relative;
-            width: 100%;
-            height: 100%;
-            min-height: 600px; /* Garante altura mínima */
-            background: radial-gradient(circle at center, #1b1b25 0%, #050505 100%);
-            overflow: hidden;
+            /* O tamanho (width/height) será definido via JS para ser gigante */
+            background: transparent; /* Fundo transparente para mostrar o do viewport */
+            display: flex; /* Para centralizar o conteúdo da árvore */
+            justify-content: center; /* Para centralizar o conteúdo da árvore */
+            align-items: center; /* Para centralizar o conteúdo da árvore */
         }
 
         #skill-tree-canvas svg {
