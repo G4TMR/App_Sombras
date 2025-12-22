@@ -522,15 +522,13 @@
                 canvas.appendChild(classNode);
 
                 // 2. Desenha as especializações em um círculo
-
-                    // 3. Desenha as habilidades de cada especiali                const radius = Math.min(width, height) * 0.3; // DIMINUÍDO: Dá mais espaço para as ramificações
+                const radius = Math.min(width, height) * 0.3; // DIMINUÍDO: Dá mais espaço para as ramificações
                 const angleStep = (2 * Math.PI) / treeData.specializations.length;
 
                 treeData.specializations.forEach((spec, index) => {
                     const angle = angleStep * index - (Math.PI / 2); // Começa no topo
                     const specX = 50 + (radius / width * 100) * Math.cos(angle);
-
-                        const skillNode = createNode(skill, skillX, skillY, skill.type);                    const specY = 50 + (radius / height * 100) * Math.sin(angle);
+                    const specY = 50 + (radius / height * 100) * Math.sin(angle);
                     
                     const specNode = createNode(spec, specX, specY, 'specialization');
                     canvas.appendChild(specNode);
