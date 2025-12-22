@@ -462,19 +462,12 @@
             <div class="skill-tree-instructions"><p>Use a roda do mouse para dar zoom e arraste para navegar.</p></div>
         </div>
     </div>
-script>
-    <!-- Importa os dado das árvores -->
-    <script src="skillTrees.js"></script>
-    <script src="script.js"></script>
-    
-    <!-- S de Integração da Árvore --
-    <scsiptc
-        document.addEventListener('DOMContentLoaded', () => {
-            const openSkillsBtn = document.getElementById('open-skills-modal-btn');
-            const modalOverlay = document.getElementById('skill-tree-modal-overlay');
-rip         t src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- 1. Importa a biblioteca Axios PRIMEIRO -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- Importa os dados das árvores -->
     <script src="skillTrees.js"></script>
+    <!-- Importa o script principal que usa Axios e os dados das árvores -->
     <script src="script.js"></script>
     
     <!-- Script de Integração da Árvore -->
@@ -650,14 +643,14 @@ rip         t src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></scrip
                 });
 
                 viewport.addEventListener('wheel', (e) => {
-                    e.preventDefault();
+                    e.preventDefault(); // Previne o scroll da página
                     const zoomIntensity = 0.1;
                     const rect = viewport.getBoundingClientRect();
                     const mouseX = e.clientX - rect.left;
                     const mouseY = e.clientY - rect.top;
 
                     const oldScale = scale;
-                    scale += e.deltaY * -0.001 * zoomIntensity * scale;
+                    scale += e.deltaY * -0.001 * zoomIntensity * scale; // Inverte a direção do scroll
                     scale = Math.min(Math.max(0.2, scale), 3);
 
                     panX = mouseX - (mouseX - panX) * (scale / oldScale);
