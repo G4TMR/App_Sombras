@@ -106,6 +106,21 @@
             margin: 0 0 1rem 0;
             letter-spacing: 1px;
         }
+
+        .skill-details-panel .skill-details-meta {
+            font-size: 0.9rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            display: block;
+            border-bottom: 1px solid #444;
+            padding-bottom: 0.5rem;
+        }
+
+        .skill-details-panel .skill-details-description {
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body data-page="agentes">
@@ -510,22 +525,22 @@
                 canvas.appendChild(classNode);
 
                 // 2. Desenha as especializações em um círculo
-                const radius = Math.min(width, height) * 0.25; // Raio do círculo de especializações
+                const radius = Math.min(width, height) * 0.35; // AUMENTADO: Mais espaço para as especializações
                 const angleStep = (2 * Math.PI) / treeData.specializations.length;
 
                 treeData.specializations.forEach((spec, index) => {
                     const angle = angleStep * index - (Math.PI / 2); // Começa no topo
                     const specX = 50 + (radius / width * 100) * Math.cos(angle);
                     const specY = 50 + (radius / height * 100) * Math.sin(angle);
-                    
+
                     const specNode = createNode(spec, specX, specY, 'specialization');
                     canvas.appendChild(specNode);
                     drawConnection(treeData.position, {x: specX, y: specY});
 
                     // 3. Desenha as habilidades de cada especialização
-                    const skillRadius = 80; // Distância da habilidade para a especialização
+                    const skillRadius = Math.min(width, height) * 0.12; // ALTERADO: Raio relativo para as habilidades
                     spec.skills.forEach((skill, skillIndex) => {
-                        const skillAngle = angle + (skillIndex - (spec.skills.length - 1) / 2) * 0.25; // Espalha as habilidades
+                        const skillAngle = angle + (skillIndex - (spec.skills.length - 1) / 2) * 0.35; // AUMENTADO: Espalha mais as habilidades
                         const skillX = specX + (skillRadius / width * 100) * Math.cos(skillAngle);
                         const skillY = specY + (skillRadius / height * 100) * Math.sin(skillAngle);
 
@@ -547,8 +562,9 @@
                         el.classList.add('active');
                         
                         detailsPanel.innerHTML = `
-                            <h3>${data.name}</h3>
-                            <p>${data.description}</p>
+                            <h3>${data.name || 'Habilidade'}</h3>
+                            <p class="skill-details-meta">${data.type || 'Classe'}</p>
+                            <p class="skill-details-description">${data.description || 'Sem descrição.'}</p>
                             ${data.cost ? `<p><strong>Custo:</strong> ${data.cost} Ponto(s)</p>` : ''}
                         `;
                         detailsPanel.classList.add('visible');
@@ -572,6 +588,7 @@
                 canvas.addEventListener('click', (e) => {
                     if (e.target === canvas) {
                         detailsPanel.classList.remove('visible');
+                        // Remove a classe 'active' de qualquer nó selecionado ao fechar o painel
                         document.querySelectorAll('.tree-node.active').forEach(n => n.classList.remove('active'));
                     }
                 });
