@@ -482,7 +482,7 @@ rip         t src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></scrip
         document.addEventListener('DOMContentLoaded', () => {
             const openSkillsBtn = document.getElementById('open-skills-modal-btn');
             const modalOverlay = document.getElementById('skill-tree-modal-overlay');
-            const closeSkillsBtn = modalOverlay.querySelector('#close-skills-modal-btn'); // Garante que pegamos o botão certo
+            const closeSkillsBtn = modalOverlay.querySelector('#close-skills-modal-btn'); 
             
             if(openSkillsBtn && modalOverlay) {
                 openSkillsBtn.addEventListener('click', () => {
@@ -561,15 +561,14 @@ rip         t src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></scrip
                     el.className = `tree-node type-${type}`;
                     el.style.left = `${x}%`;
                     el.style.top = `${y}%`;
-                    el.innerHTML = `<span style="font-size:20p
-x; pointer-events:none;">${data.icon || '🔹'}</span>`;
+                    el.innerHTML = `<span style="font-size:20px; pointer-events:none;">${data.icon || '🔹'}</span>`;
 
                     el.addEventListener('click', (e) => {
                         e.stopPropagation(); // Impede que o clique no nó feche o painel
 
                         document.querySelectorAll('.tree-node.active').forEach(n => n.classList.remove('active'));
                         el.classList.add('active');
-                        
+
                         // O painel de detalhes é buscado aqui para garantir que ele exista
                         detailsPanel.innerHTML = `
                             <h3>${data.name || 'Habilidade'}</h3>
@@ -651,14 +650,14 @@ x; pointer-events:none;">${data.icon || '🔹'}</span>`;
                 });
 
                 viewport.addEventListener('wheel', (e) => {
-                    e.preventDefault();
+                    e.preventDefault(); // Previne o scroll da página
                     const zoomIntensity = 0.1;
                     const rect = viewport.getBoundingClientRect();
                     const mouseX = e.clientX - rect.left;
                     const mouseY = e.clientY - rect.top;
 
                     const oldScale = scale;
-                    scale += e.deltaY * -0.001 * zoomIntensity * scale;
+                    scale += e.deltaY * -0.001 * zoomIntensity * scale; // Inverte a direção do scroll
                     scale = Math.min(Math.max(0.2, scale), 3);
 
                     panX = mouseX - (mouseX - panX) * (scale / oldScale);
@@ -670,13 +669,6 @@ x; pointer-events:none;">${data.icon || '🔹'}</span>`;
 
             // Inicializa a lógica do modal de habilidades
             initializeSkillTreeModal();
-        });
-    </script>
-</body>
-</html>
-                    canvas.appendChild(el);
-                });
-            }
         });
     </script>
 </body>
