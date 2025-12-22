@@ -10,7 +10,6 @@
         background-color: #0f0f12;
         color: #e0e0e0;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        overflow: hidden;
     }
 
     /* Interface de Controle */
@@ -42,6 +41,15 @@
         background: radial-gradient(circle at center, #1b1b25 0%, #050505 100%);
     }
 
+    #nodes-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+    }
+
     svg {
         position: absolute;
         top: 0;
@@ -63,24 +71,24 @@
         justify-content: center;
         align-items: center;
         cursor: pointer;
-        z-index: 2;
+        z-index: 10;
         transition: all 0.3s ease;
-        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        box-shadow: 0 0 20px rgba(0,0,0,0.8);
         /* Centraliza o nó baseado na posição top/left */
         transform: translate(-50%, -50%);
     }
 
     .node:hover {
-        transform: translate(-50%, -50%) scale(1.15);
-        z-index: 3;
+        transform: translate(-50%, -50%) scale(1.2);
+        z-index: 20;
         border-color: #fff;
     }
 
     /* Tipos de Habilidade (Cores) */
-    .node.type-specialization { border-color: #ffd700; box-shadow: 0 0 10px #ffd700; }
-    .node.type-active { border-color: #ff4444; }
-    .node.type-passive { border-color: #44ff44; }
-    .node.type-reaction { border-color: #aa44ff; }
+    .node.type-specialization { border-color: #ffd700; box-shadow: 0 0 15px #ffd700, inset 0 0 10px rgba(255, 215, 0, 0.2); }
+    .node.type-active { border-color: #ff4444; box-shadow: 0 0 15px #ff4444, inset 0 0 10px rgba(255, 68, 68, 0.2); }
+    .node.type-passive { border-color: #44ff44; box-shadow: 0 0 15px #44ff44, inset 0 0 10px rgba(68, 255, 68, 0.2); }
+    .node.type-reaction { border-color: #aa44ff; box-shadow: 0 0 15px #aa44ff, inset 0 0 10px rgba(170, 68, 255, 0.2); }
 
     .node-icon {
         font-size: 24px;
@@ -97,7 +105,7 @@
         pointer-events: none;
         opacity: 0;
         transition: opacity 0.2s;
-        z-index: 10;
+        z-index: 100;
         max-width: 250px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.9);
     }
@@ -108,8 +116,9 @@
 
     .path {
         fill: none;
-        stroke: #444;
+        stroke: #555;
         stroke-width: 2;
+        filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));
         transition: stroke 0.3s;
     }
 </style>
@@ -117,6 +126,7 @@
 <body>
 
 <div id="ui-controls">
+    <h3 style="margin: 0 0 10px 0; color: #fff;">Árvore de Habilidades</h3>
     <label for="class-select">Classe:</label>
     <select id="class-select">
         <option value="belico">Bélico</option>
@@ -149,6 +159,10 @@
     };
 
     function init() {
+        if (!window.skillTrees) {
+            alert("Erro: O arquivo skillTrees.js não foi carregado. Verifique se ele está na mesma pasta.");
+            return;
+        }
         classSelect.addEventListener('change', () => renderTree(classSelect.value));
         window.addEventListener('resize', () => renderTree(classSelect.value));
         // Renderiza a primeira classe por padrão
@@ -231,7 +245,7 @@
         nodesLayer.appendChild(el);
     }
 
-    init();
+    window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
