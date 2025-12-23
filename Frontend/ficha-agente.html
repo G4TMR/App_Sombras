@@ -142,6 +142,16 @@
             border: none;
             min-height: 400px;
         }
+        
+        /* Adiciona a imagem de fundo ao pentagrama de atributos */
+        .primary-attributes-display.visual-mode {
+            position: relative;
+            background-image: url('/img/pentagrama-atributos.png'); /* Caminho da imagem */
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 380px; 
+        }
 
         .attributes-bg-container {
             position: relative;
@@ -248,9 +258,7 @@
                     -->
                     <div class="primary-attributes-display visual-mode">
                         <div class="attributes-bg-container">
-                            <!-- Imagem de fundo (Pentagrama/Círculo) -->
-                            <!-- Substitua o src pela imagem desejada -->
-                            <img src="https://placehold.co/500x500/1b1b25/FFF?text=Pentagrama" alt="Fundo Atributos" class="attributes-bg-img">
+                            <!-- Imagem de fundo removida daqui e aplicada via CSS para evitar bugs visuais -->
                             
                             <!-- Força (Topo) -->
                             <div class="attr-point" style="top: 10%; left: 50%;" data-attr="forca">

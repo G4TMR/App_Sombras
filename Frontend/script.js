@@ -1992,9 +1992,6 @@ class CharacterSheet {
         const specDisplay = this.character.specialization ? ` (${this.character.specialization})` : '';
         header.querySelector('#sheet-char-class-player').textContent = `${classDisplay}${specDisplay} | Jogador: ${personalization.player || 'N/A'}`;
         
-        const classSpecLabel = document.getElementById('sheet-class-specialization');
-        if (classSpecLabel) classSpecLabel.textContent = this.character.specialization || this.character.class;
-
         document.title = `${personalization.name || 'Agente'} | Ficha de Agente`;
         document.getElementById('sheet-level').textContent = level;
         document.getElementById('sheet-nf').textContent = nf;
@@ -2019,10 +2016,25 @@ class CharacterSheet {
         document.getElementById('sheet-res-paranormal').textContent = this.character.resParanormal || 0;
         document.getElementById('sheet-proficiencies').textContent = this.character.proficiencies || 'Armas simples.';
 
-        // Controla a visibilidade do botão de especialização
+        // Gerencia o conteúdo do bloco central de especialização (o pentagrama)
         const specBlock = document.getElementById('class-specialization-block');
         if (specBlock) {
-            specBlock.classList.toggle('can-specialize', this.character.skillPoints > 0 && !this.character.specialization);
+            specBlock.innerHTML = ''; // Limpa conteúdo pré-existente (remove bugs visuais)
+
+            if (this.character.specialization) {
+                // Se já tem especialização, apenas mostra o nome
+                specBlock.textContent = this.character.specialization;
+            } else if (this.character.nf >= 5 && this.character.skillPoints > 0) {
+                // Se pode especializar, mostra o botão
+                const specButton = document.createElement('button');
+                specButton.className = 'attr-btn-add'; // Mantém a classe de estilo
+                specButton.dataset.action = 'specialize';
+                specButton.textContent = '+'; // Ou 'Especializar' se preferir texto
+                specBlock.appendChild(specButton);
+            } else {
+                // Se não pode especializar ainda, mostra a classe base
+                specBlock.textContent = this.character.class;
+            }
         }
 
         this.renderActionsPanel();
@@ -2694,7 +2706,10 @@ class CharacterSheet {
             const rect = viewport.getBoundingClientRect();
             panX = -canvas.offsetWidth / 2 + rect.width / 2;
             panY = -canvas.offsetHeight / 2 + rect.height / 2;
-            scale = 1;
+            
+            // Ajusta o zoom inicial para dispositivos móveis para facilitar a visualização
+            scale = window.innerWidth < 768 ? 0.5 : 1;
+            
             applyTransform();
         };
 
@@ -2702,8 +2717,11 @@ class CharacterSheet {
             modalOverlay.classList.add('visible');
             document.body.style.overflow = 'hidden';
             setTimeout(() => {
-                canvas.style.width = '300vw';
-                canvas.style.height = '300vh';
+                // Ajuste Responsivo: Usa um tamanho fixo mínimo grande para garantir que o layout não quebre em telas estreitas
+                const minSize = 3500;
+                canvas.style.width = `${Math.max(window.innerWidth * 2, minSize)}px`;
+                canvas.style.height = `${Math.max(window.innerHeight * 2, minSize)}px`;
+                
                 this.renderSkillConstellation();
                 centerView();
             }, 50);
