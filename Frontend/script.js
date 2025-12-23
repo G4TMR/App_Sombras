@@ -2195,8 +2195,8 @@ class CharacterSheet {
         });
 
         document.querySelector('.primary-attributes-display').addEventListener('click', (e) => {
-            if (e.target.classList.contains('attr-btn')) {
-                const block = e.target.closest('.primary-attr-block');
+            if (e.target.classList.contains('attr-btn') || e.target.classList.contains('attr-btn-add')) {
+                const block = e.target.closest('[data-attr]');
                 const attrName = block.dataset.attr;
                 const action = e.target.dataset.action;
 
@@ -2680,45 +2680,43 @@ class CharacterSheet {
         const closeBtn = document.getElementById('close-skills-modal-btn');
         const viewport = document.getElementById('skill-tree-viewport');
         const canvas = document.getElementById('skill-tree-canvas');
+        const detailsPanel = document.getElementById('skill-details-panel');
 
-        if (!modalOverlay || !openBtn || !closeBtn || !viewport || !canvas) return;
+        if (!modalOverlay || !openBtn || !closeBtn || !viewport || !canvas || !detailsPanel) return;
 
-        openBtn.addEventListener('click', () => {
-            // Define um canvas gigante para ter espaço de navegação
-            canvas.style.width = '300vw';
-            canvas.style.height = '300vh';
-
-            this.renderFullSkillTree(); // Renderiza o conteúdo antes de mostrar
-            modalOverlay.classList.add('visible');
-            document.body.style.overflow = 'hidden'; // Trava a rolagem da página
-
-            // Centraliza a visão inicial no meio do canvas gigante
-            const rect = viewport.getBoundingClientRect();
-            panX = -canvas.offsetWidth / 2 + rect.width / 2;
-            panY = -canvas.offsetHeight / 2 + rect.height / 2;
-            scale = 1;
-            applyTransform();
-        });
-
-        closeBtn.addEventListener('click', () => {
-            modalOverlay.classList.remove('visible');
-            document.body.style.overflow = ''; // Libera a rolagem da página
-        });
-
-        // Lógica de Pan e Zoom
-        let scale = 1;
-        let panX = 0;
-        let panY = 0;
-        let isPanning = false;
-        let startPanX, startPanY;
+        let scale = 1, panX = 0, panY = 0, isPanning = false, startPanX, startPanY, initialPinchDistance = null;
 
         const applyTransform = () => {
             canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
         };
 
+        const centerView = () => {
+            const rect = viewport.getBoundingClientRect();
+            panX = -canvas.offsetWidth / 2 + rect.width / 2;
+            panY = -canvas.offsetHeight / 2 + rect.height / 2;
+            scale = 1;
+            applyTransform();
+        };
+
+        openBtn.addEventListener('click', () => {
+            modalOverlay.classList.add('visible');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => {
+                canvas.style.width = '300vw';
+                canvas.style.height = '300vh';
+                this.renderSkillConstellation();
+                centerView();
+            }, 50);
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('visible');
+            document.body.style.overflow = '';
+            detailsPanel.classList.remove('visible');
+        });
+
         viewport.addEventListener('mousedown', (e) => {
-            e.preventDefault(); // Impede o comportamento padrão de arrastar (seleção de texto)
-            if (e.button !== 0) return; // Apenas clique esquerdo
+            if (e.button !== 0) return;
             isPanning = true;
             startPanX = e.clientX - panX;
             startPanY = e.clientY - panY;
@@ -2732,7 +2730,7 @@ class CharacterSheet {
             applyTransform();
         });
 
-        viewport.addEventListener('mouseup', () => {
+        document.addEventListener('mouseup', () => {
             isPanning = false;
             viewport.style.cursor = 'grab';
         });
@@ -2742,16 +2740,13 @@ class CharacterSheet {
             viewport.style.cursor = 'grab';
         });
 
-        // --- NOVOS EVENTOS DE TOQUE PARA MOBILE ---
-        let initialPinchDistance = null;
-
         viewport.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) { // Pan com um dedo
+            if (e.touches.length === 1) {
                 isPanning = true;
                 startPanX = e.touches[0].clientX - panX;
                 startPanY = e.touches[0].clientY - panY;
-            } else if (e.touches.length === 2) { // Zoom com dois dedos (pinça)
-                isPanning = false; // Para de mover ao fazer pinça
+            } else if (e.touches.length === 2) {
+                isPanning = false;
                 const dx = e.touches[0].clientX - e.touches[1].clientX;
                 const dy = e.touches[0].clientY - e.touches[1].clientY;
                 initialPinchDistance = Math.sqrt(dx * dx + dy * dy);
@@ -2759,58 +2754,158 @@ class CharacterSheet {
         }, { passive: true });
 
         viewport.addEventListener('touchmove', (e) => {
-            e.preventDefault(); // Previne o scroll da página enquanto navega no mapa
-            if (e.touches.length === 1 && isPanning) { // Movimento de Pan
+            e.preventDefault();
+            if (e.touches.length === 1 && isPanning) {
                 panX = e.touches[0].clientX - startPanX;
                 panY = e.touches[0].clientY - startPanY;
                 applyTransform();
-            } else if (e.touches.length === 2 && initialPinchDistance) { // Movimento de Zoom
+            } else if (e.touches.length === 2 && initialPinchDistance) {
                 const dx = e.touches[0].clientX - e.touches[1].clientX;
                 const dy = e.touches[0].clientY - e.touches[1].clientY;
                 const newPinchDistance = Math.sqrt(dx * dx + dy * dy);
                 const scaleFactor = newPinchDistance / initialPinchDistance;
-
                 const rect = viewport.getBoundingClientRect();
                 const pinchCenterX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
                 const pinchCenterY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
-
                 const oldScale = scale;
-                scale = Math.min(Math.max(0.2, scale), 3); // Limita o zoom
                 scale *= scaleFactor;
-
+                scale = Math.min(Math.max(0.2, scale), 3);
                 panX = pinchCenterX - (pinchCenterX - panX) * (scale / oldScale);
                 panY = pinchCenterY - (pinchCenterY - panY) * (scale / oldScale);
-
                 applyTransform();
-                initialPinchDistance = newPinchDistance; // Atualiza para um zoom contínuo
+                initialPinchDistance = newPinchDistance;
             }
         }, { passive: false });
 
-        viewport.addEventListener('touchend', () => { isPanning = false; initialPinchDistance = null; });
+        viewport.addEventListener('touchend', () => {
+            isPanning = false;
+            initialPinchDistance = null;
+        });
 
         viewport.addEventListener('wheel', (e) => {
             e.preventDefault();
-            const zoomIntensity = 1.5; // Aumentado para melhorar a sensibilidade do zoom
+            const zoomIntensity = 1.5;
             const rect = viewport.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
-
             const oldScale = scale;
             scale += e.deltaY * -0.001 * zoomIntensity * scale;
-            scale = Math.min(Math.max(0.2, scale), 3); // Limita o zoom
-
-            // Ajusta o pan para que o zoom seja centrado no mouse
+            scale = Math.min(Math.max(0.2, scale), 3);
             panX = mouseX - (mouseX - panX) * (scale / oldScale);
             panY = mouseY - (mouseY - panY) * (scale / oldScale);
-
             applyTransform();
         });
+    }
 
-        // Centraliza a visão inicial
-        const rect = viewport.getBoundingClientRect();
-        panX = rect.width / 4; // Começa um pouco deslocado
-        panY = rect.height / 4;
-        applyTransform();
+    /**
+     * Renderiza a árvore de habilidades no formato de constelação.
+     */
+    renderSkillConstellation() {
+        const canvas = document.getElementById('skill-tree-canvas');
+        const detailsPanel = document.getElementById('skill-details-panel');
+        if (!canvas || !window.skillTrees) return;
+
+        const classTextElement = document.getElementById('sheet-char-class-player');
+        let classKey = 'belico'; // Padrão
+        if (classTextElement) {
+            const text = classTextElement.textContent.toLowerCase();
+            if (text.includes('bélico') || text.includes('belico')) classKey = 'belico';
+            else if (text.includes('esotérico') || text.includes('esoterico')) classKey = 'esoterico';
+            else if (text.includes('erudito')) classKey = 'erudito';
+        }
+
+        const treeData = window.skillTrees[classKey];
+        if (!treeData) return;
+
+        canvas.innerHTML = ''; // Limpa o canvas
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svgLayer = document.createElementNS(svgNS, "svg");
+        canvas.appendChild(svgLayer);
+
+        const width = canvas.clientWidth || 800;
+        const height = canvas.clientHeight || 600;
+
+        // 1. Desenha o nó raiz (a classe)
+        const classNode = this._createConstellationNode(treeData, treeData.position.x, treeData.position.y, 'class-root', width, height, svgLayer);
+        canvas.appendChild(classNode);
+
+        // 2. Desenha as especializações em um círculo
+        const radius = Math.min(width, height) * 0.3;
+        const angleStep = (2 * Math.PI) / treeData.specializations.length;
+
+        treeData.specializations.forEach((spec, index) => {
+            const angle = angleStep * index - (Math.PI / 2);
+            const specX = 50 + (radius / width * 100) * Math.cos(angle);
+            const specY = 50 + (radius / height * 100) * Math.sin(angle);
+            
+            const specNode = this._createConstellationNode(spec, specX, specY, 'specialization', width, height, svgLayer);
+            canvas.appendChild(specNode);
+            this._drawConstellationConnection(treeData.position, {x: specX, y: specY}, width, height, svgLayer);
+
+            // 3. Desenha as habilidades de cada especialização
+            const skillRadius = Math.min(width, height) * 0.20;
+            spec.skills.forEach((skill, skillIndex) => {
+                const skillAngle = angle + (skillIndex - (spec.skills.length - 1) / 2) * 0.45;
+                const skillX = specX + (skillRadius / width * 100) * Math.cos(skillAngle);
+                const skillY = specY + (skillRadius / height * 100) * Math.sin(skillAngle);
+
+                const skillNode = this._createConstellationNode(skill, skillX, skillY, skill.type, width, height, svgLayer);
+                canvas.appendChild(skillNode);
+                this._drawConstellationConnection({x: specX, y: specY}, {x: skillX, y: skillY}, width, height, svgLayer);
+            });
+        });
+
+        // Fechar o painel se clicar fora dele (no canvas)
+        canvas.addEventListener('click', (e) => {
+            if (e.target === canvas) {
+                detailsPanel.classList.remove('visible');
+                document.querySelectorAll('.tree-node.active').forEach(n => n.classList.remove('active'));
+            }
+        });
+    }
+
+    _createConstellationNode(data, x, y, type) {
+        const detailsPanel = document.getElementById('skill-details-panel');
+        const el = document.createElement('div');
+        el.className = `tree-node type-${type}`;
+        el.style.left = `${x}%`;
+        el.style.top = `${y}%`;
+        el.innerHTML = `<span style="font-size:20px; pointer-events:none;">${data.icon || '🔹'}</span>`;
+
+        el.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            if (el.classList.contains('active')) {
+                el.classList.remove('active');
+                detailsPanel.classList.remove('visible');
+                return;
+            }
+
+            document.querySelectorAll('.tree-node.active').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+
+            detailsPanel.innerHTML = `
+                <h3>${data.name || 'Habilidade'}</h3>
+                <p class="skill-details-meta">${data.type || 'Classe'}</p>
+                <p class="skill-details-description">${data.description || 'Sem descrição.'}</p>
+                ${data.cost ? `<p><strong>Custo:</strong> ${data.cost} Ponto(s)</p>` : ''}
+            `;
+            detailsPanel.classList.add('visible');
+        });
+
+        return el;
+    }
+
+    _drawConstellationConnection(pos1, pos2, width, height, svgLayer) {
+        const svgNS = "http://www.w3.org/2000/svg";
+        const p1 = { x: (pos1.x / 100) * width, y: (pos1.y / 100) * height };
+        const p2 = { x: (pos2.x / 100) * width, y: (pos2.y / 100) * height };
+
+        const path = document.createElementNS(svgNS, "path");
+        const d = `M ${p1.x} ${p1.y} C ${p1.x} ${p1.y + (p2.y - p1.y) / 2}, ${p2.x} ${p2.y - (p2.y - p1.y) / 2}, ${p2.x} ${p2.y}`;
+        path.setAttribute("d", d);
+        path.setAttribute("class", "tree-path");
+        svgLayer.appendChild(path);
     }
 
     /**
