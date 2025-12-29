@@ -43,9 +43,11 @@ function updateUI() {
     });
 }
 
-// Evento de Clique nas Cartas
-skillCards.forEach(card => {
-    card.addEventListener('click', () => {
+// Evento de Clique nos Botões de Selecionar
+document.querySelectorAll('.btn-choose').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        // Encontra a carta pai do botão clicado
+        const card = btn.closest('.skill-card');
         const cardId = card.getAttribute('data-id');
 
         // Só permite ação se:
