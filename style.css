@@ -1,6 +1,7 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #121212;
+    border-top: 5px solid #ff0000; /* DEBUG: Borda vermelha para confirmar CSS novo */
     /* Faz a imagem de fundo cobrir toda a tela */
     background-size: cover;
     background-position: center;

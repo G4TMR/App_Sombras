@@ -1,3 +1,6 @@
+// DEBUG: Confirmação no Console
+console.log(">>> SCRIPT ATUALIZADO CARREGADO: VERSÃO 3.0 <<<");
+
 // Estado do Personagem
 let characterState = {
     nf: 0,
