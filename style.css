@@ -1,0 +1,111 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121212;
+    /* Faz a imagem de fundo cobrir toda a tela */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+header {
+    border-bottom: 1px solid #333;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.status-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1e1e1e;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+button {
+    padding: 8px 16px;
+    cursor: pointer;
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: #444;
+}
+
+.paths-container {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.skill-card {
+    background-color: #252525;
+    /* Garante que se houver imagem no card, ela cubra tudo */
+    background-size: cover;
+    background-position: center;
+    border: 2px solid #444;
+    border-radius: 10px;
+    padding: 20px;
+    width: 160px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.skill-card .icon {
+    font-size: 4rem; /* Aumentado para destacar mais */
+    margin-bottom: 10px;
+}
+
+/* ESTADOS DO SISTEMA */
+
+/* 1. Bloqueado (Padrão inicial ou NF insuficiente) */
+.skill-card.locked {
+    filter: grayscale(100%);
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* 2. Disponível (NF suficiente, pronto para escolha) */
+.skill-card.available {
+    filter: grayscale(0%);
+    opacity: 1;
+    cursor: pointer;
+    border-color: #ffd700; /* Dourado */
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+}
+
+.skill-card.available:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+/* 3. Selecionado (O caminho escolhido) */
+.skill-card.selected {
+    filter: grayscale(0%);
+    opacity: 1;
+    border-color: #00ff00; /* Verde */
+    background-color: #1a331a;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+    transform: scale(1.05);
+}
+
+/* 4. Descartado (Os outros caminhos após a escolha) */
+.skill-card.discarded {
+    filter: grayscale(100%);
+    opacity: 0.2;
+    pointer-events: none; /* Não pode mais clicar */
+    border-color: #222;
+}

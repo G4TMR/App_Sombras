@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sombras do Abismo - Árvore de Habilidades</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Evolução de Personagem</h1>
+            <div class="status-panel">
+                <p>Nível de Fragmentação (NF): <span id="nf-display">0</span></p>
+                <div class="controls">
+                    <button id="btn-levelup">Upar (+5 NF)</button>
+                    <button id="btn-reset">Resetar Ficha</button>
+                </div>
+            </div>
+        </header>
+
+        <section class="skill-tree">
+            <h2>Escolha sua Especialização (Requer NF 5)</h2>
+            <div class="paths-container">
+                <!-- Opção 1 -->
+                <div class="skill-card" data-id="esp-1">
+                    <div class="icon">⚔️</div>
+                    <h3>Lâmina Maldita</h3>
+                    <p>Combate corpo a corpo focado em sangramento.</p>
+                </div>
+                <!-- Opção 2 -->
+                <div class="skill-card" data-id="esp-2">
+                    <div class="icon">🔫</div>
+                    <h3>Atirador Espectral</h3>
+                    <p>Disparos que atravessam barreiras físicas.</p>
+                </div>
+                <!-- Opção 3 -->
+                <div class="skill-card" data-id="esp-3">
+                    <div class="icon">🔮</div>
+                    <h3>Ocultista</h3>
+                    <p>Manipulação direta da entropia e rituais.</p>
+                </div>
+                <!-- Opção 4 -->
+                <div class="skill-card" data-id="esp-4">
+                    <div class="icon">🛡️</div>
+                    <h3>Guardião do Limiar</h3>
+                    <p>Proteção pesada contra o paranormal.</p>
+                </div>
+                <!-- Opção 5 -->
+                <div class="skill-card" data-id="esp-5">
+                    <div class="icon">👁️</div>
+                    <h3>Investigador</h3>
+                    <p>Percepção aguçada para encontrar pistas.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
