@@ -16,6 +16,53 @@
     --gradient-primary: linear-gradient(135deg, var(--color-primary), var(--color-accent-rare), #00ffff);
 }
 
+/* --- CORES POR ELEMENTO - SISTEMA DE DEFESA --- */
+
+/* Temporal: Cinza Oscilante tipo Névoa */
+.sheet-container.temporal {
+    --defense-primary: #8892b0;
+    --defense-primary-hover: #a8b8d0;
+    --defense-accent: #b0b8c8;
+    --defense-gradient: linear-gradient(135deg, #6b7c99, #8892b0, #5a6b88);
+    --defense-glow: rgba(107, 124, 153, 0.5);
+}
+
+/* Cerebral: Dourado */
+.sheet-container.cerebral {
+    --defense-primary: #d4a574;
+    --defense-primary-hover: #e8b88a;
+    --defense-accent: #f0c894;
+    --defense-gradient: linear-gradient(135deg, #b8860b, #d4a574, #daa520);
+    --defense-glow: rgba(212, 165, 116, 0.5);
+}
+
+/* Visceral: Vermelho Escuro (Sangue) */
+.sheet-container.visceral {
+    --defense-primary: #c94c4c;
+    --defense-primary-hover: #dd6b6b;
+    --defense-accent: #e08888;
+    --defense-gradient: linear-gradient(135deg, #8b2e2e, #c94c4c, #a04040);
+    --defense-glow: rgba(201, 76, 76, 0.5);
+}
+
+/* Vital: Verde Vivo (Energia da Vida) */
+.sheet-container.vital {
+    --defense-primary: #4ecca3;
+    --defense-primary-hover: #6fdb9f;
+    --defense-accent: #7ee5b8;
+    --defense-gradient: linear-gradient(135deg, #229954, #4ecca3, #1e8449);
+    --defense-glow: rgba(78, 204, 163, 0.5);
+}
+
+/* Padrão caso não tenha elemento */
+.sheet-container {
+    --defense-primary: #a855f7;
+    --defense-primary-hover: #c084fc;
+    --defense-accent: #b8a0ff;
+    --defense-gradient: linear-gradient(135deg, #a855f7, #c084fc, #00ffff);
+    --defense-glow: rgba(168, 85, 247, 0.5);
+}
+
 /* --- Estilos Globais --- */
 html, body {
     box-sizing: border-box;
@@ -1773,12 +1820,12 @@ body[data-page="agentes"] .sheet-container {
 
 .defense-container {
     margin-bottom: 2rem;
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(0, 255, 255, 0.08) 100%);
-    padding: 2rem;
+    background: linear-gradient(135deg, rgba(212, 165, 116, 0.15) 0%, rgba(212, 165, 116, 0.08) 100%);
+    padding: 1.5rem 1rem;
     border-radius: 16px;
-    border: 2px solid rgba(168, 85, 247, 0.4);
+    border: 2px solid var(--defense-primary);
     box-shadow: 
-        0 8px 32px rgba(168, 85, 247, 0.15),
+        0 8px 32px var(--defense-glow),
         inset 0 1px 1px rgba(255, 255, 255, 0.1);
     position: relative;
     overflow: hidden;
@@ -1791,21 +1838,17 @@ body[data-page="agentes"] .sheet-container {
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.6), transparent);
+    background: linear-gradient(90deg, transparent, var(--defense-primary), transparent);
+    opacity: 0.6;
 }
 
 .defense-container h4 {
     font-family: var(--font-display);
-    font-size: 1.4rem;
-    margin: 0 0 1.5rem 0;
-    color: var(--color-primary);
+    font-size: 1.2rem;
+    margin: 0 0 1rem 0;
+    color: var(--defense-primary);
     text-transform: uppercase;
-    letter-spacing: 2px;
-    background: linear-gradient(135deg, var(--color-primary), #c084fc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: none;
+    letter-spacing: 1px;
 }
 
 .defense-system {
@@ -1861,11 +1904,11 @@ body[data-page="agentes"] .sheet-container {
 }
 
 .defense-type-btn.active {
-    background: linear-gradient(135deg, var(--color-primary) 0%, #c084fc 100%);
-    border-color: #c084fc;
+    background: var(--defense-gradient);
+    border-color: var(--defense-primary);
     box-shadow: 
-        0 0 20px rgba(168, 85, 247, 0.6),
-        0 8px 20px rgba(168, 85, 247, 0.3),
+        0 0 20px var(--defense-glow),
+        0 8px 20px var(--defense-glow),
         inset 0 1px 1px rgba(255, 255, 255, 0.3);
     color: white;
     transform: translateY(-3px) scale(1.02);
@@ -1968,7 +2011,7 @@ body[data-page="agentes"] .sheet-container {
     width: 32px;
     height: 32px;
     padding: 0;
-    background: linear-gradient(135deg, var(--color-primary), #c084fc);
+    background: var(--defense-gradient);
     border: none;
     border-radius: 6px;
     color: white;
@@ -1979,13 +2022,13 @@ body[data-page="agentes"] .sheet-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+    box-shadow: 0 4px 12px var(--defense-glow);
 }
 
 .defense-bonus-btn:hover {
-    background: linear-gradient(135deg, #c084fc, #d4a5ff);
+    background: var(--defense-primary-hover);
     transform: scale(1.15) translateY(-2px);
-    box-shadow: 0 6px 16px rgba(168, 85, 247, 0.5);
+    box-shadow: 0 6px 16px var(--defense-glow);
 }
 
 .defense-bonus-btn:active {
@@ -2023,8 +2066,8 @@ body[data-page="agentes"] .sheet-container {
 /* Botão Rolar Defesa */
 .roll-defense-btn {
     padding: 1rem 2rem;
-    background: linear-gradient(135deg, var(--color-primary) 0%, #c084fc 100%);
-    border: 2px solid transparent;
+    background: var(--defense-gradient);
+    border: 2px solid var(--defense-primary);
     border-radius: 10px;
     color: white;
     font-weight: 700;
@@ -2036,8 +2079,8 @@ body[data-page="agentes"] .sheet-container {
     position: relative;
     overflow: hidden;
     box-shadow: 
-        0 8px 24px rgba(168, 85, 247, 0.4),
-        0 0 16px rgba(168, 85, 247, 0.2);
+        0 8px 24px var(--defense-glow),
+        0 0 16px var(--defense-glow);
 }
 
 .roll-defense-btn::before {
@@ -2056,8 +2099,8 @@ body[data-page="agentes"] .sheet-container {
 .roll-defense-btn:hover {
     transform: translateY(-4px);
     box-shadow: 
-        0 12px 32px rgba(168, 85, 247, 0.6),
-        0 0 24px rgba(168, 85, 247, 0.3);
+        0 12px 32px var(--defense-glow),
+        0 0 24px var(--defense-glow);
     border-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -2069,15 +2112,131 @@ body[data-page="agentes"] .sheet-container {
 .roll-defense-btn:active {
     transform: translateY(-2px);
     box-shadow: 
-        0 6px 16px rgba(168, 85, 247, 0.4),
-        0 0 12px rgba(168, 85, 247, 0.2);
+        0 6px 16px var(--defense-glow),
+        0 0 12px var(--defense-glow);
 }
 
 .defense-value {
     font-family: var(--font-display);
-    font-size: 2.2rem;
-    color: var(--color-primary);
-    text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+    font-size: 2rem;
+    color: var(--defense-primary);
+    text-shadow: 0 0 10px var(--defense-glow);
+    font-weight: bold;
+}
+
+/* --- RESPONSIVIDADE DO SISTEMA DE DEFESA --- */
+@media (max-width: 800px) {
+    .defense-container {
+        padding: 1.2rem 0.8rem;
+        margin-bottom: 1.5rem;
+        border-radius: 12px;
+    }
+    
+    .defense-container h4 {
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
+    }
+    
+    .defense-system {
+        gap: 0.8rem;
+    }
+    
+    .defense-type-selector {
+        gap: 0.3rem;
+    }
+    
+    .defense-type-btn {
+        padding: 0.65rem 0.75rem;
+        font-size: 0.85rem;
+        border-radius: 8px;
+    }
+    
+    .defense-calculation {
+        padding: 1rem;
+    }
+    
+    .defense-calc-row {
+        padding: 0.4rem 0;
+        font-size: 0.85rem;
+    }
+    
+    .defense-calc-label {
+        font-weight: 600;
+    }
+    
+    .defense-calc-value {
+        font-size: 0.95rem;
+    }
+    
+    .defense-bonus-input-group {
+        gap: 0.2rem;
+    }
+    
+    .defense-bonus-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.95rem;
+    }
+    
+    .defense-bonus-input {
+        width: 40px;
+        padding: 0.4rem;
+        font-size: 0.8rem;
+    }
+    
+    .roll-defense-btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.95rem;
+        letter-spacing: 0.5px;
+        margin-top: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .defense-container {
+        padding: 1rem 0.6rem;
+        margin-bottom: 1.2rem;
+    }
+    
+    .defense-container h4 {
+        font-size: 1rem;
+        margin-bottom: 0.6rem;
+    }
+    
+    .defense-type-btn {
+        padding: 0.55rem 0.6rem;
+        font-size: 0.75rem;
+    }
+    
+    .defense-calculation {
+        padding: 0.8rem;
+    }
+    
+    .defense-calc-row {
+        padding: 0.3rem 0;
+        font-size: 0.75rem;
+    }
+    
+    .defense-bonus-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 0.8rem;
+    }
+    
+    .defense-bonus-input {
+        width: 35px;
+        padding: 0.3rem;
+        font-size: 0.7rem;
+    }
+    
+    .roll-defense-btn {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.85rem;
+    }
+    
+    .defense-value {
+        font-size: 1.5rem;
+    }
 }
 
 .resistances-container {
