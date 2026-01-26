@@ -2152,6 +2152,131 @@ body[data-page="agentes"] .sheet-container {
     transition: all 0.2s ease;
 }
 
+/* --- NOVO: ESTILOS DO MODAL DA CONSTELAÇÃO DE HABILIDADES (FICHA) --- */
+.skill-tree-viewport {
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    overflow: hidden; /* Esconde o que sai da tela */
+    position: relative;
+    background: radial-gradient(circle at center, #1b1b25 0%, #050505 100%); /* Fundo unificado */
+}
+
+/* Estilos da Árvore de Habilidades Integrada */
+#skill-tree-canvas svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.tree-node {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: #2a2a35;
+    border: 2px solid #444;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(0,0,0,0.8);
+    transform: translate(-50%, -50%);
+}
+
+.tree-node:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+    z-index: 20;
+    border-color: #fff;
+}
+
+/* Cores por Tipo */
+.tree-node.type-specialization { border-color: #ffd700; box-shadow: 0 0 15px #ffd700, inset 0 0 10px rgba(255, 215, 0, 0.2); }
+.tree-node.type-active { border-color: #ff4444; box-shadow: 0 0 15px #ff4444, inset 0 0 10px rgba(255, 68, 68, 0.2); }
+.tree-node.type-passive { border-color: #44ff44; box-shadow: 0 0 15px #44ff44, inset 0 0 10px rgba(68, 255, 68, 0.2); }
+.tree-node.type-reaction { border-color: #aa44ff; box-shadow: 0 0 15px #aa44ff, inset 0 0 10px rgba(170, 68, 255, 0.2); }
+
+.tree-path {
+    fill: none;
+    stroke: #555;
+    stroke-width: 2;
+    filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));
+    transition: stroke 0.3s;
+}
+
+.tree-path.active {
+    stroke: var(--element-color, var(--color-primary));
+    stroke-width: 3;
+}
+
+.tree-node.active {
+    border-color: #fff;
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* Painel de Detalhes da Habilidade */
+.skill-details-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 300px;
+    height: 100%;
+    background: rgba(10, 10, 15, 0.9);
+    border-left: 1px solid #333;
+    backdrop-filter: blur(10px);
+    transform: translateX(100%);
+    transition: transform 0.4s ease-in-out;
+    z-index: 100;
+    padding: 2rem;
+    box-sizing: border-box;
+    color: var(--color-text-primary);
+    overflow-y: auto;
+}
+
+.skill-details-panel.visible {
+    transform: translateX(0);
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+}
+
+.skill-details-panel h3 {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--page-color, var(--color-primary));
+    margin: 0 0 1rem 0;
+    letter-spacing: 1px;
+}
+
+.skill-details-panel .skill-details-meta {
+    font-size: 0.9rem;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    display: block;
+    border-bottom: 1px solid #444;
+    padding-bottom: 0.5rem;
+}
+
+.skill-details-panel .skill-details-description {
+    line-height: 1.6;
+}
+
+/* --- NOVO VISUAL DE ATRIBUTOS (PENTAGRAMA) --- */
+.primary-attributes-display.visual-mode {
+    position: relative;
+    background-image: url('imagens/atributos_Fundo.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 700px;
+}
+
 .close-viewer-btn:hover {
     background: var(--color-danger);
     transform: scale(1.1);
@@ -3408,138 +3533,166 @@ body.dev-mode #dev-mode-form { display: none; }
     100% { transform: rotate(360deg); }
 }
 
+/* Animação para entrada suave de seções */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* --- NOVO E CORRIGIDO: NAVEGAÇÃO FLUTUANTE MOBILE PARA FICHA --- */
+/* ========================================================================
+   NAVEGAÇÃO FLUTUANTE MOBILE - FICHA DE AGENTE
+   Sistema de navegação com botão FAB (Cubo) para mobile
+======================================================================== */
+
 .mobile-fab-container {
     position: fixed;
     bottom: 1.5rem;
     right: 1.5rem;
     z-index: 1050;
-    display: none; /* CRÍTICO: Escondido por padrão para não aparecer no PC */
+    display: none; /* Escondido por padrão (desktop) */
+    font-family: var(--font-primary);
 }
 
+/* ========== BOTÃO FAB (CUBO) ========== */
 .mobile-fab {
     width: 60px;
     height: 60px;
-    border-radius: 12px; /* Quadrado com cantos arredondados */
+    border-radius: 12px;
     background: var(--gradient-primary);
     color: white;
     border: none;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    box-shadow: 0 6px 20px rgba(168, 85, 247, 0.3);
     cursor: pointer;
-    transition: transform 0.3s ease, background-color 0.3s ease;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
+    overflow: visible;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding: 0;
 }
 
+.mobile-fab:active {
+    transform: scale(0.95);
+}
+
+.mobile-fab:hover {
+    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.5);
+    transform: translateY(-3px);
+}
+
+/* Ícones do FAB */
 .mobile-fab .fab-icon {
     width: 32px;
     height: 32px;
     position: absolute;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mobile-fab .icon-grid {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
 }
 
 .mobile-fab .icon-close {
-    transform: rotate(-45deg) scale(0.5);
     opacity: 0;
+    transform: scale(0.3) rotate(-90deg);
 }
 
+/* Estado aberto do FAB */
 .mobile-fab.open {
-    background: var(--color-danger);
+    background: linear-gradient(135deg, #dc3545, #ff6b6b);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
 }
 
 .mobile-fab.open .icon-grid {
-    transform: rotate(45deg) scale(0.5);
     opacity: 0;
+    transform: scale(0.3) rotate(90deg);
 }
 
 .mobile-fab.open .icon-close {
-    transform: rotate(0deg) scale(1);
     opacity: 1;
+    transform: scale(1) rotate(0deg);
 }
 
+/* ========== MENU DE NAVEGAÇÃO ========== */
 .mobile-nav-menu {
     position: absolute;
     bottom: 75px;
     right: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 0.6rem;
+    background: rgba(24, 24, 24, 0.95);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 12px;
+    padding: 0.8rem;
+    backdrop-filter: blur(10px);
     opacity: 0;
-    visibility: hidden; /* CRÍTICO: Escondido por padrão */
-    transform: translateY(20px);
-    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    visibility: hidden;
+    transform: translateY(15px) scale(0.9);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+    min-width: 160px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .mobile-nav-menu.visible {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+    pointer-events: all;
 }
 
-/* --- NOVO E CORRIGIDO: NAVEGAÇÃO FLUTUANTE MOBILE PARA FICHA --- */
-.mobile-fab-container {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    z-index: 1050;
-    display: none; /* CRÍTICO: Escondido por padrão para não aparecer no PC */
-}
-
-.mobile-fab {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px; /* Quadrado com cantos arredondados */
-    background: var(--gradient-primary);
-    color: white;
-    border: none;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    cursor: pointer;
-    transition: transform 0.3s ease, background-color 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* Links do menu de navegação */
+.mobile-nav-menu a {
+    display: block;
+    padding: 0.8rem 1rem;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+    font-weight: 500;
+    position: relative;
     overflow: hidden;
+    white-space: nowrap;
 }
 
-.mobile-fab .fab-icon {
-    width: 32px;
-    height: 32px;
+.mobile-nav-menu a::before {
+    content: '';
     position: absolute;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    left: -100%;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.3), transparent);
+    transition: left 0.4s ease;
 }
 
-.mobile-fab .icon-close {
-    transform: rotate(-45deg) scale(0.5);
-    opacity: 0;
+.mobile-nav-menu a:hover {
+    background-color: rgba(168, 85, 247, 0.2);
+    color: var(--color-primary-hover);
+    padding-left: 1.3rem;
 }
 
-.mobile-fab.open {
-    background: var(--color-danger);
+.mobile-nav-menu a:hover::before {
+    left: 100%;
 }
 
-.mobile-fab.open .icon-grid {
-    transform: rotate(45deg) scale(0.5);
-    opacity: 0;
-}
-
-.mobile-fab.open .icon-close {
-    transform: rotate(0deg) scale(1);
-    opacity: 1;
-}
-
-.mobile-nav-menu {
-    position: absolute;
-    bottom: 75px;
-    right: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    opacity: 0;
-    visibility: hidden; /* CRÍTICO: Escondido por padrão */
-    transform: translateY(20px);
-    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+.mobile-nav-menu a:active {
+    background-color: rgba(168, 85, 247, 0.3);
+    transform: scale(0.98);
 }
 
 .loader-small {
@@ -3705,6 +3858,11 @@ body.dev-mode #dev-mode-form { display: none; }
         text-align: center; /* Centraliza o texto do título */
     }
 
+    /* ========== NAVEGAÇÃO MOBILE - FICHA DE AGENTE ========== */
+    .mobile-fab-container {
+        display: flex !important; /* Ativa o container no mobile */
+    }
+
     /* --- LAYOUT MOBILE DA FICHA DE AGENTE --- */
     .sheet-main-desktop {
         display: block; /* Remove o grid e empilha as colunas */
@@ -3715,10 +3873,46 @@ body.dev-mode #dev-mode-form { display: none; }
     .sheet-mobile-section {
         display: none;
         margin-bottom: 1rem; /* Espaço entre as seções quando visíveis */
+        animation: slideInUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     
     .sheet-mobile-section.mobile-default-visible, #mobile-section-lore {
-        display: block; /* Mostra apenas a seção de lore inicialmente */
+        display: block !important; /* Mostra apenas a seção de lore inicialmente */
+    }
+
+    /* Estilos para as seções accordion no mobile */
+    .sheet-mobile-section.accordion-panel {
+        padding: 1rem;
+        background-color: rgba(26, 26, 26, 0.7);
+        border-radius: 12px;
+        border: 1px solid rgba(168, 85, 247, 0.2);
+    }
+
+    .accordion-header {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(0, 255, 255, 0.1));
+        border: none;
+        border-radius: 8px;
+        color: var(--color-text-primary);
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: left;
+        margin: -1rem -1rem 0 -1rem;
+        border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+    }
+
+    .accordion-header:hover {
+        background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(0, 255, 255, 0.2));
+        color: var(--color-primary-hover);
+    }
+
+    .accordion-content {
+        padding: 1rem 0;
+        max-height: 80vh;
+        overflow-y: auto;
     }
 
     /* Esconde o botão de "Ver Habilidades" no mobile, pois o FAB o substitui */

@@ -2647,41 +2647,113 @@ class CharacterSheet {
         return skillNode;
     }
 
+    /**
+     * Inicializa a navegação flutuante mobile com FAB (botão cubo)
+     * Permite navegar entre seções da ficha em dispositivos móveis
+     */
     initializeMobileNavigation() {
+        // Elementos principais
         const fab = document.getElementById('mobile-fab');
+        const container = document.getElementById('mobile-fab-container');
         const navMenu = document.getElementById('mobile-nav-menu');
         const navLinks = navMenu.querySelectorAll('a');
         const sections = document.querySelectorAll('.sheet-mobile-section');
 
-        fab.addEventListener('click', () => {
-            // Se o menu estiver sendo aberto pela primeira vez e nenhuma seção estiver visível,
-            // mostra a seção de Lore por padrão.
+        // Valida se está em modo mobile
+        if (!fab || !navMenu) return;
+
+        /**
+         * Função para fechar o menu (remove classes de "visível" e "aberto")
+         */
+        const closeMenu = () => {
+            navMenu.classList.remove('visible');
+            fab.classList.remove('open');
+        };
+
+        /**
+         * Função para exibir uma seção específica
+         * @param {string} targetId - ID da seção a ser exibida
+         */
+        const showSection = (targetId) => {
+            sections.forEach(section => {
+                if (section.id === targetId) {
+                    section.style.display = 'block';
+                    // Scroll para o topo da seção
+                    setTimeout(() => {
+                        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 50);
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        };
+
+        // ====== EVENTO: Clique no botão FAB ======
+        fab.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            // Garante que alguma seção está visível se for a primeira abertura
             const isAnySectionVisible = Array.from(sections).some(s => s.style.display === 'block');
             if (!isAnySectionVisible) {
-                document.getElementById('mobile-section-lore').style.display = 'block';
+                showSection('mobile-section-lore');
             }
 
+            // Toggle do menu
             navMenu.classList.toggle('visible');
             fab.classList.toggle('open');
         });
 
-        navLinks.forEach(link => {
+        // ====== EVENTO: Clique nos links de navegação ======
+        navLinks.forEach((link, index) => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
+                
                 const targetId = link.getAttribute('href').substring(1);
-                sections.forEach(section => {
-                    section.style.display = section.id === targetId ? 'block' : 'none';
-                });
-                navMenu.classList.remove('visible');
-                fab.classList.remove('open');
+                
+                // Adiciona animação suave
+                showSection(targetId);
+                
+                // Fecha o menu com pequeno delay para animação
+                setTimeout(() => {
+                    closeMenu();
+                }, 150);
             });
+
+            // Adiciona atributos de acessibilidade
+            link.setAttribute('role', 'button');
+            link.setAttribute('tabindex', index);
         });
 
-        // Garante que ao carregar a página, apenas a seção de Lore esteja visível.
+        // ====== EVENTO: Clique fora do menu ======
+        document.addEventListener('click', (e) => {
+            // Fecha o menu se clicarem fora dele
+            if (!e.target.closest('.mobile-fab-container') && navMenu.classList.contains('visible')) {
+                closeMenu();
+            }
+        });
+
+        // ====== EVENTO: Tecla ESC ======
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && navMenu.classList.contains('visible')) {
+                closeMenu();
+            }
+        });
+
+        // ====== INICIALIZAÇÃO: Esconde todas as seções e mostra a padrão (Lore) ======
         sections.forEach(section => {
             section.style.display = 'none';
         });
-        document.getElementById('mobile-section-lore').style.display = 'block';
+        
+        // Mostra a seção de Lore por padrão
+        const loreSection = document.getElementById('mobile-section-lore');
+        if (loreSection) {
+            loreSection.style.display = 'block';
+        }
+
+        // Detecta mudanças de orientação do dispositivo
+        window.addEventListener('orientationchange', () => {
+            closeMenu();
+        });
     }
     /**
      * Inicializa o modal da árvore de habilidades, incluindo pan e zoom.
