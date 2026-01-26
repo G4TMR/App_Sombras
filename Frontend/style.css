@@ -1772,38 +1772,312 @@ body[data-page="agentes"] .sheet-container {
 }
 
 .defense-container {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    background-color: rgba(0,0,0,0.2);
-    padding: 1.5rem;
-    border-radius: 8px;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(0, 255, 255, 0.08) 100%);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 2px solid rgba(168, 85, 247, 0.4);
+    box-shadow: 
+        0 8px 32px rgba(168, 85, 247, 0.15),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
 }
 
-.defense-shield {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto 1rem auto;
-    border: 4px solid var(--color-surface-2);
-    border-radius: 50%;
+.defense-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.6), transparent);
+}
+
+.defense-container h4 {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    margin: 0 0 1.5rem 0;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--color-primary), #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+}
+
+.defense-system {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Seletor de Tipo de Defesa */
+.defense-type-selector {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.defense-type-btn {
+    flex: 1;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(0, 255, 255, 0.05));
+    border: 2px solid rgba(168, 85, 247, 0.3);
+    color: var(--color-text-primary);
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.defense-type-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.defense-type-btn:hover {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(0, 255, 255, 0.1));
+    border-color: rgba(168, 85, 247, 0.6);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(168, 85, 247, 0.25);
+}
+
+.defense-type-btn:hover::before {
+    left: 100%;
+}
+
+.defense-type-btn.active {
+    background: linear-gradient(135deg, var(--color-primary) 0%, #c084fc 100%);
+    border-color: #c084fc;
+    box-shadow: 
+        0 0 20px rgba(168, 85, 247, 0.6),
+        0 8px 20px rgba(168, 85, 247, 0.3),
+        inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    color: white;
+    transform: translateY(-3px) scale(1.02);
+}
+
+.defense-type-btn.active::before {
+    display: none;
+}
+
+/* Cálculo de Defesa */
+.defense-calculation {
+    background: linear-gradient(135deg, rgba(26, 26, 26, 0.8) 0%, rgba(18, 18, 30, 0.8) 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    backdrop-filter: blur(10px);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 1px rgba(168, 85, 247, 0.1);
+}
+
+.defense-calc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.defense-calc-row:hover {
+    background: rgba(168, 85, 247, 0.05);
+    padding: 0.75rem 0.5rem;
+    border-radius: 4px;
+}
+
+.defense-calc-label {
+    color: rgba(240, 240, 240, 0.8);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+}
+
+.defense-calc-value {
+    color: var(--color-primary);
+    font-family: var(--font-display);
+    font-weight: bold;
+    font-size: 1.3rem;
+    text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+}
+
+.defense-calc-row.defense-total {
+    border-top: 2px solid rgba(168, 85, 247, 0.4);
+    border-bottom: 2px solid rgba(168, 85, 247, 0.4);
+    padding: 1rem 0;
+    margin: 0.5rem 0;
+    font-size: 1.15rem;
+    background: rgba(168, 85, 247, 0.08);
+    border-radius: 8px;
+    padding: 1rem 0.75rem;
+}
+
+.defense-calc-row.defense-total .defense-calc-label {
+    color: var(--color-primary);
+    font-size: 0.95rem;
+}
+
+.defense-calc-row.defense-total .defense-value {
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--color-primary), #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.4));
+    }
+    50% {
+        filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.8));
+    }
+}
+
+/* Input de Bônus */
+.defense-bonus-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(168, 85, 247, 0.1);
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.defense-bonus-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: linear-gradient(135deg, var(--color-primary), #c084fc);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle, #444 0%, #2a2a2a 100%);
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.7);
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.defense-bonus-btn:hover {
+    background: linear-gradient(135deg, #c084fc, #d4a5ff);
+    transform: scale(1.15) translateY(-2px);
+    box-shadow: 0 6px 16px rgba(168, 85, 247, 0.5);
+}
+
+.defense-bonus-btn:active {
+    transform: scale(0.95);
+}
+
+.defense-bonus-input {
+    width: 60px;
+    padding: 0.6rem;
+    background: rgba(26, 26, 26, 0.8);
+    border: 2px solid rgba(168, 85, 247, 0.3);
+    color: var(--color-primary);
+    text-align: center;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    font-family: var(--font-display);
+}
+
+.defense-bonus-input:hover {
+    border-color: rgba(168, 85, 247, 0.6);
+    background: rgba(26, 26, 26, 0.95);
+}
+
+.defense-bonus-input:focus {
+    outline: none;
+    border-color: #c084fc;
+    box-shadow: 
+        0 0 12px rgba(168, 85, 247, 0.4),
+        inset 0 0 8px rgba(168, 85, 247, 0.1);
+    background: rgba(26, 26, 26, 0.95);
+}
+
+/* Botão Rolar Defesa */
+.roll-defense-btn {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, var(--color-primary) 0%, #c084fc 100%);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 8px 24px rgba(168, 85, 247, 0.4),
+        0 0 16px rgba(168, 85, 247, 0.2);
+}
+
+.roll-defense-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.roll-defense-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+        0 12px 32px rgba(168, 85, 247, 0.6),
+        0 0 24px rgba(168, 85, 247, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.roll-defense-btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.roll-defense-btn:active {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 6px 16px rgba(168, 85, 247, 0.4),
+        0 0 12px rgba(168, 85, 247, 0.2);
 }
 
 .defense-value {
     font-family: var(--font-display);
-    font-size: 4rem;
-    color: var(--color-text-primary);
-    text-shadow: 0 0 10px rgba(255,255,255,0.5);
-}
-
-.defense-label {
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    letter-spacing: 1px;
-    color: var(--color-text-secondary);
+    font-size: 2.2rem;
+    color: var(--color-primary);
+    text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
 }
 
 .resistances-container {

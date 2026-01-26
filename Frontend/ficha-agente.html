@@ -128,11 +128,47 @@
                             <div class="status-bar-background"><div id="pa-bar-fill" class="status-bar-fill pa"></div></div>
                         </div>
                     </div>
+                    <!-- NOVO SISTEMA DE DEFESA -->
                     <div class="defense-container">
-                        <div class="defense-shield">
-                            <span id="sheet-defense" class="defense-value">--</span>
+                        <h4>Sistema de Defesa</h4>
+                        <div class="defense-system">
+                            <!-- Seleção de Tipo de Defesa -->
+                            <div class="defense-type-selector">
+                                <button id="defense-block-btn" class="defense-type-btn active" data-type="block" title="Bloquear - usa Vitalidade">
+                                    🛡️ Bloquear
+                                </button>
+                                <button id="defense-dodge-btn" class="defense-type-btn" data-type="dodge" title="Esquivar - usa Agilidade">
+                                    ⚡ Esquivar
+                                </button>
+                            </div>
+
+                            <!-- Cálculo de Defesa -->
+                            <div class="defense-calculation">
+                                <div class="defense-calc-row">
+                                    <span class="defense-calc-label">Base:</span>
+                                    <span id="defense-base" class="defense-calc-value">--</span>
+                                </div>
+                                <div class="defense-calc-row">
+                                    <span class="defense-calc-label">Habilidades:</span>
+                                    <span id="defense-passive" class="defense-calc-value">+0</span>
+                                </div>
+                                <div class="defense-calc-row">
+                                    <span class="defense-calc-label">Bônus Manual:</span>
+                                    <div class="defense-bonus-input-group">
+                                        <button class="defense-bonus-btn minus" data-action="decrease" title="Diminuir">-</button>
+                                        <input type="number" id="defense-bonus-input" class="defense-bonus-input" value="0" min="0" title="Bônus manual de defesa">
+                                        <button class="defense-bonus-btn plus" data-action="increase" title="Aumentar">+</button>
+                                    </div>
+                                </div>
+                                <div class="defense-calc-row defense-total">
+                                    <span class="defense-calc-label">Total:</span>
+                                    <span id="sheet-defense" class="defense-value">--</span>
+                                </div>
+                            </div>
+
+                            <!-- Botão para Rolar Defesa -->
+                            <button id="roll-defense-btn" class="roll-defense-btn">Rolar Defesa</button>
                         </div>
-                        <span class="defense-label">Defesa Total</span>
                     </div>
                     <div class="proficiencies-box">
                         <h4>Proficiências</h4>

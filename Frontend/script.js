@@ -2035,6 +2035,7 @@ class CharacterSheet {
         }
 
         this.renderActionsPanel();
+        this.initializeDefenseSystem();
 
         document.getElementById('sheet-container').style.display = 'flex';
     }
@@ -2338,6 +2339,9 @@ class CharacterSheet {
         document.getElementById('level-up-btn').addEventListener('click', () => {
             this.levelUp();
         });
+
+        // Inicializa o novo sistema de defesa
+        this.initializeDefenseSystem();
     }
     setupImageUpload() {
         const imageContainer = document.querySelector('.sheet-header-image-container');
@@ -2642,6 +2646,132 @@ class CharacterSheet {
         }
 
         return skillNode;
+    }
+
+    /**
+     * Inicializa o sistema de defesa dinâmico com escolha entre Bloquear e Esquivar
+     */
+    initializeDefenseSystem() {
+        // Inicializa a estrutura de defesa se não existir
+        if (!this.character.defense) {
+            this.character.defense = {
+                type: 'dodge',  // 'block' ou 'dodge'
+                passiveBonus: 0, // De habilidades
+                manualBonus: 0,  // Do jogador
+            };
+            this.saveCharacterChanges();
+        }
+
+        // Botões de seleção de tipo
+        const blockBtn = document.getElementById('defense-block-btn');
+        const dodgeBtn = document.getElementById('defense-dodge-btn');
+        
+        if (blockBtn) blockBtn.addEventListener('click', () => {
+            this.character.defense.type = 'block';
+            this.updateDefenseDisplay();
+            this.saveCharacterChanges();
+        });
+
+        if (dodgeBtn) dodgeBtn.addEventListener('click', () => {
+            this.character.defense.type = 'dodge';
+            this.updateDefenseDisplay();
+            this.saveCharacterChanges();
+        });
+
+        // Input de bonus manual
+        const bonusInput = document.getElementById('defense-bonus-input');
+        if (bonusInput) {
+            bonusInput.addEventListener('change', (e) => {
+                this.character.defense.manualBonus = parseInt(e.target.value) || 0;
+                this.updateDefenseDisplay();
+                this.saveCharacterChanges();
+            });
+        }
+
+        // Botões de incremento/decremento
+        const decreaseBtn = document.querySelector('[data-action="decrease"]');
+        const increaseBtn = document.querySelector('[data-action="increase"]');
+
+        if (decreaseBtn) decreaseBtn.addEventListener('click', () => {
+            const input = document.getElementById('defense-bonus-input');
+            input.value = Math.max(0, parseInt(input.value) || 0) - 1;
+            input.dispatchEvent(new Event('change'));
+        });
+
+        if (increaseBtn) increaseBtn.addEventListener('click', () => {
+            const input = document.getElementById('defense-bonus-input');
+            input.value = (parseInt(input.value) || 0) + 1;
+            input.dispatchEvent(new Event('change'));
+        });
+
+        // Botão para rolar defesa
+        const rollBtn = document.getElementById('roll-defense-btn');
+        if (rollBtn) rollBtn.addEventListener('click', () => {
+            this.rollDefense();
+        });
+
+        // Renderiza a defesa
+        this.updateDefenseDisplay();
+    }
+
+    /**
+     * Calcula e atualiza a exibição da defesa
+     */
+    updateDefenseDisplay() {
+        const attrs = this.character.attributes || {};
+        const defense = this.character.defense || { type: 'dodge', passiveBonus: 0, manualBonus: 0 };
+
+        // Calcula base de defesa conforme o tipo
+        let baseDefense = 10;
+        if (defense.type === 'block') {
+            baseDefense += attrs.vitalidade || 0; // Bloquear usa Vitalidade (Fortitude)
+        } else {
+            baseDefense += attrs.agilidade || 0;  // Esquivar usa Agilidade
+        }
+
+        const totalDefense = baseDefense + (defense.passiveBonus || 0) + (defense.manualBonus || 0);
+
+        // Atualiza displays
+        document.getElementById('defense-base').textContent = baseDefense;
+        document.getElementById('defense-passive').textContent = `+${defense.passiveBonus || 0}`;
+        document.getElementById('sheet-defense').textContent = totalDefense;
+        document.getElementById('defense-bonus-input').value = defense.manualBonus || 0;
+
+        // Atualiza botões de seleção
+        const blockBtn = document.getElementById('defense-block-btn');
+        const dodgeBtn = document.getElementById('defense-dodge-btn');
+        
+        if (blockBtn) {
+            blockBtn.classList.toggle('active', defense.type === 'block');
+        }
+        if (dodgeBtn) {
+            dodgeBtn.classList.toggle('active', defense.type === 'dodge');
+        }
+    }
+
+    /**
+     * Rola a defesa e mostra o resultado
+     */
+    rollDefense() {
+        const totalDefense = parseInt(document.getElementById('sheet-defense').textContent) || 0;
+        const diceRoll = Math.floor(Math.random() * 20) + 1;
+        const result = diceRoll + totalDefense;
+
+        // Cria notificação visual
+        const defenseType = this.character.defense?.type === 'block' ? '🛡️ BLOQUEIO' : '⚡ ESQUIVA';
+        alert(`${defenseType}\n\nD20: ${diceRoll}\nDefesa Base: ${totalDefense}\n━━━━━━━━━━━\nTotal: ${result}`);
+    }
+
+    /**
+     * Adiciona bonus passivo de habilidade à defesa
+     */
+    addPassiveDefenseBonus(bonus) {
+        if (!this.character.defense) {
+            this.character.defense = { type: 'dodge', passiveBonus: 0, manualBonus: 0 };
+        }
+        this.character.defense.passiveBonus += bonus;
+        this.updateDefenseDisplay();
+        this.saveCharacterChanges();
     }
 
     /**
