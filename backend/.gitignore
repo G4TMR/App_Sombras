@@ -1,0 +1,32 @@
+# Variáveis de ambiente
+.env
+.env.local
+.env.*.local
+
+# Node modules
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Dependências instaladas
+package-lock.json
+yarn.lock
+
+# Arquivos de OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build outputs
+dist/
+build/
+
+# Logs
+logs/
+*.log
