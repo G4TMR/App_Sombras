@@ -16,18 +16,26 @@ const api = axios.create({
 });
 
 // Adiciona um interceptor para lidar com erros de autenticação globalmente
-// Isso garante que, se a sessão expirar, o usuário seja redirecionado para o login.
+// DESATIVADO: Este interceptor estava causando redirects para rotas inexistentes.
+// Os erros 401 são tratados nos handlers de erro específicos de cada função.
+/*
 api.interceptors.response.use(
     response => response,
     error => {
         if (error.response && error.response.status === 401) {
-            // Se for um erro 401 (Não Autorizado), redireciona para a página de login
             console.warn("Sessão expirada ou não autorizado. Redirecionando para login.", window.location.pathname);
-            // Salva a página atual para redirecionar de volta após o login
-            // O backend precisaria ser ajustado para lidar com este parâmetro `redirect_url`
-            // window.location.href = `${API_BASE_URL}/auth/google?redirect_url=${window.location.href}`;
-            window.location.href = `${API_BASE_URL}/auth/google`; // Ou sua página de login
+            window.location.href = `${API_BASE_URL}/auth/google`;
         }
+        return Promise.reject(error);
+    }
+);
+*/
+
+// Interceptor passthrough - apenas passa os erros para frente
+api.interceptors.response.use(
+    response => response,
+    error => {
+        // Não faz redirect automático aqui - deixe que cada função trate seus próprios erros
         return Promise.reject(error);
     }
 );
