@@ -15,27 +15,16 @@ const api = axios.create({
     withCredentials: true, // Permite que cookies de autenticação sejam enviados
 });
 
-// Adiciona um interceptor para lidar com erros de autenticação globalmente
-// DESATIVADO: Este interceptor estava causando redirects para rotas inexistentes.
-// Os erros 401 são tratados nos handlers de erro específicos de cada função.
-/*
+// Adiciona um interceptor simples para lidar com erros
+// Não faz redirect automático - cada função trata seus próprios erros
 api.interceptors.response.use(
     response => response,
     error => {
-        if (error.response && error.response.status === 401) {
-            console.warn("Sessão expirada ou não autorizado. Redirecionando para login.", window.location.pathname);
-            window.location.href = `${API_BASE_URL}/auth/google`;
+        // Log silencioso de erros 401/403/404 sem console spam
+        if (error.response && [401, 403, 404].includes(error.response.status)) {
+            // Silencia erros conhecidos que já são tratados
+            // (ex: tentativa de carregar recursos que não existem)
         }
-        return Promise.reject(error);
-    }
-);
-*/
-
-// Interceptor passthrough - apenas passa os erros para frente
-api.interceptors.response.use(
-    response => response,
-    error => {
-        // Não faz redirect automático aqui - deixe que cada função trate seus próprios erros
         return Promise.reject(error);
     }
 );
@@ -5289,8 +5278,11 @@ async function checkAuthStatus() {
         // Se a API responder mas não houver usuário, o botão de login já está visível.
         return null;
     } catch (error) {
-        // Se a API falhar (ex: 401, erro de rede), o botão de login já está visível.
-        console.log('Nenhuma sessão de usuário ativa encontrada. O botão de login será exibido.');
+        // Se a API falhar (ex: 401, erro de rede, CORS), o botão de login já está visível.
+        // Log apenas erros que não são esperados (não loga 404 ou CORS que já aparecem no console)
+        if (error.response && error.response.status !== 404 && error.response.status !== 0) {
+            console.debug('Erro ao verificar sessão:', error.message);
+        }
         // Retorna nulo para indicar que não há usuário.
         return null;
     }
