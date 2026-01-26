@@ -2359,11 +2359,13 @@ body[data-page="agentes"] .sheet-container {
 
 /* --- SEÇÃO LORE (DETALHES E ORIGEM) - SEMPRE VISÍVEL --- */
 .lore-section {
+    display: none; /* Começa oculta, controlada pelo JavaScript */
     background-color: rgba(var(--color-surface-1), 0.6);
     border: 1px solid var(--color-surface-2);
     border-radius: 8px;
     padding: 1.5rem 1rem;
     margin-bottom: 1.5rem;
+    animation: slideInUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .lore-section h3 {
@@ -3964,12 +3966,6 @@ body.dev-mode #dev-mode-form { display: none; }
     
     .sheet-mobile-section.mobile-default-visible {
         display: block !important; /* Mostra seções marcadas como padrão */
-    }
-    
-    /* Lore é uma seção mobile normal - não força display permanente */
-    #mobile-section-lore {
-        display: none; /* Começa oculta, será mostrada pelo JS quando necessário */
-        margin-bottom: 1rem;
     }
 
     /* Estilos para as seções accordion no mobile */
