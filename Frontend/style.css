@@ -1867,8 +1867,8 @@ body[data-page="agentes"] .sheet-container {
 .defense-type-btn {
     flex: 1;
     padding: 1rem 1.25rem;
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(0, 255, 255, 0.05));
-    border: 2px solid rgba(168, 85, 247, 0.3);
+    background: linear-gradient(135deg, var(--defense-primary), var(--defense-accent));
+    border: 2px solid var(--defense-primary);
     color: var(--color-text-primary);
     border-radius: 10px;
     cursor: pointer;
@@ -1893,10 +1893,10 @@ body[data-page="agentes"] .sheet-container {
 }
 
 .defense-type-btn:hover {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(0, 255, 255, 0.1));
-    border-color: rgba(168, 85, 247, 0.6);
+    background: linear-gradient(135deg, var(--defense-primary), var(--defense-accent));
+    border-color: var(--defense-primary);
     transform: translateY(-3px);
-    box-shadow: 0 8px 16px rgba(168, 85, 247, 0.25);
+    box-shadow: 0 8px 16px var(--defense-glow);
 }
 
 .defense-type-btn:hover::before {
@@ -1923,11 +1923,11 @@ body[data-page="agentes"] .sheet-container {
     background: linear-gradient(135deg, rgba(26, 26, 26, 0.8) 0%, rgba(18, 18, 30, 0.8) 100%);
     border-radius: 12px;
     padding: 1.5rem;
-    border: 1px solid rgba(168, 85, 247, 0.3);
+    border: 2px solid var(--defense-primary);
     backdrop-filter: blur(10px);
     box-shadow: 
         0 8px 32px rgba(0, 0, 0, 0.3),
-        inset 0 1px 1px rgba(168, 85, 247, 0.1);
+        inset 0 1px 1px var(--defense-glow);
 }
 
 .defense-calc-row {
@@ -1940,9 +1940,10 @@ body[data-page="agentes"] .sheet-container {
 }
 
 .defense-calc-row:hover {
-    background: rgba(168, 85, 247, 0.05);
+    background: transparent;
     padding: 0.75rem 0.5rem;
     border-radius: 4px;
+    border-left: 3px solid var(--defense-primary);
 }
 
 .defense-calc-label {
@@ -1954,45 +1955,42 @@ body[data-page="agentes"] .sheet-container {
 }
 
 .defense-calc-value {
-    color: var(--color-primary);
+    color: var(--defense-primary);
     font-family: var(--font-display);
     font-weight: bold;
     font-size: 1.3rem;
-    text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+    text-shadow: 0 0 10px var(--defense-glow);
 }
 
 .defense-calc-row.defense-total {
-    border-top: 2px solid rgba(168, 85, 247, 0.4);
-    border-bottom: 2px solid rgba(168, 85, 247, 0.4);
+    border-top: 2px solid var(--defense-primary);
+    border-bottom: 2px solid var(--defense-primary);
     padding: 1rem 0;
     margin: 0.5rem 0;
     font-size: 1.15rem;
-    background: rgba(168, 85, 247, 0.08);
+    background: transparent;
     border-radius: 8px;
     padding: 1rem 0.75rem;
 }
 
 .defense-calc-row.defense-total .defense-calc-label {
-    color: var(--color-primary);
+    color: var(--defense-primary);
     font-size: 0.95rem;
 }
 
 .defense-calc-row.defense-total .defense-value {
     font-size: 2rem;
-    background: linear-gradient(135deg, var(--color-primary), #c084fc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+    color: var(--defense-primary);
+    text-shadow: 0 0 20px var(--defense-glow);
     animation: pulse-glow 2s ease-in-out infinite;
 }
 
 @keyframes pulse-glow {
     0%, 100% {
-        filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.4));
+        filter: drop-shadow(0 0 10px var(--defense-glow));
     }
     50% {
-        filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.8));
+        filter: drop-shadow(0 0 20px var(--defense-glow));
     }
 }
 
@@ -2001,10 +1999,10 @@ body[data-page="agentes"] .sheet-container {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(168, 85, 247, 0.1);
+    background: transparent;
     padding: 0.5rem;
     border-radius: 8px;
-    border: 1px solid rgba(168, 85, 247, 0.2);
+    border: 1px solid var(--defense-primary);
 }
 
 .defense-bonus-btn {
@@ -2039,8 +2037,8 @@ body[data-page="agentes"] .sheet-container {
     width: 60px;
     padding: 0.6rem;
     background: rgba(26, 26, 26, 0.8);
-    border: 2px solid rgba(168, 85, 247, 0.3);
-    color: var(--color-primary);
+    border: 2px solid var(--defense-primary);
+    color: var(--defense-primary);
     text-align: center;
     border-radius: 6px;
     font-weight: 700;
@@ -2050,16 +2048,16 @@ body[data-page="agentes"] .sheet-container {
 }
 
 .defense-bonus-input:hover {
-    border-color: rgba(168, 85, 247, 0.6);
+    border-color: var(--defense-primary-hover);
     background: rgba(26, 26, 26, 0.95);
 }
 
 .defense-bonus-input:focus {
     outline: none;
-    border-color: #c084fc;
+    border-color: var(--defense-primary-hover);
     box-shadow: 
-        0 0 12px rgba(168, 85, 247, 0.4),
-        inset 0 0 8px rgba(168, 85, 247, 0.1);
+        0 0 12px var(--defense-glow),
+        inset 0 0 8px var(--defense-glow);
     background: rgba(26, 26, 26, 0.95);
 }
 
