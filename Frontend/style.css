@@ -2294,11 +2294,15 @@ body[data-page="agentes"] .sheet-container {
 
 .attr-value-text {
     font-family: var(--font-display);
-    font-size: 2.2rem;
+    font-size: 2.8rem;
     font-weight: bold;
     color: #fff;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
     z-index: 2;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .attr-btn-add {
@@ -4248,4 +4252,42 @@ body.dev-mode #dev-mode-form { display: none; }
 
 .map-fullscreen-button svg path {
     fill: var(--color-text-primary);
+}
+
+/* --- DETALHES E ORIGEM (LORE) - TEXTAREA STYLING --- */
+.details-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.details-group h4 {
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.details-textarea {
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+    border: 2px solid var(--color-primary);
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-family: var(--font-primary);
+    font-size: 0.9rem;
+    resize: vertical;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.details-textarea:focus {
+    outline: none;
+    border-color: #c084fc;
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+}
+
+.details-textarea::placeholder {
+    color: #666;
 }
