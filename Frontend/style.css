@@ -27,13 +27,13 @@
     --defense-glow: rgba(107, 124, 153, 0.5);
 }
 
-/* Cerebral: Dourado Escuro Saturado */
+/* Cerebral: Dourado Amarelado */
 .sheet-container.cerebral {
-    --defense-primary: #CC8800;
-    --defense-primary-hover: #DD9910;
-    --defense-accent: #B87000;
-    --defense-gradient: linear-gradient(135deg, #B87000, #CC8800, #AA6600);
-    --defense-glow: rgba(204, 136, 0, 0.4);
+    --defense-primary: #CCAA00;
+    --defense-primary-hover: #DDBB11;
+    --defense-accent: #B89900;
+    --defense-gradient: linear-gradient(135deg, #B89900, #CCAA00, #DDBB11);
+    --defense-glow: rgba(204, 170, 0, 0.4);
 }
 
 /* Visceral: Vermelho Escuro (Sangue) */
@@ -597,7 +597,7 @@ body[data-page="agentes"] .sheet-container {
 }
 
 .element-card[data-element="Temporal"] { --element-color: #9E9E9E; } /* Cinza para representar Preto */
-.element-card[data-element="Cerebral"] { --element-color: #CC8800; }
+.element-card[data-element="Cerebral"] { --element-color: #CCAA00; }
 .element-card[data-element="Visceral"] { --element-color: #dc3545; }
 .element-card[data-element="Vital"]    { --element-color: #9b59b6; }
 
@@ -1374,9 +1374,9 @@ body[data-page="agentes"] .sheet-container {
     --element-gradient: linear-gradient(90deg, #9E9E9E, #f0f0f0, #9E9E9E);
 }
 .sheet-container.cerebral, .character-card.cerebral {
-    --element-color: #CC8800;
-    --element-shadow-color: rgba(204, 136, 0, 0.5);
-    --element-gradient: linear-gradient(90deg, #B87000, #CC8800, #B87000);
+    --element-color: #CCAA00;
+    --element-shadow-color: rgba(204, 170, 0, 0.5);
+    --element-gradient: linear-gradient(90deg, #B89900, #CCAA00, #B89900);
 }
 .sheet-container.visceral, .character-card.visceral {
     --element-color: #dc3545;
