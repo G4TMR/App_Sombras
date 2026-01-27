@@ -5509,3 +5509,40 @@ body.dev-mode #dev-mode-form { display: none; }
         font-size: 0.85rem;
     }
 }
+
+/* ===== FIX CRÍTICO: GARANTIR VISIBILIDADE DO MODAL EM TODOS OS DISPOSITIVOS ===== */
+#skill-tree-modal-overlay {
+    display: flex !important;
+    visibility: visible !important;
+    z-index: 2000 !important;
+}
+
+#skill-tree-modal-overlay.visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.skill-tree-modal-content {
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 100vh;
+    overflow-y: auto;
+}
+
+.skill-grid-container {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 200px;
+}
+
+.skill-cards-grid {
+    display: grid !important;
+    width: 100%;
+}
+
+.skill-details-panel {
+    border-top: 2px solid var(--color-surface-2);
+    max-height: 40vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+}

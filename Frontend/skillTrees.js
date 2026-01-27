@@ -1,4 +1,59 @@
 const skillTrees = {
+  // ESTRUTURA POR ELEMENTO - Para o novo sistema modal
+  temporal: {
+    element: "temporal",
+    elementName: "Temporal",
+    icon: "⏳",
+    skills: [
+      { id: "temporal_1", name: "Manipulação Temporal", description: "Altera a percepção de tempo em uma área.", type: "ofensiva", level: 1, icon: "⏰" },
+      { id: "temporal_2", name: "Retardo Cronológico", description: "Reduz a velocidade de um alvo.", type: "defensiva", level: 2, icon: "🕐" },
+      { id: "temporal_3", name: "Visão do Futuro", description: "Permite enxergar alguns segundos à frente.", type: "passiva", level: 3, icon: "👁️" },
+      { id: "temporal_4", name: "Eco Temporal", description: "Cria uma cópia de si mesmo do passado.", type: "utility", level: 2, icon: "✨" },
+      { id: "temporal_5", name: "Solidez Temporal", description: "Torna-se imune a manipulações de tempo.", type: "passiva", level: 4, icon: "🛡️" },
+      { id: "temporal_6", name: "Aceleração Pessoal", description: "Aumenta significativamente a velocidade pessoal.", type: "ofensiva", level: 3, icon: "⚡" },
+    ]
+  },
+  cerebral: {
+    element: "cerebral",
+    elementName: "Cerebral",
+    icon: "🧠",
+    skills: [
+      { id: "cerebral_1", name: "Telepatia", description: "Comunica-se mentalmente com um alvo.", type: "utility", level: 1, icon: "💬" },
+      { id: "cerebral_2", name: "Mentira Telepática", description: "Implanta pensamentos falsos em uma mente.", type: "ofensiva", level: 2, icon: "🎭" },
+      { id: "cerebral_3", name: "Blindagem Mental", description: "Protege a mente contra invasões psíquicas.", type: "defensiva", level: 2, icon: "🔒" },
+      { id: "cerebral_4", name: "Leitura de Mentes", description: "Consegue ler os pensamentos superficiais.", type: "utility", level: 3, icon: "📖" },
+      { id: "cerebral_5", name: "Psicopompia", description: "Governa múltiplas mentes simultaneamente.", type: "ofensiva", level: 4, icon: "👥" },
+      { id: "cerebral_6", name: "Foco Psíquico", description: "Aumenta poder de habilidades mentais.", type: "passiva", level: 3, icon: "✨" },
+    ]
+  },
+  visceral: {
+    element: "visceral",
+    elementName: "Visceral",
+    icon: "❤️",
+    skills: [
+      { id: "visceral_1", name: "Regeneração Rápida", description: "Recupera saúde rapidamente.", type: "passiva", level: 1, icon: "💚" },
+      { id: "visceral_2", name: "Grito Primitivo", description: "Aterroriza inimigos próximos com um grito.", type: "ofensiva", level: 2, icon: "😤" },
+      { id: "visceral_3", name: "Resistência de Besta", description: "Reduz dano recebido significativamente.", type: "defensiva", level: 2, icon: "🦾" },
+      { id: "visceral_4", name: "Fúria", description: "Aumenta força e resistência por um tempo.", type: "ofensiva", level: 2, icon: "🔥" },
+      { id: "visceral_5", name: "Mutação Corporal", description: "Altera o corpo para fins diversos.", type: "utility", level: 3, icon: "🧬" },
+      { id: "visceral_6", name: "Pulso de Vida", description: "Cura aliados próximos em ondas.", type: "defensiva", level: 3, icon: "💫" },
+    ]
+  },
+  vital: {
+    element: "vital",
+    elementName: "Vital",
+    icon: "🌱",
+    skills: [
+      { id: "vital_1", name: "Germinação", description: "Faz plantas crescerem rapidamente.", type: "utility", level: 1, icon: "🌿" },
+      { id: "vital_2", name: "Envolvimento de Vinhas", description: "Imobiliza inimigos com plantas.", type: "defensiva", level: 2, icon: "🌾" },
+      { id: "vital_3", name: "Sporo Tóxico", description: "Libera esporos venenosos em uma área.", type: "ofensiva", level: 2, icon: "☠️" },
+      { id: "vital_4", name: "Harmonia Natural", description: "Se conecta com a natureza ao redor.", type: "passiva", level: 2, icon: "🍃" },
+      { id: "vital_5", name: "Ressurreição de Plantas", description: "Revitaliza plantas e criaturas naturais.", type: "utility", level: 3, icon: "🌳" },
+      { id: "vital_6", name: "Comando da Floresta", description: "Controla múltiplas plantas simultaneamente.", type: "ofensiva", level: 4, icon: "🌲" },
+    ]
+  },
+
+  // ESTRUTURA ANTIGA - Mantida para compatibilidade
   belico: {
     className: "Bélico",
     description: "Especialistas em combate, seja com armas de fogo, lâminas ou os próprios punhos. São a linha de frente contra as sombras.",

@@ -3047,22 +3047,31 @@ class CharacterSheet {
             elementRestrictionBadge.style.display = multiElementEnabled ? 'none' : 'block';
         }
 
-        // Pegar habilidades
+        // Pegar habilidades desbloqueadas
         const unlockedSkills = this.character.unlocked_skills || [];
         let allSkills = [];
 
         // Se multi-elemento está desativado, mostrar apenas o elemento selecionado
         if (!multiElementEnabled) {
-            const skillTree = skillTrees[element] || [];
-            allSkills = skillTree;
+            const elementData = skillTrees[element];
+            if (elementData && elementData.skills) {
+                allSkills = elementData.skills.map(skill => ({
+                    ...skill,
+                    element: element
+                }));
+            }
         } else {
             // Se habilitado, combinar todas as habilidades de todos os elementos
-            Object.keys(skillTrees).forEach(elementKey => {
-                const skillTree = skillTrees[elementKey] || [];
-                allSkills = allSkills.concat(skillTree.map(skill => ({
-                    ...skill,
-                    element: elementKey
-                })));
+            ['temporal', 'cerebral', 'visceral', 'vital'].forEach(elementKey => {
+                const elementData = skillTrees[elementKey];
+                if (elementData && elementData.skills) {
+                    elementData.skills.forEach(skill => {
+                        allSkills.push({
+                            ...skill,
+                            element: elementKey
+                        });
+                    });
+                }
             });
         }
 
@@ -3070,6 +3079,12 @@ class CharacterSheet {
         let filteredSkills = allSkills;
         if (filter !== 'all') {
             filteredSkills = allSkills.filter(skill => skill.type === filter);
+        }
+
+        // Se não houver skills, mostrar mensagem
+        if (filteredSkills.length === 0) {
+            skillCardsGrid.innerHTML = '<div style="grid-column: 1/-1; padding: 2rem; text-align: center; color: var(--color-text-secondary);">Nenhuma habilidade disponível</div>';
+            return;
         }
 
         // Criar cards
@@ -3089,7 +3104,7 @@ class CharacterSheet {
                     <div class="skill-card-icon">${skill.icon || '⭐'}</div>
                     <div>
                         <div class="skill-card-title">${skill.name}</div>
-                        <span class="skill-card-type">${skill.type || 'Passiva'}</span>
+                        <span class="skill-card-type">${skill.type || 'passiva'}</span>
                     </div>
                     ${elementBadge}
                 </div>
