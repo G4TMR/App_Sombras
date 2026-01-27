@@ -364,6 +364,7 @@
     <div id="skill-tree-modal-overlay" class="modal-overlay">
         <div class="skill-tree-modal-content">
             <button id="close-skills-modal-btn" class="close-viewer-btn">&times;</button>
+            <button id="skills-settings-btn" class="skills-settings-btn" title="Configurações de Habilidades">⚙️</button>
             
             <!-- Abas por Elemento -->
             <div class="skill-modal-tabs">
@@ -390,6 +391,11 @@
                 <button class="filter-btn" data-filter="utility">🔧 Utility</button>
             </div>
 
+            <!-- Badge de restrição de elemento (quando multi-elemento desativado) -->
+            <div id="element-restriction-badge" class="element-restriction-badge" style="display: none;">
+                🔒 Você pode usar apenas habilidades do elemento <strong id="current-element-name">Temporal</strong>
+            </div>
+
             <!-- Grid de Habilidades -->
             <div class="skill-grid-container">
                 <div id="skill-cards-grid" class="skill-cards-grid">
@@ -399,6 +405,52 @@
 
             <!-- Painel de Detalhes (expande ao clicar em card) -->
             <div id="skill-details-panel" class="skill-details-panel"></div>
+        </div>
+
+        <!-- Modal de Configurações (Settigns) -->
+        <div id="skills-settings-modal" class="skills-settings-modal" style="display: none;">
+            <div class="skills-settings-content">
+                <button id="close-settings-modal-btn" class="close-viewer-btn" style="position: absolute; top: 1rem; right: 1rem;">&times;</button>
+                <h2>⚙️ Configurações de Habilidades</h2>
+                
+                <div class="settings-section">
+                    <h3>Regras de Elemento</h3>
+                    <p class="settings-description">Por padrão, personagens podem usar habilidades de apenas um elemento. Ative a opção abaixo para permitir múltiplos elementos.</p>
+                    
+                    <div class="settings-toggle-group">
+                        <label class="settings-toggle-label">
+                            <input type="checkbox" id="multi-element-toggle" class="settings-toggle-input">
+                            <span class="settings-toggle-slider"></span>
+                            <span class="settings-toggle-text">Habilitar Multi-Elemento</span>
+                        </label>
+                        <p class="settings-toggle-info">Quando ativado, você pode desbloquear e usar habilidades de qualquer elemento</p>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Visibilidade da Ficha</h3>
+                    <p class="settings-description">Controle quem pode visualizar sua ficha quando conectado em uma campanha. O mestre sempre pode ver e alterar.</p>
+                    
+                    <div class="settings-toggle-group">
+                        <label class="settings-toggle-label">
+                            <input type="checkbox" id="sheet-visibility-toggle" class="settings-toggle-input" checked>
+                            <span class="settings-toggle-slider"></span>
+                            <span class="settings-toggle-text">Visível para Outros Jogadores</span>
+                        </label>
+                        <p class="settings-toggle-info">Quando desativado, apenas o mestre pode ver sua ficha</p>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Status Atual</h3>
+                    <p id="current-rule-status">
+                        <strong>Regra Ativa:</strong> <span id="rule-status-text">Elemento Único (Padrão)</span>
+                    </p>
+                    <p id="current-visibility-status">
+                        <strong>Visibilidade:</strong> <span id="visibility-status-text">Visível para Outros Jogadores</span>
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 

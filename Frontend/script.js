@@ -2889,6 +2889,13 @@ class CharacterSheet {
         const modalOverlay = document.getElementById('skill-tree-modal-overlay');
         const openBtn = document.getElementById('open-skills-modal-btn');
         const closeBtn = document.getElementById('close-skills-modal-btn');
+        const settingsBtn = document.getElementById('skills-settings-btn');
+        const settingsModal = document.getElementById('skills-settings-modal');
+        const closeSettingsBtn = document.getElementById('close-settings-modal-btn');
+        const multiElementToggle = document.getElementById('multi-element-toggle');
+        const ruleStatusText = document.getElementById('rule-status-text');
+        const elementRestrictionBadge = document.getElementById('element-restriction-badge');
+        const currentElementName = document.getElementById('current-element-name');
         const tabButtons = document.querySelectorAll('.skill-tab-btn');
         const filterButtons = document.querySelectorAll('.filter-btn');
         const skillCardsGrid = document.getElementById('skill-cards-grid');
@@ -2898,21 +2905,60 @@ class CharacterSheet {
 
         let currentElement = 'temporal';
         let currentFilter = 'all';
+        let multiElementEnabled = localStorage.getItem('skillsMultiElement') === 'true';
 
-        // Abrir modal
+        // Carregar estado do toggle
+        multiElementToggle.checked = multiElementEnabled;
+        this.updateRuleStatus(multiElementEnabled, ruleStatusText);
+
+        // Abrir modal principal
         openBtn.addEventListener('click', () => {
             modalOverlay.classList.add('visible');
             document.body.style.overflow = 'hidden';
             setTimeout(() => {
-                this.renderSkillCards(currentElement, currentFilter);
+                this.renderSkillCards(currentElement, currentFilter, multiElementEnabled);
             }, 50);
         });
 
-        // Fechar modal
+        // Fechar modal principal
         closeBtn.addEventListener('click', () => {
             modalOverlay.classList.remove('visible');
             document.body.style.overflow = '';
             detailsPanel.classList.remove('visible');
+            settingsModal.style.display = 'none';
+        });
+
+        // Abrir modal de settings
+        settingsBtn.addEventListener('click', () => {
+            settingsModal.style.display = 'flex';
+        });
+
+        // Fechar modal de settings
+        closeSettingsBtn.addEventListener('click', () => {
+            settingsModal.style.display = 'none';
+        });
+
+        // Toggle multi-elemento
+        multiElementToggle.addEventListener('change', () => {
+            multiElementEnabled = multiElementToggle.checked;
+            localStorage.setItem('skillsMultiElement', multiElementEnabled.toString());
+            this.updateRuleStatus(multiElementEnabled, ruleStatusText);
+            this.renderSkillCards(currentElement, currentFilter, multiElementEnabled);
+        });
+
+        // Toggle de visibilidade da ficha
+        const sheetVisibilityToggle = document.getElementById('sheet-visibility-toggle');
+        const visibilityStatusText = document.getElementById('visibility-status-text');
+        
+        // Carregar estado anterior de localStorage
+        let sheetVisibilityEnabled = localStorage.getItem('sheetVisibility') !== 'false';
+        sheetVisibilityToggle.checked = sheetVisibilityEnabled;
+        this.updateVisibilityStatus(sheetVisibilityEnabled, visibilityStatusText);
+
+        sheetVisibilityToggle.addEventListener('change', () => {
+            sheetVisibilityEnabled = sheetVisibilityToggle.checked;
+            localStorage.setItem('sheetVisibility', sheetVisibilityEnabled.toString());
+            this.updateVisibilityStatus(sheetVisibilityEnabled, visibilityStatusText);
         });
 
         // Clique em abas
@@ -2921,13 +2967,23 @@ class CharacterSheet {
                 tabButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentElement = btn.dataset.element;
+                
+                // Atualizar nome do elemento no badge
+                const elementNames = {
+                    temporal: 'Temporal',
+                    cerebral: 'Cerebral',
+                    visceral: 'Visceral',
+                    vital: 'Vital'
+                };
+                currentElementName.textContent = elementNames[currentElement];
+
                 // Atualizar cor do elemento na página
                 const sheetContainer = document.getElementById('sheet-container');
                 if (sheetContainer) {
                     sheetContainer.className = sheetContainer.className.replace(/(temporal|cerebral|visceral|vital)/g, '');
                     sheetContainer.classList.add(currentElement);
                 }
-                this.renderSkillCards(currentElement, currentFilter);
+                this.renderSkillCards(currentElement, currentFilter, multiElementEnabled);
             });
         });
 
@@ -2937,36 +2993,97 @@ class CharacterSheet {
                 filterButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentFilter = btn.dataset.filter;
-                this.renderSkillCards(currentElement, currentFilter);
+                this.renderSkillCards(currentElement, currentFilter, multiElementEnabled);
             });
         });
+
+        // Fechar settings ao clicar fora
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                settingsModal.style.display = 'none';
+            }
+        });
+    }
+
+    /**
+     * Atualiza o status das regras no modal de settings.
+     */
+    updateRuleStatus(multiElementEnabled, ruleStatusText) {
+        if (ruleStatusText) {
+            ruleStatusText.textContent = multiElementEnabled 
+                ? 'Multi-Elemento Ativado' 
+                : 'Elemento Único (Padrão)';
+        }
+    }
+
+    /**
+     * Atualiza o status de visibilidade da ficha no modal de settings.
+     */
+    updateVisibilityStatus(isVisible, visibilityStatusText) {
+        if (visibilityStatusText) {
+            if (isVisible) {
+                visibilityStatusText.textContent = 'Visível para Outros Jogadores';
+                visibilityStatusText.style.color = '#4ade80'; // Verde
+            } else {
+                visibilityStatusText.textContent = 'Apenas o Mestre Pode Ver';
+                visibilityStatusText.style.color = '#facc15'; // Amarelo/Aviso
+            }
+        }
     }
 
     /**
      * Renderiza os cards de habilidades baseado no elemento e filtro.
      */
-    renderSkillCards(element, filter) {
+    renderSkillCards(element, filter, multiElementEnabled) {
         const skillCardsGrid = document.getElementById('skill-cards-grid');
+        const elementRestrictionBadge = document.getElementById('element-restriction-badge');
         if (!skillCardsGrid) return;
 
         // Limpar grid
         skillCardsGrid.innerHTML = '';
 
-        // Pegar habilidades do elemento selecionado
-        const skillTree = skillTrees[element] || [];
+        // Mostrar/ocultar badge de restrição
+        if (elementRestrictionBadge) {
+            elementRestrictionBadge.style.display = multiElementEnabled ? 'none' : 'block';
+        }
+
+        // Pegar habilidades
         const unlockedSkills = this.character.unlocked_skills || [];
+        let allSkills = [];
+
+        // Se multi-elemento está desativado, mostrar apenas o elemento selecionado
+        if (!multiElementEnabled) {
+            const skillTree = skillTrees[element] || [];
+            allSkills = skillTree;
+        } else {
+            // Se habilitado, combinar todas as habilidades de todos os elementos
+            Object.keys(skillTrees).forEach(elementKey => {
+                const skillTree = skillTrees[elementKey] || [];
+                allSkills = allSkills.concat(skillTree.map(skill => ({
+                    ...skill,
+                    element: elementKey
+                })));
+            });
+        }
 
         // Filtrar por tipo se necessário
-        let filteredSkills = skillTree;
+        let filteredSkills = allSkills;
         if (filter !== 'all') {
-            filteredSkills = skillTree.filter(skill => skill.type === filter);
+            filteredSkills = allSkills.filter(skill => skill.type === filter);
         }
 
         // Criar cards
-        filteredSkills.forEach((skill, index) => {
+        filteredSkills.forEach((skill) => {
             const isUnlocked = unlockedSkills.includes(skill.id);
+            const skillElement = skill.element || element;
             const card = document.createElement('div');
             card.className = `skill-card ${isUnlocked ? '' : 'locked'}`;
+            
+            // Mostrar badge de elemento se multi-elemento ativado
+            const elementBadge = multiElementEnabled 
+                ? `<span class="skill-element-badge" style="background-color: var(--element-${skillElement}-color, #999);">${this.getElementEmoji(skillElement)}</span>`
+                : '';
+
             card.innerHTML = `
                 <div class="skill-card-header">
                     <div class="skill-card-icon">${skill.icon || '⭐'}</div>
@@ -2974,6 +3091,7 @@ class CharacterSheet {
                         <div class="skill-card-title">${skill.name}</div>
                         <span class="skill-card-type">${skill.type || 'Passiva'}</span>
                     </div>
+                    ${elementBadge}
                 </div>
                 <div class="skill-card-description">${skill.description || 'Sem descrição'}</div>
                 <div class="skill-card-meta">
@@ -2986,7 +3104,7 @@ class CharacterSheet {
 
             // Clique no card expande painel
             card.addEventListener('click', () => {
-                this.showSkillDetails(skill, isUnlocked);
+                this.showSkillDetails(skill, isUnlocked, skillElement);
             });
 
             skillCardsGrid.appendChild(card);
@@ -2994,14 +3112,30 @@ class CharacterSheet {
 
         // Se não houver skills, mostrar mensagem
         if (filteredSkills.length === 0) {
-            skillCardsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #999;">Nenhuma habilidade encontrada neste filtro.</p>';
+            const message = !multiElementEnabled && filter === 'all'
+                ? 'Nenhuma habilidade encontrada para este elemento.'
+                : 'Nenhuma habilidade encontrada neste filtro.';
+            skillCardsGrid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #999;">${message}</p>`;
         }
+    }
+
+    /**
+     * Retorna o emoji do elemento.
+     */
+    getElementEmoji(element) {
+        const emojis = {
+            temporal: '⏳',
+            cerebral: '🧠',
+            visceral: '❤️',
+            vital: '🌱'
+        };
+        return emojis[element] || '⭐';
     }
 
     /**
      * Mostra detalhes de uma habilidade no painel lateral.
      */
-    showSkillDetails(skill, isUnlocked) {
+    showSkillDetails(skill, isUnlocked, skillElement = null) {
         const detailsPanel = document.getElementById('skill-details-panel');
         if (!detailsPanel) return;
 

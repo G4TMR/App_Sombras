@@ -2714,6 +2714,19 @@ body[data-page="agentes"] .sheet-container {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
+/* Badge de elemento no card */
+.skill-element-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    opacity: 0.8;
+    margin-left: auto;
+}
+
 .skill-card-type {
     display: inline-block;
     font-size: 0.7rem;
@@ -2820,6 +2833,187 @@ body[data-page="agentes"] .sheet-container {
     color: var(--color-text-secondary);
     margin-bottom: 1.5rem;
     font-size: 0.95rem;
+}
+
+/* ===== BOTÃO DE SETTINGS ===== */
+.skills-settings-btn {
+    position: absolute;
+    top: 1rem;
+    right: 4rem;
+    background: rgba(42, 42, 42, 0.8);
+    border: 1px solid var(--color-surface-2);
+    color: var(--color-text-primary);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.skills-settings-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--element-color, var(--color-primary));
+    transform: rotate(20deg);
+}
+
+/* ===== MODAL DE CONFIGURAÇÕES ===== */
+.skills-settings-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    animation: fadeIn 0.3s ease;
+}
+
+.skills-settings-content {
+    background: linear-gradient(135deg, rgba(15, 15, 25, 0.95) 0%, rgba(20, 20, 35, 0.95) 100%);
+    border: 2px solid var(--element-color, var(--color-primary));
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    max-height: 70vh;
+    overflow-y: auto;
+    position: relative;
+    color: var(--color-text-primary);
+}
+
+.skills-settings-content h2 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    color: var(--element-color, var(--color-primary));
+    margin: 0 0 1.5rem 0;
+    text-align: center;
+}
+
+.settings-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.settings-section h3 {
+    font-size: 1.2rem;
+    color: var(--element-color, var(--color-primary));
+    margin: 0 0 0.75rem 0;
+}
+
+.settings-description {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+}
+
+/* ===== TOGGLE SWITCH ===== */
+.settings-toggle-group {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.settings-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.settings-toggle-input {
+    display: none;
+}
+
+.settings-toggle-slider {
+    width: 50px;
+    height: 28px;
+    background-color: #444;
+    border-radius: 14px;
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+.settings-toggle-slider::after {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background-color: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: left 0.3s ease;
+}
+
+.settings-toggle-input:checked + .settings-toggle-slider {
+    background-color: var(--element-color, var(--color-primary));
+}
+
+.settings-toggle-input:checked + .settings-toggle-slider::after {
+    left: 24px;
+}
+
+.settings-toggle-text {
+    font-weight: bold;
+    color: var(--color-text-primary);
+    font-size: 1rem;
+}
+
+.settings-toggle-info {
+    font-size: 0.85rem;
+    color: #999;
+    margin: 1rem 0 0 0;
+}
+
+.settings-toggle-label:hover .settings-toggle-slider {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+/* ===== BADGE DE RESTRIÇÃO ===== */
+.element-restriction-badge {
+    background: linear-gradient(135deg, rgba(255, 68, 68, 0.2) 0%, rgba(255, 100, 100, 0.1) 100%);
+    border: 1px solid rgba(255, 68, 68, 0.5);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    color: #ffbbbb;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.element-restriction-badge strong {
+    color: #ff8888;
+}
+
+/* ===== STYLING PARA VISIBILIDADE DA FICHA ===== */
+#current-visibility-status {
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.5rem;
+}
+
+#visibility-status-text {
+    color: var(--element-color, var(--color-primary));
+    font-weight: 600;
+    transition: color 0.3s ease;
 }
 
 /* ===== ANIMAÇÕES ===== */
@@ -5014,4 +5208,304 @@ body.dev-mode #dev-mode-form { display: none; }
 
 .details-textarea::placeholder {
     color: #666;
+}
+/* ===== RESPONSIVIDADE MOBILE - MODAL DE HABILIDADES ===== */
+@media (max-width: 768px) {
+    .skill-tree-modal-content {
+        width: 98vw;
+        height: 95vh;
+        padding: 0.75rem;
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+
+    .skill-modal-tabs {
+        gap: 0.25rem;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .skill-tab-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        flex: 1;
+        min-width: 70px;
+    }
+
+    .skill-tab-btn .tab-icon {
+        font-size: 1.1rem;
+    }
+
+    .skill-filters {
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        flex: 1;
+        min-width: 60px;
+    }
+
+    .skill-cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .skill-card {
+        padding: 0.75rem;
+    }
+
+    .skill-card-header {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .skill-card-title {
+        font-size: 0.9rem;
+    }
+
+    .skill-card-type {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .skill-card-level {
+        font-size: 0.75rem;
+    }
+
+    .skill-element-badge {
+        width: 24px;
+        height: 24px;
+        font-size: 0.9rem;
+    }
+
+    .element-restriction-badge {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        margin: 0.5rem 0 0.75rem 0;
+    }
+
+    .skill-details-panel {
+        padding: 1rem;
+        max-height: 40vh;
+        font-size: 0.9rem;
+    }
+
+    .skill-details-panel h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .skill-details-panel p {
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+
+    .skills-settings-modal {
+        width: 95vw;
+        max-width: 95vw;
+    }
+
+    .skills-settings-content {
+        width: 100%;
+        max-width: 100%;
+        max-height: 80vh;
+        padding: 1.5rem 1rem;
+    }
+
+    .skills-settings-content h2 {
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+    }
+
+    .settings-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+    }
+
+    .settings-section h3 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .settings-description {
+        font-size: 0.8rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .settings-toggle-label {
+        font-size: 0.95rem;
+    }
+
+    .settings-toggle-text {
+        font-size: 0.9rem;
+    }
+
+    .settings-toggle-info {
+        font-size: 0.75rem;
+        margin-top: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .skill-tree-modal-content {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        padding: 0.5rem;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    .skill-modal-tabs {
+        gap: 0.25rem;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .skill-tab-btn {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.75rem;
+        min-width: 60px;
+    }
+
+    .skill-filters {
+        gap: 0.4rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .filter-btn {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.7rem;
+        min-width: 50px;
+    }
+
+    .skill-cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .skill-card {
+        padding: 0.5rem;
+    }
+
+    .skill-card-header {
+        padding: 0.4rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .skill-card-title {
+        font-size: 0.8rem;
+    }
+
+    .skill-card-type {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.4rem;
+    }
+
+    .skill-card-level {
+        font-size: 0.65rem;
+    }
+
+    .skill-element-badge {
+        width: 20px;
+        height: 20px;
+        font-size: 0.8rem;
+    }
+
+    .element-restriction-badge {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem;
+        margin: 0.4rem 0 0.6rem 0;
+    }
+
+    .skill-details-panel {
+        padding: 0.75rem;
+        max-height: 35vh;
+        font-size: 0.85rem;
+        border-top: 2px solid var(--color-surface-2);
+        margin-top: 0.5rem;
+    }
+
+    .skill-details-panel h3 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .skill-details-panel p {
+        margin-bottom: 0.4rem;
+        line-height: 1.3;
+    }
+
+    .close-viewer-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 1.5rem;
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+
+    .skills-settings-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1.2rem;
+    }
+
+    .skills-settings-modal {
+        width: 100vw;
+        height: 100vh;
+    }
+
+    .skills-settings-content {
+        width: 95vw;
+        height: 90vh;
+        border-radius: 0;
+        padding: 1rem 0.75rem;
+    }
+
+    .skills-settings-content h2 {
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .settings-section {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .settings-section h3 {
+        font-size: 0.95rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .settings-description {
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .settings-toggle-label {
+        font-size: 0.9rem;
+    }
+
+    .settings-toggle-text {
+        font-size: 0.85rem;
+    }
+
+    .settings-toggle-info {
+        font-size: 0.7rem;
+        margin-top: 0.4rem;
+    }
+
+    #current-rule-status,
+    #current-visibility-status {
+        font-size: 0.85rem;
+    }
 }
