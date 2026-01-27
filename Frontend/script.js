@@ -3043,8 +3043,12 @@ class CharacterSheet {
         skillCardsGrid.innerHTML = '';
 
         // Mostrar/ocultar badge de restrição
+        // Deve aparecer APENAS se:
+        // 1. Multi-elemento está DESATIVADO
+        // 2. E o elemento selecionado é DIFERENTE do elemento da ficha
         if (elementRestrictionBadge) {
-            elementRestrictionBadge.style.display = multiElementEnabled ? 'none' : 'block';
+            const shouldShowBadge = !multiElementEnabled && element !== (this.character?.element || 'temporal');
+            elementRestrictionBadge.style.display = shouldShowBadge ? 'block' : 'none';
         }
 
         // Pegar habilidades desbloqueadas
