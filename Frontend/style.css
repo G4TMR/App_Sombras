@@ -599,7 +599,7 @@ body[data-page="agentes"] .sheet-container {
 .element-card[data-element="Temporal"] { --element-color: #9E9E9E; } /* Cinza para representar Preto */
 .element-card[data-element="Cerebral"] { --element-color: #CCAA00; }
 .element-card[data-element="Visceral"] { --element-color: #dc3545; }
-.element-card[data-element="Vital"]    { --element-color: #9b59b6; }
+.element-card[data-element="Vital"]    { --element-color: #4ecca3; }
 
 .element-card[data-element="Vital"]:hover h4, .element-card[data-element="Vital"].active h4 {
     background: linear-gradient(90deg, #9b59b6, #3498db, #2ecc71, #f1c40f, #e74c3c, #9b59b6);
@@ -1384,7 +1384,9 @@ body[data-page="agentes"] .sheet-container {
     --element-gradient: linear-gradient(90deg, #dc3545, #ff6b81, #dc3545);
 }
 .sheet-container.vital, .character-card.vital {
-    --element-gradient: linear-gradient(90deg, #9b59b6, #3498db, #2ecc71, #f1c40f, #e74c3c, #9b59b6);
+    --element-color: #4ecca3;
+    --element-shadow-color: rgba(78, 204, 163, 0.5);
+    --element-gradient: linear-gradient(90deg, #229954, #4ecca3, #1e8449);
 }
 
 /* --- Tematização Animada para Elementos --- */
