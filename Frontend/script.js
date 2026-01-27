@@ -2916,10 +2916,11 @@ class CharacterSheet {
             modalOverlay.classList.add('visible');
             document.body.style.overflow = 'hidden';
             setTimeout(() => {
-                // Ajuste Responsivo: Usa um tamanho fixo mínimo grande para garantir que o layout não quebre em telas estreitas
-                const minSize = 3500;
-                canvas.style.width = `${Math.max(window.innerWidth * 2, minSize)}px`;
-                canvas.style.height = `${Math.max(window.innerHeight * 2, minSize)}px`;
+                // Ajuste Responsivo: Canvas muito grande para parecer infinito ao navegar com zoom
+                // Mantém a ilusão de espaço infinito mesmo com zoom alto
+                const canvasSize = Math.max(window.innerWidth * 4, 8000);
+                canvas.style.width = `${canvasSize}px`;
+                canvas.style.height = `${canvasSize}px`;
                 
                 this.renderSkillConstellation();
                 centerView();

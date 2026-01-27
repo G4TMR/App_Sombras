@@ -2564,8 +2564,12 @@ body[data-page="agentes"] .sheet-container {
     position: relative;
     transform-origin: 0 0;
     transition: transform 0.1s ease-out; /* Suaviza o pan/zoom */
-    /* Fundo radial aplicado aqui para se mover com o pan/zoom */
-    background: radial-gradient(circle at center, #1b1b25 0%, #050505 100%);
+    /* Padrão de fundo subtil tipo grid que não revela borda mesmo com zoom alto */
+    background: 
+        linear-gradient(90deg, transparent 0%, rgba(51, 51, 102, 0.1) 1%, transparent 2%, transparent 50%, rgba(51, 51, 102, 0.1) 51%, transparent 52%),
+        linear-gradient(0deg, transparent 0%, rgba(51, 51, 102, 0.1) 1%, transparent 2%, transparent 50%, rgba(51, 51, 102, 0.1) 51%, transparent 52%),
+        #050505;
+    background-size: 200px 200px, 200px 200px, auto;
     /* A largura e altura serão definidas dinamicamente via JS para serem maiores que a viewport */
 }
 
