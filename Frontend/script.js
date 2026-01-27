@@ -3033,56 +3033,6 @@ class CharacterSheet {
         }
     }
 
-        if (!modalOverlay || !openBtn || !closeBtn) return;
-
-        let currentElement = 'temporal';
-        let currentFilter = 'all';
-
-        // Abrir modal
-        openBtn.addEventListener('click', () => {
-            modalOverlay.classList.add('visible');
-            document.body.style.overflow = 'hidden';
-            setTimeout(() => {
-                this.renderSkillCards(currentElement, currentFilter);
-            }, 50);
-        });
-
-        // Fechar modal
-        closeBtn.addEventListener('click', () => {
-            modalOverlay.classList.remove('visible');
-            document.body.style.overflow = '';
-            detailsPanel.classList.remove('visible');
-        });
-
-        // Clique em abas
-        const tabButtons = document.querySelectorAll('.skill-tab-btn');
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                tabButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentElement = btn.dataset.element;
-                // Atualizar cor do elemento na página
-                const sheetContainer = document.getElementById('sheet-container');
-                if (sheetContainer) {
-                    sheetContainer.className = sheetContainer.className.replace(/(temporal|cerebral|visceral|vital)/g, '');
-                    sheetContainer.classList.add(currentElement);
-                }
-                this.renderSkillCards(currentElement, currentFilter);
-            });
-        });
-
-        // Clique em filtros
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        filterButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentFilter = btn.dataset.filter;
-                this.renderSkillCards(currentElement, currentFilter);
-            });
-        });
-    }
-
     /**
      * Renderiza a árvore de habilidades no formato de constelação.
      */
