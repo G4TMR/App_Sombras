@@ -360,19 +360,45 @@
         </div>
     </div>
 
-    <!-- NOVO: Modal da Constelação de Habilidades (Corrigido e Unificado) -(>
-    <div id="skill-tree-mCdal-oorrigid class="modal-overlay"o e Unificado) -->
+    <!-- NOVO: Modal de Habilidades com Abas por Elemento -->
     <div id="skill-tree-modal-overlay" class="modal-overlay">
         <div class="skill-tree-modal-content">
             <button id="close-skills-modal-btn" class="close-viewer-btn">&times;</button>
-            <div id="skill-tree-viewport" class="skill-tree-viewport">
-                <div id="skill-tree-canvas">
-                    <!-- A árvore de habilidades completa será renderizada aqui -->
+            
+            <!-- Abas por Elemento -->
+            <div class="skill-modal-tabs">
+                <button class="skill-tab-btn active" data-element="temporal">
+                    <span class="tab-icon">⏳</span> Temporal
+                </button>
+                <button class="skill-tab-btn" data-element="cerebral">
+                    <span class="tab-icon">🧠</span> Cerebral
+                </button>
+                <button class="skill-tab-btn" data-element="visceral">
+                    <span class="tab-icon">❤️</span> Visceral
+                </button>
+                <button class="skill-tab-btn" data-element="vital">
+                    <span class="tab-icon">🌱</span> Vital
+                </button>
+            </div>
+
+            <!-- Filtros por Tipo -->
+            <div class="skill-filters">
+                <button class="filter-btn active" data-filter="all">Todas</button>
+                <button class="filter-btn" data-filter="ofensiva">⚔️ Ofensiva</button>
+                <button class="filter-btn" data-filter="defensiva">🛡️ Defensiva</button>
+                <button class="filter-btn" data-filter="passiva">✨ Passiva</button>
+                <button class="filter-btn" data-filter="utility">🔧 Utility</button>
+            </div>
+
+            <!-- Grid de Habilidades -->
+            <div class="skill-grid-container">
+                <div id="skill-cards-grid" class="skill-cards-grid">
+                    <!-- Cards de habilidades serão renderizados aqui -->
                 </div>
             </div>
-            <!-- O painel de detalhes fica aqui, fora do viewport mas dentro do content -->
+
+            <!-- Painel de Detalhes (expande ao clicar em card) -->
             <div id="skill-details-panel" class="skill-details-panel"></div>
-            <div class="skill-tree-instructions"><p>Use a roda do mouse para dar zoom e arraste para navegar.</p></div>
         </div>
     </div>
 

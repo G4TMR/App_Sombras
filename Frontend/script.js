@@ -2883,140 +2883,203 @@ class CharacterSheet {
         });
     }
     /**
-     * Inicializa o modal da árvore de habilidades, incluindo pan e zoom.
+     * Inicializa o modal de habilidades com sistema de abas e cards.
      */
     initializeSkillTreeModal() {
         const modalOverlay = document.getElementById('skill-tree-modal-overlay');
         const openBtn = document.getElementById('open-skills-modal-btn');
         const closeBtn = document.getElementById('close-skills-modal-btn');
-        const viewport = document.getElementById('skill-tree-viewport');
-        const canvas = document.getElementById('skill-tree-canvas');
+        const tabButtons = document.querySelectorAll('.skill-tab-btn');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const skillCardsGrid = document.getElementById('skill-cards-grid');
         const detailsPanel = document.getElementById('skill-details-panel');
 
-        if (!modalOverlay || !openBtn || !closeBtn || !viewport || !canvas || !detailsPanel) return;
+        if (!modalOverlay || !openBtn || !closeBtn) return;
 
-        let scale = 1, panX = 0, panY = 0, isPanning = false, startPanX, startPanY, initialPinchDistance = null;
+        let currentElement = 'temporal';
+        let currentFilter = 'all';
 
-        const applyTransform = () => {
-            canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
-        };
-
-        const centerView = () => {
-            const rect = viewport.getBoundingClientRect();
-            // Centra o canvas gigante na viewport
-            panX = (rect.width - canvas.offsetWidth * scale) / 2;
-            panY = (rect.height - canvas.offsetHeight * scale) / 2;
-            
-            // Zoom inicial reduzido para canvas de 20000px (visualização inicial da árvore completa)
-            scale = Math.min(rect.width / canvas.offsetWidth, rect.height / canvas.offsetHeight) * 0.95;
-            scale = Math.max(scale, 0.05); // Mínimo de 5% de zoom
-            
-            applyTransform();
-        };
-
+        // Abrir modal
         openBtn.addEventListener('click', () => {
             modalOverlay.classList.add('visible');
             document.body.style.overflow = 'hidden';
             setTimeout(() => {
-                // Canvas REALMENTE INFINITO: ~20000x20000px = 400 milhões de pixels
-                // Espaço suficiente para 150+ habilidades com distribuição em árvore
-                // Mantém a ilusão de espaço infinito mesmo navegando em todas as direções
-                const canvasSize = 20000;
-                canvas.style.width = `${canvasSize}px`;
-                canvas.style.height = `${canvasSize}px`;
-                
-                this.renderSkillConstellation();
-                centerView();
+                this.renderSkillCards(currentElement, currentFilter);
             }, 50);
         });
 
+        // Fechar modal
         closeBtn.addEventListener('click', () => {
             modalOverlay.classList.remove('visible');
             document.body.style.overflow = '';
             detailsPanel.classList.remove('visible');
         });
 
-        viewport.addEventListener('mousedown', (e) => {
-            if (e.button !== 0) return;
-            isPanning = true;
-            startPanX = e.clientX - panX;
-            startPanY = e.clientY - panY;
-            viewport.style.cursor = 'grabbing';
+        // Clique em abas
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentElement = btn.dataset.element;
+                // Atualizar cor do elemento na página
+                const sheetContainer = document.getElementById('sheet-container');
+                if (sheetContainer) {
+                    sheetContainer.className = sheetContainer.className.replace(/(temporal|cerebral|visceral|vital)/g, '');
+                    sheetContainer.classList.add(currentElement);
+                }
+                this.renderSkillCards(currentElement, currentFilter);
+            });
         });
 
-        viewport.addEventListener('mousemove', (e) => {
-            if (!isPanning) return;
-            panX = e.clientX - startPanX;
-            panY = e.clientY - startPanY;
-            applyTransform();
+        // Clique em filtros
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                this.renderSkillCards(currentElement, currentFilter);
+            });
+        });
+    }
+
+    /**
+     * Renderiza os cards de habilidades baseado no elemento e filtro.
+     */
+    renderSkillCards(element, filter) {
+        const skillCardsGrid = document.getElementById('skill-cards-grid');
+        if (!skillCardsGrid) return;
+
+        // Limpar grid
+        skillCardsGrid.innerHTML = '';
+
+        // Pegar habilidades do elemento selecionado
+        const skillTree = skillTrees[element] || [];
+        const unlockedSkills = this.character.unlocked_skills || [];
+
+        // Filtrar por tipo se necessário
+        let filteredSkills = skillTree;
+        if (filter !== 'all') {
+            filteredSkills = skillTree.filter(skill => skill.type === filter);
+        }
+
+        // Criar cards
+        filteredSkills.forEach((skill, index) => {
+            const isUnlocked = unlockedSkills.includes(skill.id);
+            const card = document.createElement('div');
+            card.className = `skill-card ${isUnlocked ? '' : 'locked'}`;
+            card.innerHTML = `
+                <div class="skill-card-header">
+                    <div class="skill-card-icon">${skill.icon || '⭐'}</div>
+                    <div>
+                        <div class="skill-card-title">${skill.name}</div>
+                        <span class="skill-card-type">${skill.type || 'Passiva'}</span>
+                    </div>
+                </div>
+                <div class="skill-card-description">${skill.description || 'Sem descrição'}</div>
+                <div class="skill-card-meta">
+                    <span class="skill-card-level">Nível ${skill.level || 1}</span>
+                    <div class="skill-card-status">
+                        <div class="skill-card-status-dot ${isUnlocked ? 'unlocked' : ''}"></div>
+                    </div>
+                </div>
+            `;
+
+            // Clique no card expande painel
+            card.addEventListener('click', () => {
+                this.showSkillDetails(skill, isUnlocked);
+            });
+
+            skillCardsGrid.appendChild(card);
         });
 
-        document.addEventListener('mouseup', () => {
-            isPanning = false;
-            viewport.style.cursor = 'grab';
+        // Se não houver skills, mostrar mensagem
+        if (filteredSkills.length === 0) {
+            skillCardsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #999;">Nenhuma habilidade encontrada neste filtro.</p>';
+        }
+    }
+
+    /**
+     * Mostra detalhes de uma habilidade no painel lateral.
+     */
+    showSkillDetails(skill, isUnlocked) {
+        const detailsPanel = document.getElementById('skill-details-panel');
+        if (!detailsPanel) return;
+
+        detailsPanel.innerHTML = `
+            <button id="close-details-panel" class="close-viewer-btn" style="position: absolute; top: 1rem; right: 1rem;">&times;</button>
+            <h2>${skill.name}</h2>
+            <div class="skill-details-meta">
+                <span>📊 Nível ${skill.level || 1}</span>
+                <span>🎯 ${skill.type || 'Passiva'}</span>
+                <span>${isUnlocked ? '✅ Desbloqueada' : '🔒 Bloqueada'}</span>
+            </div>
+            <div class="skill-details-description">
+                ${skill.description || 'Sem descrição'}
+            </div>
+            <div style="border-top: 1px solid #444; padding-top: 1rem; margin-top: 1rem;">
+                <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Requisitos</h3>
+                <p style="color: #aaa; font-size: 0.9rem;">${skill.requirements || 'Nenhum requisito especial'}</p>
+            </div>
+        `;
+
+        detailsPanel.classList.add('visible');
+
+        // Fechar painel ao clicar no X
+        const closeDetailsBtn = detailsPanel.querySelector('#close-details-panel');
+        if (closeDetailsBtn) {
+            closeDetailsBtn.addEventListener('click', () => {
+                detailsPanel.classList.remove('visible');
+            });
+        }
+    }
+
+        if (!modalOverlay || !openBtn || !closeBtn) return;
+
+        let currentElement = 'temporal';
+        let currentFilter = 'all';
+
+        // Abrir modal
+        openBtn.addEventListener('click', () => {
+            modalOverlay.classList.add('visible');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => {
+                this.renderSkillCards(currentElement, currentFilter);
+            }, 50);
         });
 
-        viewport.addEventListener('mouseleave', () => {
-            isPanning = false;
-            viewport.style.cursor = 'grab';
+        // Fechar modal
+        closeBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('visible');
+            document.body.style.overflow = '';
+            detailsPanel.classList.remove('visible');
         });
 
-        viewport.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                isPanning = true;
-                startPanX = e.touches[0].clientX - panX;
-                startPanY = e.touches[0].clientY - panY;
-            } else if (e.touches.length === 2) {
-                isPanning = false;
-                const dx = e.touches[0].clientX - e.touches[1].clientX;
-                const dy = e.touches[0].clientY - e.touches[1].clientY;
-                initialPinchDistance = Math.sqrt(dx * dx + dy * dy);
-            }
-        }, { passive: true });
-
-        viewport.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (e.touches.length === 1 && isPanning) {
-                panX = e.touches[0].clientX - startPanX;
-                panY = e.touches[0].clientY - startPanY;
-                applyTransform();
-            } else if (e.touches.length === 2 && initialPinchDistance) {
-                const dx = e.touches[0].clientX - e.touches[1].clientX;
-                const dy = e.touches[0].clientY - e.touches[1].clientY;
-                const newPinchDistance = Math.sqrt(dx * dx + dy * dy);
-                const scaleFactor = newPinchDistance / initialPinchDistance;
-                const rect = viewport.getBoundingClientRect();
-                const pinchCenterX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
-                const pinchCenterY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
-                const oldScale = scale;
-                scale *= scaleFactor;
-                // Canvas de 20000px: zoom-out até 1% para ver tudo, zoom-in até 5x para detalhe
-                scale = Math.min(Math.max(0.01, scale), 5);
-                panX = pinchCenterX - (pinchCenterX - panX) * (scale / oldScale);
-                panY = pinchCenterY - (pinchCenterY - panY) * (scale / oldScale);
-                applyTransform();
-                initialPinchDistance = newPinchDistance;
-            }
-        }, { passive: false });
-
-        viewport.addEventListener('touchend', () => {
-            isPanning = false;
-            initialPinchDistance = null;
+        // Clique em abas
+        const tabButtons = document.querySelectorAll('.skill-tab-btn');
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentElement = btn.dataset.element;
+                // Atualizar cor do elemento na página
+                const sheetContainer = document.getElementById('sheet-container');
+                if (sheetContainer) {
+                    sheetContainer.className = sheetContainer.className.replace(/(temporal|cerebral|visceral|vital)/g, '');
+                    sheetContainer.classList.add(currentElement);
+                }
+                this.renderSkillCards(currentElement, currentFilter);
+            });
         });
 
-        viewport.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            const zoomIntensity = 1.5;
-            const rect = viewport.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
-            const oldScale = scale;
-            scale += e.deltaY * -0.001 * zoomIntensity * scale;
-            // Canvas de 20000px: zoom-out até 1% para ver tudo, zoom-in até 5x para detalhe
-            scale = Math.min(Math.max(0.01, scale), 5);
-            panX = mouseX - (mouseX - panX) * (scale / oldScale);
-            panY = mouseY - (mouseY - panY) * (scale / oldScale);
-            applyTransform();
+        // Clique em filtros
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                this.renderSkillCards(currentElement, currentFilter);
+            });
         });
     }
 
