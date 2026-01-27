@@ -2903,11 +2903,13 @@ class CharacterSheet {
 
         const centerView = () => {
             const rect = viewport.getBoundingClientRect();
-            panX = -canvas.offsetWidth / 2 + rect.width / 2;
-            panY = -canvas.offsetHeight / 2 + rect.height / 2;
+            // Centra o canvas gigante na viewport
+            panX = (rect.width - canvas.offsetWidth * scale) / 2;
+            panY = (rect.height - canvas.offsetHeight * scale) / 2;
             
-            // Ajusta o zoom inicial para dispositivos móveis para facilitar a visualização
-            scale = window.innerWidth < 768 ? 0.5 : 1;
+            // Zoom inicial reduzido para canvas de 20000px (visualização inicial da árvore completa)
+            scale = Math.min(rect.width / canvas.offsetWidth, rect.height / canvas.offsetHeight) * 0.95;
+            scale = Math.max(scale, 0.05); // Mínimo de 5% de zoom
             
             applyTransform();
         };
@@ -2916,9 +2918,10 @@ class CharacterSheet {
             modalOverlay.classList.add('visible');
             document.body.style.overflow = 'hidden';
             setTimeout(() => {
-                // Ajuste Responsivo: Canvas muito grande para parecer infinito ao navegar com zoom
-                // Mantém a ilusão de espaço infinito mesmo com zoom alto
-                const canvasSize = Math.max(window.innerWidth * 4, 8000);
+                // Canvas REALMENTE INFINITO: ~20000x20000px = 400 milhões de pixels
+                // Espaço suficiente para 150+ habilidades com distribuição em árvore
+                // Mantém a ilusão de espaço infinito mesmo navegando em todas as direções
+                const canvasSize = 20000;
                 canvas.style.width = `${canvasSize}px`;
                 canvas.style.height = `${canvasSize}px`;
                 
@@ -2987,7 +2990,8 @@ class CharacterSheet {
                 const pinchCenterY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
                 const oldScale = scale;
                 scale *= scaleFactor;
-                scale = Math.min(Math.max(0.2, scale), 3);
+                // Canvas de 20000px: zoom-out até 1% para ver tudo, zoom-in até 5x para detalhe
+                scale = Math.min(Math.max(0.01, scale), 5);
                 panX = pinchCenterX - (pinchCenterX - panX) * (scale / oldScale);
                 panY = pinchCenterY - (pinchCenterY - panY) * (scale / oldScale);
                 applyTransform();
@@ -3008,7 +3012,8 @@ class CharacterSheet {
             const mouseY = e.clientY - rect.top;
             const oldScale = scale;
             scale += e.deltaY * -0.001 * zoomIntensity * scale;
-            scale = Math.min(Math.max(0.2, scale), 3);
+            // Canvas de 20000px: zoom-out até 1% para ver tudo, zoom-in até 5x para detalhe
+            scale = Math.min(Math.max(0.01, scale), 5);
             panX = mouseX - (mouseX - panX) * (scale / oldScale);
             panY = mouseY - (mouseY - panY) * (scale / oldScale);
             applyTransform();
