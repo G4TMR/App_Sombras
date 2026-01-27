@@ -5219,6 +5219,15 @@ body.dev-mode #dev-mode-form { display: none; }
         overflow-y: auto;
     }
 
+    .skills-settings-btn {
+        top: 0.75rem;
+        right: 2.5rem;
+        width: 38px;
+        height: 38px;
+        font-size: 1.3rem;
+        z-index: 11;
+    }
+
     .skill-modal-tabs {
         gap: 0.25rem;
         margin-bottom: 0.75rem;
@@ -5457,6 +5466,10 @@ body.dev-mode #dev-mode-form { display: none; }
         width: 36px;
         height: 36px;
         font-size: 1.2rem;
+        top: 0.5rem;
+        right: 2.8rem;
+        position: absolute;
+        z-index: 11;
     }
 
     .skills-settings-modal {
