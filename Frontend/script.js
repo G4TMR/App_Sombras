@@ -2903,7 +2903,7 @@ class CharacterSheet {
 
         if (!modalOverlay || !openBtn || !closeBtn) return;
 
-        let currentElement = 'temporal';
+        let currentElement = this.character?.element || 'temporal';
         let currentFilter = 'all';
         let multiElementEnabled = localStorage.getItem('skillsMultiElement') === 'true';
 
